@@ -21,10 +21,10 @@ except FileNotFoundError:
     f.close()
 
 print('Enter song ID:')
-#song_id = input()
+# song_id = input()
 song_id = "1a37c"  # For Debugging
 print('Enter difficulty (like ExpertPlusStandard):')
-#song_diff = input() + '.dat'
+# song_diff = input() + '.dat'
 song_diff = "ExpertPlusStandard.dat"
 # Setup pygame/window ---------------------------------------- #
 mainClock = pygame.time.Clock()
@@ -55,6 +55,32 @@ cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 # Funcs ------------------------------------------------------ #
 
 
+class Bloq:
+
+    def __init__(self, cutDirection, startTime, swingTime):
+        self.numNotes = 1
+        self.cutDirection = 0
+        self.swingAngle = 200
+        self.time = startTime
+        self.swingTime = swingTime
+        self.forehand = True
+
+        # Non-negoitables, Up is backhand
+        if self.cutDirection == 0:
+            self.forehand = False
+
+        # Non-negoitables, Down is forehand
+        elif self.cutDirection == 1:
+            self.forehand = True
+
+    def addNote(self):
+        self.numNotes += 1
+        self.swingAngle += 36.87
+
+    def setForehand(self, hand):
+        self.forehand = hand
+
+
 def load_song_dat(path):
     main_path = path
     with open(main_path) as json_dat:
@@ -67,14 +93,17 @@ def draw_triangle(surf, point, angle, radius):
         point[0]+radius*math.cos(math.radians(angle-45)), point[1]+radius*math.sin(math.radians(angle-45))]]
     pygame.draw.polygon(surf, (255, 255, 255), points)
 
+
 def extractBloqData(songNoteArray):
     n = 0
-    BloqDataArray = []
+    BloqDataArray: list[Bloq] = []
+
     for i, block in enumerate(songNoteArray):
 
         # Checks if the note behind is super close, and treats it as a single swing
         if i != 0 and (songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= 1/8):
             # Adds 1 to keep track of how many notes in a single swing
+<<<<<<< HEAD
             BloqDataArray[-1]['numOfBloq'] += 1
             BloqDataArray[-1]['swingAngle'] += 36.87 #Addes Swing angle for Sliders
         elif i == 0:
@@ -121,6 +150,25 @@ def extractBloqData(songNoteArray):
 
 
         
+=======
+            BloqDataArray[-1].addNote()
+
+        elif i == 0:
+            BloqDataArray.append(Bloq(block["_cutDirection"], block["_time"], block["_time"] * mspb))
+            if block['_type'] is 0:
+                # If it's the first note, assign most likely, correct Forehand/backhand assignment
+                BloqDataArray[-1].setForehand(BloqDataArray[-2].cutDirection in [5, 3, 7, 1])
+
+            elif block['_type'] is 1:
+                BloqDataArray[-1].setForehand(BloqDataArray[-2].cutDirection in [6, 4, 2, 1])
+
+        else:
+            BloqDataArray.append(Bloq(block["_cutDirection"], block["_time"], 0))
+            BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
+
+            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -
+                                           BloqDataArray[-2].time)*mspb
+>>>>>>> Working
 
     return BloqDataArray
 
@@ -178,9 +226,6 @@ for block in song_notes_original:
 
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
-
-
-
 
 
 # saber length is 1 meter
