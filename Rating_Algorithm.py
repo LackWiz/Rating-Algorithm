@@ -76,36 +76,54 @@ def extractBloqData(songNoteArray):
         if i != 0 and (songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= 1/8):
             # Adds 1 to keep track of how many notes in a single swing
             BloqDataArray[-1]['numOfBloq'] += 1
+            BloqDataArray[-1]['swingAngle'] += 36.87
+        elif i == 0:
+            BloqDataArray.append({"numOfBloq": 1, "cutDirection": 0,"swingAngle": 200,"time": block['_time'],"swingTime": block['_time']*mspb, "Forehand?": True})
+            if block['_type'] is 0:
+                if(BloqDataArray[-1]['cutDirection'] in [6, 4, 2, 0]):
+                        BloqDataArray[i]['Forehand?'] = False
 
+                    # If it's the first note, assign most likely, correct Forehand/backhand assignment
+                elif(BloqDataArray[-1]['cutDirection'] in [5, 3, 7, 1]):
+                        BloqDataArray[i]['Forehand?'] = True
+            elif block['_type'] is 1:
+                if(BloqDataArray[-1]['cutDirection'] in [5, 3, 7, 0]):
+                        BloqDataArray[i]['Forehand?'] = False
+
+                    # If it's the first note, assign most likely, correct Forehand/backhand assignment
+                elif(BloqDataArray[-1]['cutDirection'] in [6, 4, 2, 1]):
+                        BloqDataArray[i]['Forehand?'] = True
+        
         else:
-            BloqDataArray.append({"numOfBloq": 1, "cutDirection": 0,
-                                "angleNeeded": 0, "swingTime": 0, "Forehand?": True})
-            BloqDataArray[n]['cutDirection'] = block['_cutDirection']
+            BloqDataArray.append({"numOfBloq": 1, "cutDirection": 0,"angleNeeded": 200,"time": block['_time'],"swingTime": 0,"saberSpeed":0, "Forehand?": True})
+            BloqDataArray[-1]['cutDirection'] = block['_cutDirection']
 
-            if(BloqDataArray[n]['cutDirection'] == 0):  # Non-negoitables, Up is backhand
-                BloqDataArray[n]['Forehand?'] = False
+            if(BloqDataArray[-1]['cutDirection'] == 0):  # Non-negoitables, Up is backhand
+                BloqDataArray[-1]['Forehand?'] = False
 
             # Non-negoitables, Down is forehand
-            elif(BloqDataArray[n]['cutDirection'] == 1):
-                BloqDataArray[n]['Forehand?'] = True
+            elif(BloqDataArray[-1]['cutDirection'] == 1):
+                BloqDataArray[-1]['Forehand?'] = True
 
             # Checks if it's the first note in the song and sets forehand as true if it is
-            elif((BloqDataArray[n-1]['Forehand?'] == True) & (n-1 >= 0)):
+            elif((BloqDataArray[-1]['Forehand?'] == True) & (len(BloqDataArray) <= 1)):
                 # If the note has been removed, you can't toggle forehand/backhand
-                BloqDataArray[n]['Forehand?'] = False
+                BloqDataArray[-1]['Forehand?'] = False
 
-            elif((BloqDataArray[n-1]['Forehand?'] == False) & (n-1 >= 0)):
-                BloqDataArray[n]['Forehand?'] = True
+            elif((BloqDataArray[-1]['Forehand?'] == False) & (len(BloqDataArray) <= 1)):
+                BloqDataArray[-1]['Forehand?'] = True
+                
+            BloqDataArray[-1]['swingTime'] = (BloqDataArray[-1]['time']-BloqDataArray[-2]['time'])*mspb
+            
 
-            elif(i-1 == -1):  # Only for First Note Check
-                # If it's the first note, assign most likely, correct Forehand/backhand assignment
-                if(BloqDataArray[n]['_cutDirection'] in [5, 0, 4, 2]):
-                    BloqDataArray[i]['Forehand?'] = False
 
-                # If it's the first note, assign most likely, correct Forehand/backhand assignment
-                elif(BloqDataArray[n]['_cutDirection'] in [6, 1, 3, 7]):
-                    BloqDataArray[i]['Forehand?'] = True
-            n += 1
+
+
+
+
+
+        
+
     return BloqDataArray
 
 
@@ -147,8 +165,6 @@ for song_note in song_notes_temp:
 
 songNoteLeft = []
 songNoteRight = []
-BlockDataLeft = []
-BlockDataRight = []
 
 
 song_info = load_song_dat(bs_song_path + song_folder + '/info.dat')
@@ -162,6 +178,9 @@ for block in song_notes_original:
     if block['_type'] == 1:  # right
         songNoteRight.append(block.copy())
 
+BloqDataLeft = extractBloqData(songNoteLeft)
+BloqDataRight = extractBloqData(songNoteRight)
+
 
 
 
@@ -174,16 +193,16 @@ for block in song_notes_original:
 # Import song dat file
 # Filter note dat file into Left and Right Block arrays
 
-# Calculate Block distance into seconds or ms
-# Identify stacks/sliders (maybe pauls/poodles) and turn the 2-4 Blocks into a single Block with a large swing angle
-# Calculate Block distance into seconds or ms
+
+# Identify stacks/sliders (maybe pauls/poodles) and turn the 2-4 Blocks into a single Block with a large swing angle ✅
+# Calculate Block distance into seconds or ms 73.74 ✅
+
+# using 100 degree in, 60 degree out rule to calculate beginning and end points of the saber✅
+#   (change endpoint of current block to)✅
 #
-# using 100 degree in, 60 degree out rule to calculate beginning and end points of the saber
-#   (change endpoint of current block to)
 #
-#
-# using 1/2 time between last and next block (1/2 time between last and current block + 1/2 time between current and next block), calculate max time for that swing on that block
-# using timeForSwing, totalAngleNeeded and 1 meter saber length, calculate saber speed
+# using 1/2 time between last and next block (1/2 time between last and current block + 1/2 time between current and next block), calculate max time for that swing on that block ✅
+# using swingtime, swingAngle and 1 meter saber length, calculate saber speed
 
 # List off hard swing angles for both hands
 
