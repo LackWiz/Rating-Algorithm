@@ -56,8 +56,9 @@ cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
 
 class Bloq:
-    def __init__(self, cutDirection, startTime, swingTime):
+    def __init__(self, type, cutDirection, startTime, swingTime):
         self.numNotes = 1
+        self.type = type
         self.cutDirection = 0
         self.swingAngle = 200
         self.time = startTime
@@ -72,6 +73,13 @@ class Bloq:
         # Non-negoitables, Down is forehand
         elif self.cutDirection == 1:
             self.forehand = True
+
+        else:
+            if block['_type'] is 0:
+                # If it's the first note, assign most likely, correct Forehand/backhand assignment
+                self.forehand = cutDirection in [5, 3, 7, 1]
+            elif block['_type'] is 1:
+                self.forehand = cutDirection in [6, 4, 2, 1]
 
     def addNote(self):
         self.numNotes += 1
@@ -106,18 +114,12 @@ def extractBloqData(songNoteArray):
             BloqDataArray[-1].addNote()
 
         elif i == 0:
-            BloqDataArray.append(Bloq(block["_cutDirection"], block["_time"], block["_time"] * mspb))
+            BloqDataArray.append(Bloq(block["_type"], block["_cutDirection"], block["_time"], block["_time"] * mspb))
             BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
             
-            if block['_type'] is 0:
-                # If it's the first note, assign most likely, correct Forehand/backhand assignment
-                BloqDataArray[-1].setForehand(BloqDataArray[-1].cutDirection in [5, 3, 7, 1])
-
-            elif block['_type'] is 1:
-                BloqDataArray[-1].setForehand(BloqDataArray[-1].cutDirection in [6, 4, 2, 1])
 
         else:
-            BloqDataArray.append(Bloq(block["_cutDirection"], block["_time"], 0))
+            BloqDataArray.append(Bloq(block["_type"], block["_cutDirection"], block["_time"], 0))
             if block['_type'] is 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
                 BloqDataArray[-1].setForehand(BloqDataArray[-1].cutDirection in [5, 3, 7, 1])
