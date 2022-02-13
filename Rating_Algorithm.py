@@ -56,13 +56,13 @@ cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
 
 class Bloq:
-
     def __init__(self, cutDirection, startTime, swingTime):
         self.numNotes = 1
         self.cutDirection = 0
         self.swingAngle = 200
         self.time = startTime
         self.swingTime = swingTime
+        self.swingSpeed = 0
         self.forehand = True
 
         # Non-negoitables, Up is backhand
@@ -103,58 +103,12 @@ def extractBloqData(songNoteArray):
         # Checks if the note behind is super close, and treats it as a single swing
         if i != 0 and (songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= 1/8):
             # Adds 1 to keep track of how many notes in a single swing
-<<<<<<< HEAD
-            BloqDataArray[-1]['numOfBloq'] += 1
-            BloqDataArray[-1]['swingAngle'] += 36.87 #Addes Swing angle for Sliders
-        elif i == 0:
-            BloqDataArray.append({"numOfBloq": 1, "cutDirection": 0,"swingAngle": 200,"time": block['_time'],"swingTime": block['_time']*mspb,"swingSpeed":0, "Forehand?": True})
-            if(BloqDataArray[-1]["cutDirection"]==8): #If first note is a dot note, makes a decision based on if it's up high or down low
-                    if(block['_lineLayer']==2):
-                        BloqDataArray[i]['Forehand?'] = False
-                    else:
-                        BloqDataArray[i]['Forehand?'] = True
-            if block['_type'] is 0:      #Left Hand # If it's the first note, assign most likely, correct Forehand/backhand assignment
-                if(BloqDataArray[-1]['cutDirection'] in [6, 4, 2, 0]): #arbratary values=angles chosen for backhand assignment
-                        BloqDataArray[i]['Forehand?'] = False
-                elif(BloqDataArray[-1]['cutDirection'] in [5, 3, 7, 1]): #arbratary values=angles chosen for forehand assignment
-                        BloqDataArray[i]['Forehand?'] = True
-            elif block['_type'] is 1:   #Right Hand # If it's the first note, assign most likely, correct Forehand/backhand assignment
-                if(BloqDataArray[-1]['cutDirection'] in [5, 3, 7, 0]):#arbratary values=angles chosen for backhand assignment
-                        BloqDataArray[i]['Forehand?'] = False
-                elif(BloqDataArray[-1]['cutDirection'] in [6, 4, 2, 1]): #arbratary values=angles chosen for forehand assignment
-                        BloqDataArray[i]['Forehand?'] = True
-        else:
-            BloqDataArray.append({"numOfBloq": 1, "cutDirection": 0,"swingAngle": 200,"time": block['_time'],"swingTime": 0,"swingSpeed":0, "Forehand?": True})
-            BloqDataArray[-1]['cutDirection'] = block['_cutDirection']
-
-            if(BloqDataArray[-1]['cutDirection'] == 0):  # Non-negoitables, Up is backhand
-                BloqDataArray[-1]['Forehand?'] = False
-            elif(BloqDataArray[-1]['cutDirection'] == 1):   # Non-negoitables, Down is forehand
-                BloqDataArray[-1]['Forehand?'] = True
-
-            # Checks if it's the first note in the song and sets forehand as true if it is
-            elif((BloqDataArray[-2]['Forehand?'] == True) & (len(BloqDataArray) <= 1)):
-                # If the note has been removed, you can't toggle forehand/backhand
-                BloqDataArray[-1]['Forehand?'] = False
-
-            elif((BloqDataArray[-2]['Forehand?'] == False) & (len(BloqDataArray) <= 1)):
-                BloqDataArray[-1]['Forehand?'] = True
-                
-            BloqDataArray[-1]['swingTime'] = (BloqDataArray[-1]['time']-BloqDataArray[-2]['time'])*mspb
-            BloqDataArray[-1]['swingSpeed'] = BloqDataArray[-1]['swingAngle']/BloqDataArray[-1]['swingTime']
-
-
-
-
-
-
-
-        
-=======
             BloqDataArray[-1].addNote()
 
         elif i == 0:
             BloqDataArray.append(Bloq(block["_cutDirection"], block["_time"], block["_time"] * mspb))
+            BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
+            
             if block['_type'] is 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
                 BloqDataArray[-1].setForehand(BloqDataArray[-2].cutDirection in [5, 3, 7, 1])
@@ -168,7 +122,7 @@ def extractBloqData(songNoteArray):
 
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -
                                            BloqDataArray[-2].time)*mspb
->>>>>>> Working
+            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime
 
     return BloqDataArray
 
