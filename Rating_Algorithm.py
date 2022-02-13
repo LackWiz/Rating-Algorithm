@@ -76,9 +76,9 @@ def extractBloqData(songNoteArray):
         if i != 0 and (songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= 1/8):
             # Adds 1 to keep track of how many notes in a single swing
             BloqDataArray[-1]['numOfBloq'] += 1
-            BloqDataArray[-1]['swingAngle'] += 36.87
+            BloqDataArray[-1]['swingAngle'] += 36.87 #Addes Swing angle for Sliders
         elif i == 0:
-            BloqDataArray.append({"numOfBloq": 1, "cutDirection": 0,"swingAngle": 200,"time": block['_time'],"swingTime": block['_time']*mspb, "Forehand?": True})
+            BloqDataArray.append({"numOfBloq": 1, "cutDirection": 0,"swingAngle": 200,"time": block['_time'],"swingTime": block['_time']*mspb,"swingSpeed":0, "Forehand?": True})
             if(BloqDataArray[-1]["cutDirection"]==8): #If first note is a dot note, makes a decision based on if it's up high or down low
                     if(block['_lineLayer']==2):
                         BloqDataArray[i]['Forehand?'] = False
@@ -95,7 +95,7 @@ def extractBloqData(songNoteArray):
                 elif(BloqDataArray[-1]['cutDirection'] in [6, 4, 2, 1]): #arbratary values=angles chosen for forehand assignment
                         BloqDataArray[i]['Forehand?'] = True
         else:
-            BloqDataArray.append({"numOfBloq": 1, "cutDirection": 0,"angleNeeded": 200,"time": block['_time'],"swingTime": 0,"saberSpeed":0, "Forehand?": True})
+            BloqDataArray.append({"numOfBloq": 1, "cutDirection": 0,"swingAngle": 200,"time": block['_time'],"swingTime": 0,"swingSpeed":0, "Forehand?": True})
             BloqDataArray[-1]['cutDirection'] = block['_cutDirection']
 
             if(BloqDataArray[-1]['cutDirection'] == 0):  # Non-negoitables, Up is backhand
@@ -104,11 +104,11 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1]['Forehand?'] = True
 
             # Checks if it's the first note in the song and sets forehand as true if it is
-            elif((BloqDataArray[-1]['Forehand?'] == True) & (len(BloqDataArray) <= 1)):
+            elif((BloqDataArray[-2]['Forehand?'] == True) & (len(BloqDataArray) <= 1)):
                 # If the note has been removed, you can't toggle forehand/backhand
                 BloqDataArray[-1]['Forehand?'] = False
 
-            elif((BloqDataArray[-1]['Forehand?'] == False) & (len(BloqDataArray) <= 1)):
+            elif((BloqDataArray[-2]['Forehand?'] == False) & (len(BloqDataArray) <= 1)):
                 BloqDataArray[-1]['Forehand?'] = True
                 
             BloqDataArray[-1]['swingTime'] = (BloqDataArray[-1]['time']-BloqDataArray[-2]['time'])*mspb
