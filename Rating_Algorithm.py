@@ -111,10 +111,10 @@ def extractBloqData(songNoteArray):
             
             if block['_type'] is 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
-                BloqDataArray[-1].setForehand(BloqDataArray[-2].cutDirection in [5, 3, 7, 1])
+                BloqDataArray[-1].setForehand(BloqDataArray[-1].cutDirection in [5, 3, 7, 1])
 
             elif block['_type'] is 1:
-                BloqDataArray[-1].setForehand(BloqDataArray[-2].cutDirection in [6, 4, 2, 1])
+                BloqDataArray[-1].setForehand(BloqDataArray[-1].cutDirection in [6, 4, 2, 1])
 
         else:
             BloqDataArray.append(Bloq(block["_cutDirection"], block["_time"], 0))
