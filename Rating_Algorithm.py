@@ -119,7 +119,8 @@ def extractBloqData(songNoteArray):
             
         else:
             BloqDataArray.append(Bloq(block["_type"], block["_cutDirection"], block["_time"], 0))
-            BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
+            if(BloqDataArray[-1] not in [0, 1]):
+                BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -BloqDataArray[-2].time)*mspb
             BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime
 
