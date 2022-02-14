@@ -25,7 +25,7 @@ except FileNotFoundError:
 
 print('Enter song ID:')
 song_id = input()
-#song_id = "1fe06"  # For Debugging
+# song_id = "1fe06"  # For Debugging
 print('Enter difficulty (like ExpertPlusStandard):')
 # song_diff = input() + '.dat'
 song_diff = "ExpertPlusStandard.dat"
@@ -55,25 +55,26 @@ def draw_text(text, font, color, surface, x, y):
 # Data ------------------------------------------------------- #
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
-easyAngleMulti = 1          #Multiplyers for different angles
+easyAngleMulti = 1  # Multiplyers for different angles
 semiMidAngleDiff = 1.5
 medAngleMulti = 1.75
 hardAngleMulti = 2.5
 
-sliderPrecision = 1/6       #Minimum precision (how close notes are together) to consider 2 very close notes a slider
+# Minimum precision (how close notes are together) to consider 2 very close notes a slider
+sliderPrecision = 1/6
 dotSliderPrecision = 1/5
 
 staminaRollingAverage = 64
 patternRollingAverage = 32
-#CutDirection 
-#   0 = North, 
-#   1 = South, 
-#   2 = West, 
-#   3 = East, 
-#   4 = NW, 
-#   5 = NE, 
-#   6 = SW, 
-#   7 = SE, 
+# CutDirection
+#   0 = North,
+#   1 = South,
+#   2 = West,
+#   3 = East,
+#   4 = NW,
+#   5 = NE,
+#   6 = SW,
+#   7 = SE,
 #   8 = Dot Note
 
 # Funcs ------------------------------------------------------ #
@@ -95,18 +96,19 @@ class Bloq:
         self.combinedDiff = 0
 
         # Non-negoitables, Up and a select diagonal is backhand
-        if self.cutDirection in [0,4,5]: #4 = NW Left Hand, 5 = NE Right Hand
-            if (self.type is 0 & self.cutDirection in [0,4]):
+        if self.cutDirection in [0, 4, 5]:  # 4 = NW Left Hand, 5 = NE Right Hand
+            if (self.type is 0 & self.cutDirection in [0, 4]):
                 self.forehand = False
-            elif (self.type is 1 & self.cutDirection in [0,5]):
+            elif (self.type is 1 & self.cutDirection in [0, 5]):
                 self.forehand = False
         # Non-negoitables, Down and a select diagonal is forehand
-        elif self.cutDirection in [1,6,7]:
-            if (self.type is 0 & self.cutDirection in [1,7]): #6 = SE Left Hand, 7 = SW Right Hand
+        elif self.cutDirection in [1, 6, 7]:
+            # 6 = SE Left Hand, 7 = SW Right Hand
+            if (self.type is 0 & self.cutDirection in [1, 7]):
                 self.forehand = True
-            elif (self.type is 1 & self.cutDirection in [1,6]):
+            elif (self.type is 1 & self.cutDirection in [1, 6]):
                 self.forehand = True
-            
+
         else:
             if type is 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
@@ -124,44 +126,49 @@ class Bloq:
         self.calcAngleDiff()
 
     def calcAngleDiff(self):
-        if(self.type == 0): #Left Hand
+        if(self.type == 0):  # Left Hand
             if(self.forehand):
-                if(self.cutDirection in [1,7]): #Checks is angles are easy, medium or difficult
+                # Checks is angles are easy, medium or difficult
+                if(self.cutDirection in [1, 7]):
                     self.angleDiff = easyAngleMulti
                 elif(self.cutDirection is 3):
                     self.angleDiff = semiMidAngleDiff
-                elif(self.cutDirection in [5,6]): 
+                elif(self.cutDirection in [5, 6]):
                     self.angleDiff = medAngleMulti
-                elif(self.cutDirection in [0,2,4]): 
+                elif(self.cutDirection in [0, 2, 4]):
                     self.angleDiff = hardAngleMulti
             elif(not self.forehand):
-                if(self.cutDirection in [1,3]): #Checks is angles are easy, medium or difficult
+                # Checks is angles are easy, medium or difficult
+                if(self.cutDirection in [1, 3]):
                     self.angleDiff = hardAngleMulti
-                elif(self.cutDirection in [5,6]): 
+                elif(self.cutDirection in [5, 6]):
                     self.angleDiff = medAngleMulti
                 elif(self.cutDirection is 2):
                     self.angleDiff = semiMidAngleDiff
-                elif(self.cutDirection in [0,4]): 
+                elif(self.cutDirection in [0, 4]):
                     self.angleDiff = easyAngleMulti
-        elif(self.type == 1): #Right Hand
+        elif(self.type == 1):  # Right Hand
             if(self.forehand):
-                if(self.cutDirection in [1,6]): #Checks is angles are easy, medium or difficult
+                # Checks is angles are easy, medium or difficult
+                if(self.cutDirection in [1, 6]):
                     self.angleDiff = easyAngleMulti
                 elif(self.cutDirection is 2):
                     self.angleDiff = semiMidAngleDiff
-                elif(self.cutDirection in [4,7]): 
+                elif(self.cutDirection in [4, 7]):
                     self.angleDiff = medAngleMulti
-                elif(self.cutDirection in [0,3]): 
-                    self.angleDiff = hardAngleMulti  
-            elif(not self.forehand):
-                if(self.cutDirection in [1,2]): #Checks is angles are easy, medium or difficult
+                elif(self.cutDirection in [0, 3]):
                     self.angleDiff = hardAngleMulti
-                elif(self.cutDirection in [4,7]): 
+            elif(not self.forehand):
+                # Checks is angles are easy, medium or difficult
+                if(self.cutDirection in [1, 2]):
+                    self.angleDiff = hardAngleMulti
+                elif(self.cutDirection in [4, 7]):
                     self.angleDiff = medAngleMulti
                 elif(self.cutDirection is 3):
                     self.angleDiff = semiMidAngleDiff
-                elif(self.cutDirection in [0,5]): 
+                elif(self.cutDirection in [0, 5]):
                     self.angleDiff = easyAngleMulti
+
 
 def load_song_dat(path):
     main_path = path
@@ -177,60 +184,63 @@ def draw_triangle(surf, point, angle, radius):
 
 
 def extractBloqData(songNoteArray):
-    
+
     BloqDataArray: list[Bloq] = []
 
     for i, block in enumerate(songNoteArray):
 
         # Checks if the note behind is super close, and treats it as a single swing
-        if i != 0 and ((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= sliderPrecision) or ((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= dotSliderPrecision) and songNoteArray[i]["_cutDirection"] is 8)):
+        if i != 0 and (((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= sliderPrecision) or ((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= dotSliderPrecision) and songNoteArray[i]["_cutDirection"] is 8)) & (songNoteArray[i]['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'],8])):
             # Adds 1 to keep track of how many notes in a single swing
             BloqDataArray[-1].addNote()
 
         elif i == 0:
-            BloqDataArray.append(Bloq(block["_type"], block["_cutDirection"], block["_time"], block["_time"] * mspb))
+            BloqDataArray.append(Bloq(
+                block["_type"], block["_cutDirection"], block["_time"], block["_time"] * mspb))
             BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
-            
+
         else:
-            BloqDataArray.append(Bloq(block["_type"], block["_cutDirection"], block["_time"], 0))
-            if(BloqDataArray[-1].cutDirection not in [0,1,4,5,6,7]):
+            BloqDataArray.append(
+                Bloq(block["_type"], block["_cutDirection"], block["_time"], 0))
+            if(BloqDataArray[-1].cutDirection not in [0, 1, 4, 5, 6, 7]):
                 BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
 
-
-            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -BloqDataArray[-2].time)*mspb     #calculates swingTime and Speed and shoves into class for processing later
-            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime
+            # calculates swingTime and Speed and shoves into class for processing later
+            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -
+                                           BloqDataArray[-2].time)*mspb
+            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle / \
+                BloqDataArray[-1].swingTime
 
             temp = 0
-            for j in range(0,staminaRollingAverage):    #Uses a rolling average to judge stamina
+            # Uses a rolling average to judge stamina
+            for j in range(0, staminaRollingAverage):
                 if(len(BloqDataArray) >= j+1):
                     temp += BloqDataArray[-1*(j+1)].swingSpeed
-            if(len(BloqDataArray) < staminaRollingAverage/4):       #Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
+            # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
+            if(len(BloqDataArray) < staminaRollingAverage/4):
                 BloqDataArray[-1].stamina = (temp/(staminaRollingAverage/4))**3
             elif(len(BloqDataArray) < staminaRollingAverage):
                 BloqDataArray[-1].stamina = (temp/len(BloqDataArray))**3
             else:
                 BloqDataArray[-1].stamina = (temp/staminaRollingAverage)**3
             temp = 0
-            for i in range(0,patternRollingAverage):    #Uses a rolling average to judge pattern difficulty
+            # Uses a rolling average to judge pattern difficulty
+            for i in range(0, patternRollingAverage):
                 if(len(BloqDataArray) >= i+1):
                     temp += BloqDataArray[-1*(i+1)].angleDiff
             BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)**2
 
-            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)
+            BloqDataArray[-1].combinedDiff = math.sqrt(
+                BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)
 
     return BloqDataArray
 
-def combineArray(array1, array2):
-    combinedArray: list [Bloq] = []
-    size = max(len(array1),len(array2))
-    for i in range(0,size):
-        combinedArray.append()
 
-
-
-
-
-
+# def combineArray(array1, array2):
+#     combinedArray: list[Bloq] = []
+#     size = max(len(array1), len(array2))
+#     for i in range(0, size):
+#         combinedArray.append()
 
 
 # Setup ------------------------------------------------------ #
@@ -288,21 +298,16 @@ for block in song_notes_original:
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
 
-f = open (song_id + ' export.csv', 'w',newline="")
+# combinedArray = combineArray(BloqDataLeft, BloqDataRight)
+
+f = open(song_id + ' export.csv', 'w', newline="")
 writer = csv.writer(f)
-writer.writerow(["_Time","L Swing Speed degree/ms","L Angle Diff","L Stamina","L Pattern Diff","L CombinedDiff"])
+writer.writerow(["_Time", "L Swing Speed degree/ms", "L Angle Diff",
+                "L Stamina", "L Pattern Diff", "L CombinedDiff"])
 for bloq in BloqDataLeft:
-    writer.writerow([bloq.time,bloq.swingSpeed,bloq.angleDiff,bloq.stamina,bloq.patternDiff,bloq.combinedDiff])
+    writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff,
+                    bloq.stamina, bloq.patternDiff, bloq.combinedDiff])
 f.close()
-
-
-
-
-
-
-
-
-
 
 
 print("sucess")
@@ -329,21 +334,21 @@ print("sucess")
 pygame.mixer.music.load(full_music_path)
 pygame.mixer.music.play(0)
 
-last_angles = [[0,0,999],[0,0,999]]
+last_angles = [[0, 0, 999], [0, 0, 999]]
 bpms = bpm/60/1000
 start_time = time.time()
 currNoteNum = 0
 # Loop ------------------------------------------------------- #
 while True:
     # Background --------------------------------------------- #
-    screen.fill((0,0,0))
+    screen.fill((0, 0, 0))
     # Render ------------------------------------------------- #
     time_progress = (time.time()-start_time)*1000*bpms
     n = 0
     for note in song_notes:
         note = note[2]
         note_num = len(song_notes)-n-1
-        if note['_type'] in [0,1]:
+        if note['_type'] in [0, 1]:
             if (note['_time'] > time_progress-(150*bpms)) and (note['_time'] < time_progress+(1000*bpms)):
                 note_x = note['_lineIndex']-2
                 note_y = 3-(note['_lineLayer']-1.5)
@@ -352,53 +357,62 @@ while True:
                 pos_x = 270+note_x*(6+size)
                 pos_y = 80+note_y*(6+size)
                 if note['_type'] == 0:
-                    color = (255,0,0)
+                    color = (255, 0, 0)
                 if note['_type'] == 1:
-                    color = (0,0,255)
+                    color = (0, 0, 255)
                 if note['_time'] > time_progress:
-                    surf = pygame.Surface((int(size),int(size)))
+                    surf = pygame.Surface((int(size), int(size)))
                     surf.set_alpha(150)
                     surf.fill(color)
-                    screen.blit(surf,(pos_x-int(size/2),pos_y-int(size/2)))
+                    screen.blit(surf, (pos_x-int(size/2), pos_y-int(size/2)))
                     if note['_cutDirection'] != 8:
-                        draw_triangle(screen,[pos_x,pos_y],cut_direction_index[note['_cutDirection']],int(size/(2*math.sqrt(2))))
+                        draw_triangle(screen, [pos_x, pos_y], cut_direction_index[note['_cutDirection']], int(
+                            size/(2*math.sqrt(2))))
                     else:
-                        pygame.draw.circle(screen,(255,255,255),[int(pos_x),int(pos_y)],int(size/6))
+                        pygame.draw.circle(screen, (255, 255, 255), [
+                                           int(pos_x), int(pos_y)], int(size/6))
                 else:
                     if currNoteNum <= note_num:
                         #last_angles = song_angles[currNoteNum+1]
                         currNoteNum += 1
-                        #boop_sfx.play()
+                        # boop_sfx.play()
                     alt_size = int(size+(age-(1000*bpms))*150)
-                    surf_1 = pygame.Surface((alt_size,alt_size))
-                    surf_2 = pygame.Surface((alt_size-4,alt_size-4))
+                    surf_1 = pygame.Surface((alt_size, alt_size))
+                    surf_2 = pygame.Surface((alt_size-4, alt_size-4))
                     surf_1.fill(color)
-                    surf_1.blit(surf_2,(2,2))
-                    surf_1.set_colorkey((0,0,0))
+                    surf_1.blit(surf_2, (2, 2))
+                    surf_1.set_colorkey((0, 0, 0))
                     surf_1.set_alpha(255-(age-(1000*bpms))/(150*bpms)*255)
-                    screen.blit(surf_1,(pos_x-int(alt_size/2),pos_y-int(alt_size/2)))
+                    screen.blit(
+                        surf_1, (pos_x-int(alt_size/2), pos_y-int(alt_size/2)))
         n += 1
     # UI ----------------------------------------------------- #
     progress_ms = pygame.mixer.music.get_pos()
-    progress_s = round(progress_ms/1000,2)
-    draw_text(str(progress_s), font, (255,255,255), screen, 2, 2)
+    progress_s = round(progress_ms/1000, 2)
+    draw_text(str(progress_s), font, (255, 255, 255), screen, 2, 2)
 
     difficulty_r = (last_angles[1][1])**1.25/last_angles[1][2]
     difficulty_l = (last_angles[0][1])**1.25/last_angles[0][2]
 
-    pygame.draw.line(screen,(255,0,0),[100,400],[100+math.cos(last_angles[0][0])*15*(last_angles[0][1]+1),400+math.sin(last_angles[0][0])*15*(last_angles[0][1]+1)],3)
-    pygame.draw.circle(screen,(255,0,0),[100,400],7)
-    pygame.draw.circle(screen,(155,0,0),[100,400],int(15*(last_angles[0][1]+1))+1,2)
-    pygame.draw.circle(screen,(255,255,255),[100,400],int(15*difficulty_l)+2,2)
-    pygame.draw.line(screen,(0,0,255),[400,400],[400+math.cos(last_angles[1][0])*15*(last_angles[1][1]+1),400+math.sin(last_angles[1][0])*15*(last_angles[1][1]+1)],3)
-    pygame.draw.circle(screen,(0,0,255),[400,400],7)
-    pygame.draw.circle(screen,(0,0,155),[400,400],int(15*(last_angles[1][1]+1))+1,2)
-    pygame.draw.circle(screen,(255,255,255),[400,400],int(15*difficulty_r)+2,2)
+    pygame.draw.line(screen, (255, 0, 0), [100, 400], [100+math.cos(last_angles[0][0])*15*(
+        last_angles[0][1]+1), 400+math.sin(last_angles[0][0])*15*(last_angles[0][1]+1)], 3)
+    pygame.draw.circle(screen, (255, 0, 0), [100, 400], 7)
+    pygame.draw.circle(screen, (155, 0, 0), [100, 400], int(
+        15*(last_angles[0][1]+1))+1, 2)
+    pygame.draw.circle(screen, (255, 255, 255), [
+                       100, 400], int(15*difficulty_l)+2, 2)
+    pygame.draw.line(screen, (0, 0, 255), [400, 400], [400+math.cos(last_angles[1][0])*15*(
+        last_angles[1][1]+1), 400+math.sin(last_angles[1][0])*15*(last_angles[1][1]+1)], 3)
+    pygame.draw.circle(screen, (0, 0, 255), [400, 400], 7)
+    pygame.draw.circle(screen, (0, 0, 155), [400, 400], int(
+        15*(last_angles[1][1]+1))+1, 2)
+    pygame.draw.circle(screen, (255, 255, 255), [
+                       400, 400], int(15*difficulty_r)+2, 2)
 
     left_difficulty_average = 0
-    right_difficulty_average =0
-    lstam_difficulty_average =0
-    rstam_difficulty_average =0
+    right_difficulty_average = 0
+    lstam_difficulty_average = 0
+    rstam_difficulty_average = 0
 
     # left_score_map[currNoteNum]
     # right_score_map[currNoteNum]
@@ -429,7 +443,7 @@ while True:
     # pygame.draw.rect(screen,(0,100,0),sum_ghost_rect)
     # pygame.draw.rect(screen,(0,255,0),sum_rect)
     # pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-145,WINDOWHEIGHT-8-score_sum_peak*15],[WINDOWWIDTH-125,WINDOWHEIGHT-8-score_sum_peak*15],2)
-    
+
     # # ghost vals
     # lg_rect = pygame.Rect(WINDOWWIDTH-100,WINDOWHEIGHT-7-left_ghost_val*15,20,left_ghost_val*15+2)
     # rg_rect = pygame.Rect(WINDOWWIDTH-75,WINDOWHEIGHT-7-right_ghost_val*15,20,right_ghost_val*15+2)
