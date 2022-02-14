@@ -274,10 +274,9 @@ BloqDataRight = extractBloqData(songNoteRight)
 
 f = open ('export.csv', 'w',newline="")
 writer = csv.writer(f)
-writer.writerow(["_Time","Swing Speed degree/ms","Angle Diff","Stamina","Pattern Diff","CombinedDiff"])
+writer.writerow(["_Time","L Swing Speed degree/ms","L Angle Diff","L Stamina","L Pattern Diff","L CombinedDiff"])
 for bloq in BloqDataLeft:
     writer.writerow([bloq.time,bloq.swingSpeed,bloq.angleDiff,bloq.stamina,bloq.patternDiff,bloq.combinedDiff])
-
 f.close()
 
 
