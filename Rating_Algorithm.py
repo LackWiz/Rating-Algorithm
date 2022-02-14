@@ -1,3 +1,4 @@
+from cmath import sqrt
 from statistics import mean
 from pygame.locals import *
 from distutils.text_file import TextFile
@@ -204,9 +205,9 @@ def extractBloqData(songNoteArray):
                 if(len(BloqDataArray) >= j+1):
                     temp += BloqDataArray[-1*(j+1)].swingSpeed
             if(len(BloqDataArray) < staminaRollingAverage/4):       #Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
-                BloqDataArray[-1].stamina = temp/(staminaRollingAverage/4)
+                BloqDataArray[-1].stamina = (temp/(staminaRollingAverage/4))**3
             elif(len(BloqDataArray) < staminaRollingAverage):
-                BloqDataArray[-1].stamina = temp/(len(BloqDataArray))
+                BloqDataArray[-1].stamina = (temp/len(BloqDataArray))**3
             else:
                 BloqDataArray[-1].stamina = (temp/staminaRollingAverage)**3
             temp = 0
@@ -215,7 +216,7 @@ def extractBloqData(songNoteArray):
                     temp += BloqDataArray[-1*(i+1)].angleDiff
             BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)**2
 
-            BloqDataArray[-1].combinedDiff = BloqDataArray[-1].stamina * BloqDataArray[-1].patternDiff
+            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)
 
     return BloqDataArray
 
@@ -287,7 +288,7 @@ for block in song_notes_original:
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
 
-f = open ('export.csv', 'w',newline="")
+f = open (song_id + ' export.csv', 'w',newline="")
 writer = csv.writer(f)
 writer.writerow(["_Time","L Swing Speed degree/ms","L Angle Diff","L Stamina","L Pattern Diff","L CombinedDiff"])
 for bloq in BloqDataLeft:
