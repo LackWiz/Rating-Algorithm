@@ -252,3 +252,138 @@ print("sucess")
 # Block[numberOfBlocks[1 to 4], cutDirection, totalAngleNeeded[160-273.74], timeForSwing(ms), ForeHand?]✅
 
 # Final difficulty based on Total amount of notes, fastest swings using a rolling average of 4, angle difficulty average for whole map ✅
+last_angles = [[0,0,999],[0,0,999]]
+bpms = bpm/60/1000
+start_time = time.time()
+currNoteNum = 0
+# Loop ------------------------------------------------------- #
+while True:
+    # Background --------------------------------------------- #
+    screen.fill((0,0,0))
+    # Render ------------------------------------------------- #
+    time_progress = (time.time()-start_time)*1000*bpms
+    n = 0
+    for note in song_notes:
+        note = note[2]
+        note_num = len(song_notes)-n-1
+        if note['_type'] in [0,1]:
+            if (note['_time'] > time_progress-(150*bpms)) and (note['_time'] < time_progress+(1000*bpms)):
+                note_x = note['_lineIndex']-2
+                note_y = 3-(note['_lineLayer']-1.5)
+                age = time_progress+(1000*bpms)-note['_time']
+                size = age*12.5
+                pos_x = 270+note_x*(6+size)
+                pos_y = 80+note_y*(6+size)
+                if note['_type'] == 0:
+                    color = (255,0,0)
+                if note['_type'] == 1:
+                    color = (0,0,255)
+                if note['_time'] > time_progress:
+                    surf = pygame.Surface((int(size),int(size)))
+                    surf.set_alpha(150)
+                    surf.fill(color)
+                    screen.blit(surf,(pos_x-int(size/2),pos_y-int(size/2)))
+                    if note['_cutDirection'] != 8:
+                        draw_triangle(screen,[pos_x,pos_y],cut_direction_index[note['_cutDirection']],int(size/(2*math.sqrt(2))))
+                    else:
+                        pygame.draw.circle(screen,(255,255,255),[int(pos_x),int(pos_y)],int(size/6))
+                else:
+                    if currNoteNum <= note_num:
+                        #last_angles = song_angles[currNoteNum+1]
+                        currNoteNum += 1
+                        #boop_sfx.play()
+                    alt_size = int(size+(age-(1000*bpms))*150)
+                    surf_1 = pygame.Surface((alt_size,alt_size))
+                    surf_2 = pygame.Surface((alt_size-4,alt_size-4))
+                    surf_1.fill(color)
+                    surf_1.blit(surf_2,(2,2))
+                    surf_1.set_colorkey((0,0,0))
+                    surf_1.set_alpha(255-(age-(1000*bpms))/(150*bpms)*255)
+                    screen.blit(surf_1,(pos_x-int(alt_size/2),pos_y-int(alt_size/2)))
+        n += 1
+    # UI ----------------------------------------------------- #
+    progress_ms = pygame.mixer.music.get_pos()
+    progress_s = progress_ms/1000
+    progress_s = int(progress_s)
+    draw_text(str(progress_s), font, (255,255,255), screen, 2, 2)
+
+    difficulty_r = (last_angles[1][1])**1.25/last_angles[1][2]
+    difficulty_l = (last_angles[0][1])**1.25/last_angles[0][2]
+
+    pygame.draw.line(screen,(255,0,0),[100,400],[100+math.cos(last_angles[0][0])*15*(last_angles[0][1]+1),400+math.sin(last_angles[0][0])*15*(last_angles[0][1]+1)],3)
+    pygame.draw.circle(screen,(255,0,0),[100,400],7)
+    pygame.draw.circle(screen,(155,0,0),[100,400],int(15*(last_angles[0][1]+1))+1,2)
+    pygame.draw.circle(screen,(255,255,255),[100,400],int(15*difficulty_l)+2,2)
+    pygame.draw.line(screen,(0,0,255),[400,400],[400+math.cos(last_angles[1][0])*15*(last_angles[1][1]+1),400+math.sin(last_angles[1][0])*15*(last_angles[1][1]+1)],3)
+    pygame.draw.circle(screen,(0,0,255),[400,400],7)
+    pygame.draw.circle(screen,(0,0,155),[400,400],int(15*(last_angles[1][1]+1))+1,2)
+    pygame.draw.circle(screen,(255,255,255),[400,400],int(15*difficulty_r)+2,2)
+
+    left_difficulty_average = 0#left_score_map[currNoteNum]
+    right_difficulty_average =0# right_score_map[currNoteNum]
+    lstam_difficulty_average =0# lstam_score_map[currNoteNum]
+    rstam_difficulty_average =0# rstam_score_map[currNoteNum]
+
+    peak_lstam_diff = max(peak_lstam_diff,lstam_difficulty_average)
+    peak_rstam_diff = max(peak_rstam_diff,rstam_difficulty_average)
+    peak_left_diff = max(peak_left_diff,left_difficulty_average)
+    peak_right_diff = max(peak_right_diff,right_difficulty_average)
+    lstam_ghost_val -= 0.01
+    rstam_ghost_val -= 0.01
+    left_ghost_val -= 0.05
+    right_ghost_val -= 0.05
+    left_ghost_val = max(left_ghost_val,left_difficulty_average)
+    right_ghost_val = max(right_ghost_val,right_difficulty_average)
+    lstam_ghost_val = max(lstam_ghost_val,lstam_difficulty_average)
+    rstam_ghost_val = max(rstam_ghost_val,rstam_difficulty_average)
+
+    score_sum = ((left_ghost_val+lstam_ghost_val)**3 + (right_ghost_val+rstam_ghost_val)**3)**(1/3)
+
+    score_sum_ghost_val -= 0.01
+    score_sum_ghost_val = max(score_sum,score_sum_ghost_val)
+
+    score_sum_peak = max(score_sum_peak,score_sum)
+
+    sum_ghost_rect = pygame.Rect(WINDOWWIDTH-145,WINDOWHEIGHT-7-score_sum_ghost_val*15,20,score_sum_ghost_val*15+2)
+    sum_rect = pygame.Rect(WINDOWWIDTH-145,WINDOWHEIGHT-7-score_sum*15,20,score_sum*15+2)
+    pygame.draw.rect(screen,(0,100,0),sum_ghost_rect)
+    pygame.draw.rect(screen,(0,255,0),sum_rect)
+    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-145,WINDOWHEIGHT-8-score_sum_peak*15],[WINDOWWIDTH-125,WINDOWHEIGHT-8-score_sum_peak*15],2)
+    
+    # ghost vals
+    lg_rect = pygame.Rect(WINDOWWIDTH-100,WINDOWHEIGHT-7-left_ghost_val*15,20,left_ghost_val*15+2)
+    rg_rect = pygame.Rect(WINDOWWIDTH-75,WINDOWHEIGHT-7-right_ghost_val*15,20,right_ghost_val*15+2)
+    pygame.draw.rect(screen,(100,0,0),lg_rect)
+    pygame.draw.rect(screen,(0,0,100),rg_rect)
+    lstamg_rect = pygame.Rect(WINDOWWIDTH-50,WINDOWHEIGHT-7-lstam_ghost_val*15,20,lstam_ghost_val*15+2)
+    rstamg_rect = pygame.Rect(WINDOWWIDTH-25,WINDOWHEIGHT-7-rstam_ghost_val*15,20,rstam_ghost_val*15+2)
+    pygame.draw.rect(screen,(100,25,0),lstamg_rect)
+    pygame.draw.rect(screen,(0,25,100),rstamg_rect)
+    # realtime vals
+    l_rect = pygame.Rect(WINDOWWIDTH-100,WINDOWHEIGHT-7-left_difficulty_average*15,20,left_difficulty_average*15+2)
+    r_rect = pygame.Rect(WINDOWWIDTH-75,WINDOWHEIGHT-7-right_difficulty_average*15,20,right_difficulty_average*15+2)
+    pygame.draw.rect(screen,(255,0,0),l_rect)
+    pygame.draw.rect(screen,(0,0,255),r_rect)
+    lstam_rect = pygame.Rect(WINDOWWIDTH-50,WINDOWHEIGHT-7-lstam_difficulty_average*15,20,lstam_difficulty_average*15+2)
+    rstam_rect = pygame.Rect(WINDOWWIDTH-25,WINDOWHEIGHT-7-rstam_difficulty_average*15,20,rstam_difficulty_average*15+2)
+    pygame.draw.rect(screen,(255,50,0),lstam_rect)
+    pygame.draw.rect(screen,(0,50,255),rstam_rect)
+    for i in range(26):
+        pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-120,WINDOWHEIGHT-5-i*15],[WINDOWWIDTH-102,WINDOWHEIGHT-5-i*15],2)
+        draw_text(str(i), font, (255,255,255), screen, WINDOWWIDTH-120, WINDOWHEIGHT-19-i*15)
+    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-100,WINDOWHEIGHT-8-peak_left_diff*15],[WINDOWWIDTH-80,WINDOWHEIGHT-8-peak_left_diff*15],2)
+    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-75,WINDOWHEIGHT-8-peak_right_diff*15],[WINDOWWIDTH-55,WINDOWHEIGHT-8-peak_right_diff*15],2)
+    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-50,WINDOWHEIGHT-8-peak_lstam_diff*15],[WINDOWWIDTH-30,WINDOWHEIGHT-8-peak_lstam_diff*15],2)
+    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-25,WINDOWHEIGHT-8-peak_rstam_diff*15],[WINDOWWIDTH-5,WINDOWHEIGHT-8-peak_rstam_diff*15],2)
+    # Buttons ------------------------------------------------ #
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+    # Update ------------------------------------------------- #
+    pygame.display.update()
+    mainClock.tick(60)
