@@ -75,10 +75,10 @@ class Bloq:
             self.forehand = True
 
         else:
-            if block['_type'] is 0:
+            if type is 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
                 self.forehand = cutDirection in [5, 3, 7, 1]
-            elif block['_type'] is 1:
+            elif type is 1:
                 self.forehand = cutDirection in [6, 4, 2, 1]
 
     def addNote(self):
@@ -117,15 +117,8 @@ def extractBloqData(songNoteArray):
             BloqDataArray.append(Bloq(block["_type"], block["_cutDirection"], block["_time"], block["_time"] * mspb))
             BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
             
-
         else:
             BloqDataArray.append(Bloq(block["_type"], block["_cutDirection"], block["_time"], 0))
-            if block['_type'] is 0:
-                # If it's the first note, assign most likely, correct Forehand/backhand assignment
-                BloqDataArray[-1].setForehand(BloqDataArray[-1].cutDirection in [5, 3, 7, 1])
-
-            elif block['_type'] is 1:
-                BloqDataArray[-1].setForehand(BloqDataArray[-1].cutDirection in [6, 4, 2, 1])
 
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -
                                            BloqDataArray[-2].time)*mspb
