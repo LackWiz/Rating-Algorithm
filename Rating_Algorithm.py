@@ -23,8 +23,8 @@ except FileNotFoundError:
     f.close()
 
 print('Enter song ID:')
-# song_id = input()
-song_id = "c32d"  # For Debugging
+song_id = input()
+#song_id = "1fe06"  # For Debugging
 print('Enter difficulty (like ExpertPlusStandard):')
 # song_diff = input() + '.dat'
 song_diff = "ExpertPlusStandard.dat"
@@ -61,7 +61,7 @@ hardAngleMulti = 2
 sliderPrecision = 1/6       #Minimum precision (how close notes are together) to consider 2 very close notes a slider
 dotSliderPrecision = 1/5
 
-staminaRollingAverage = 256
+staminaRollingAverage = 64
 patternRollingAverage = 16
 #CutDirection 
 #   0 = North, 
