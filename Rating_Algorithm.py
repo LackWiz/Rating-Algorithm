@@ -238,27 +238,17 @@ print("sucess")
 # saber length is 1 meter
 # distance between top and bottom notes is roughly 1.5m
 # distance between side to side notes it roughly 2m
-# totalSwingAnglec = 160degrees + numberOfBlocks * RadToDegrees(tan-1(0.75/1))
+# totalSwingAnglec = 200degrees + numberOfBlocks * RadToDegrees(tan-1(0.75/1))
 
-# Import song dat file
-# Filter note dat file into Left and Right Block arrays
-
-
+# Import song dat file✅
+# Filter note dat file into Left and Right Block arrays✅
 # Identify stacks/sliders (maybe pauls/poodles) and turn the 2-4 Blocks into a single Block with a large swing angle ✅
 # Calculate Block distance into seconds or ms 73.74 ✅
-
 # using 100 degree in, 60 degree out rule to calculate beginning and end points of the saber✅
-#   (change endpoint of current block to)✅
-#
-#
-# using 1/2 time between last and next block (1/2 time between last and current block + 1/2 time between current and next block), calculate max time for that swing on that block ✅
 # using swingtime, swingAngle and 1 meter saber length, calculate saber speed ✅
-
-# List off hard swing angles for both hands ✅
-
+# List off hard swing angles for both hands + Appended angle diff to class✅
 
 # Each swing entry for left and right hand array should contain
-# Block[numberOfBlocks[1 to 4], position[X,Y], angleOfBlock(degree), totalAngleNeeded[160-273.74], timeForSwing(ms), ForeHand?]
-# 273.74 = 200 + tan-1(0.75/1)*2 (worst case inverts/quadruple sliders)
+# Block[numberOfBlocks[1 to 4], cutDirection, totalAngleNeeded[160-273.74], timeForSwing(ms), ForeHand?]✅
 
-# Final difficulty based on Total amount of notes, fastest swings using a rolling average of 4, angle difficulty average for whole map
+# Final difficulty based on Total amount of notes, fastest swings using a rolling average of 4, angle difficulty average for whole map ✅
