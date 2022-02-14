@@ -1,3 +1,4 @@
+from statistics import mean
 from pygame.locals import *
 from distutils.text_file import TextFile
 import pygame
@@ -23,7 +24,7 @@ except FileNotFoundError:
 
 print('Enter song ID:')
 # song_id = input()
-song_id = "1a37c"  # For Debugging
+song_id = "161b4"  # For Debugging
 print('Enter difficulty (like ExpertPlusStandard):')
 # song_diff = input() + '.dat'
 song_diff = "ExpertPlusStandard.dat"
@@ -53,13 +54,15 @@ def draw_text(text, font, color, surface, x, y):
 # Data ------------------------------------------------------- #
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
-easyAngleMulti = 1
+easyAngleMulti = 1          #Multiplyers for different angles
 medAngleMulti = 1.5
 hardAngleMulti = 2
 
-sliderPrecision = 1/6
+sliderPrecision = 1/6       #Minimum precision (how close notes are together) to consider 2 very close notes a slider
 dotSliderPrecision = 1/5
 
+staminaRollingAverage = 256
+patternRollingAverage = 16
 #CutDirection 
 #   0 = North, 
 #   1 = South, 
@@ -85,11 +88,13 @@ class Bloq:
         self.swingSpeed = 0
         self.forehand = True
         self.angleDiff = 1
+        self.stamina = 0
+        self.patternDiff = 0
+        self.combinedDiff = 0
 
         # Non-negoitables, Up is backhand
         if self.cutDirection == 0:
             self.forehand = False
-
         # Non-negoitables, Down is forehand
         elif self.cutDirection == 1:
             self.forehand = True
@@ -119,28 +124,40 @@ class Bloq:
                     self.angleDiff = medAngleMulti
                 elif(self.cutDirection in [0,2,4]): 
                     self.angleDiff = hardAngleMulti
-            if(not self.forehand):
-                if(self.cutDirection in [1,3,7]): #Checks is angles are easy, medium or difficult
+                #elif(self.cutDirection in[4]):#This angle is too ridiculous, forcing reset
+                #    self.angleDiff = easyAngleMulti
+                #    self.forehand = False
+            elif(not self.forehand):
+                if(self.cutDirection in [1,3]): #Checks is angles are easy, medium or difficult
                     self.angleDiff = hardAngleMulti
                 elif(self.cutDirection in [5,6]): 
                     self.angleDiff = medAngleMulti
                 elif(self.cutDirection in [0,2,4]): 
                     self.angleDiff = easyAngleMulti
+                #elif(self.cutDirection in[7]):#This angle is too ridiculous, forcing reset
+                #    self.angleDiff = easyAngleMulti
+                #    self.forehand = True
         elif(self.type == 1): #Right Hand
             if(self.forehand):
                 if(self.cutDirection in [1,2,6]): #Checks is angles are easy, medium or difficult
                     self.angleDiff = easyAngleMulti
                 elif(self.cutDirection in [4,7]): 
                     self.angleDiff = medAngleMulti
-                elif(self.cutDirection in [0,3,5]): 
+                elif(self.cutDirection in [0,3]): 
                     self.angleDiff = hardAngleMulti
-            if(not self.forehand):
-                if(self.cutDirection in [1,2,6]): #Checks is angles are easy, medium or difficult
+                #elif(self.cutDirection in[5]): #This angle is too ridiculous, forcing reset
+                #    self.angleDiff = easyAngleMulti
+                #    self.forehand = False
+            elif(not self.forehand):
+                if(self.cutDirection in [1,2]): #Checks is angles are easy, medium or difficult
                     self.angleDiff = hardAngleMulti
                 elif(self.cutDirection in [4,7]): 
                     self.angleDiff = medAngleMulti
                 elif(self.cutDirection in [0,3,5]): 
                     self.angleDiff = easyAngleMulti
+                #elif(self.cutDirection in[6]):#This angle is too ridiculous, forcing reset
+                #    self.angleDiff = easyAngleMulti
+                #    self.forehand = True
 
 def load_song_dat(path):
     main_path = path
@@ -156,7 +173,7 @@ def draw_triangle(surf, point, angle, radius):
 
 
 def extractBloqData(songNoteArray):
-    n = 0
+    
     BloqDataArray: list[Bloq] = []
 
     for i, block in enumerate(songNoteArray):
@@ -172,10 +189,30 @@ def extractBloqData(songNoteArray):
             
         else:
             BloqDataArray.append(Bloq(block["_type"], block["_cutDirection"], block["_time"], 0))
-            if(BloqDataArray[-1] not in [0, 1]):
+            if(BloqDataArray[-1].cutDirection not in [0, 1]):
                 BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
-            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -BloqDataArray[-2].time)*mspb
+
+
+            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -BloqDataArray[-2].time)*mspb     #calculates swingTime and Speed and shoves into class for processing later
             BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime
+
+            temp = 0
+            for j in range(0,staminaRollingAverage):    #Uses a rolling average to judge stamina
+                if(len(BloqDataArray) >= j+1):
+                    temp += BloqDataArray[-1*(j+1)].swingSpeed
+            if(len(BloqDataArray) < staminaRollingAverage/4):       #Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
+                BloqDataArray[-1].stamina = temp/(staminaRollingAverage/4)
+            elif(len(BloqDataArray) < staminaRollingAverage):
+                BloqDataArray[-1].stamina = temp/(i)
+            else:
+                BloqDataArray[-1].stamina = temp/staminaRollingAverage
+            temp = 0
+            for i in range(0,patternRollingAverage):    #Uses a rolling average to judge pattern difficulty
+                if(len(BloqDataArray) >= i+1):
+                    temp += BloqDataArray[-1*(i+1)].angleDiff
+            BloqDataArray[-1].patternDiff = temp/patternRollingAverage
+
+            BloqDataArray[-1].combinedDiff = BloqDataArray[-1].stamina * BloqDataArray[-1].patternDiff
 
     return BloqDataArray
 
@@ -237,8 +274,9 @@ BloqDataRight = extractBloqData(songNoteRight)
 
 f = open ('export.csv', 'w',newline="")
 writer = csv.writer(f)
+writer.writerow(["_Time","Swing Speed degree/ms","Angle Diff","Stamina","Pattern Diff","CombinedDiff"])
 for bloq in BloqDataLeft:
-    writer.writerow([bloq.time,bloq.swingSpeed])
+    writer.writerow([bloq.time,bloq.swingSpeed,bloq.angleDiff,bloq.stamina,bloq.patternDiff,bloq.combinedDiff])
 
 f.close()
 
