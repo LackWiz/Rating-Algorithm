@@ -55,14 +55,15 @@ def draw_text(text, font, color, surface, x, y):
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
 easyAngleMulti = 1          #Multiplyers for different angles
-medAngleMulti = 1.5
-hardAngleMulti = 2
+semiMidAngleDiff = 1.5
+medAngleMulti = 1.75
+hardAngleMulti = 2.5
 
 sliderPrecision = 1/6       #Minimum precision (how close notes are together) to consider 2 very close notes a slider
 dotSliderPrecision = 1/5
 
 staminaRollingAverage = 64
-patternRollingAverage = 16
+patternRollingAverage = 32
 #CutDirection 
 #   0 = North, 
 #   1 = South, 
@@ -92,13 +93,19 @@ class Bloq:
         self.patternDiff = 0
         self.combinedDiff = 0
 
-        # Non-negoitables, Up is backhand
-        if self.cutDirection == 0:
-            self.forehand = False
-        # Non-negoitables, Down is forehand
-        elif self.cutDirection == 1:
-            self.forehand = True
-
+        # Non-negoitables, Up and a select diagonal is backhand
+        if self.cutDirection in [0,4,5]: #4 = NW Left Hand, 5 = NE Right Hand
+            if (self.type is 0 & self.cutDirection in [0,4]):
+                self.forehand = False
+            elif (self.type is 1 & self.cutDirection in [0,5]):
+                self.forehand = False
+        # Non-negoitables, Down and a select diagonal is forehand
+        elif self.cutDirection in [1,6,7]:
+            if (self.type is 0 & self.cutDirection in [1,7]): #6 = SE Left Hand, 7 = SW Right Hand
+                self.forehand = True
+            elif (self.type is 1 & self.cutDirection in [1,6]):
+                self.forehand = True
+            
         else:
             if type is 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
@@ -118,46 +125,42 @@ class Bloq:
     def calcAngleDiff(self):
         if(self.type == 0): #Left Hand
             if(self.forehand):
-                if(self.cutDirection in [1,3,7]): #Checks is angles are easy, medium or difficult
+                if(self.cutDirection in [1,7]): #Checks is angles are easy, medium or difficult
                     self.angleDiff = easyAngleMulti
+                elif(self.cutDirection is 3):
+                    self.angleDiff = semiMidAngleDiff
                 elif(self.cutDirection in [5,6]): 
                     self.angleDiff = medAngleMulti
                 elif(self.cutDirection in [0,2,4]): 
                     self.angleDiff = hardAngleMulti
-                #elif(self.cutDirection in[4]):#This angle is too ridiculous, forcing reset
-                #    self.angleDiff = easyAngleMulti
-                #    self.forehand = False
             elif(not self.forehand):
                 if(self.cutDirection in [1,3]): #Checks is angles are easy, medium or difficult
                     self.angleDiff = hardAngleMulti
                 elif(self.cutDirection in [5,6]): 
                     self.angleDiff = medAngleMulti
-                elif(self.cutDirection in [0,2,4]): 
+                elif(self.cutDirection is 2):
+                    self.angleDiff = semiMidAngleDiff
+                elif(self.cutDirection in [0,4]): 
                     self.angleDiff = easyAngleMulti
-                #elif(self.cutDirection in[7]):#This angle is too ridiculous, forcing reset
-                #    self.angleDiff = easyAngleMulti
-                #    self.forehand = True
         elif(self.type == 1): #Right Hand
             if(self.forehand):
-                if(self.cutDirection in [1,2,6]): #Checks is angles are easy, medium or difficult
+                if(self.cutDirection in [1,6]): #Checks is angles are easy, medium or difficult
                     self.angleDiff = easyAngleMulti
+                elif(self.cutDirection is 2):
+                    self.angleDiff = semiMidAngleDiff
                 elif(self.cutDirection in [4,7]): 
                     self.angleDiff = medAngleMulti
                 elif(self.cutDirection in [0,3]): 
-                    self.angleDiff = hardAngleMulti
-                #elif(self.cutDirection in[5]): #This angle is too ridiculous, forcing reset
-                #    self.angleDiff = easyAngleMulti
-                #    self.forehand = False
+                    self.angleDiff = hardAngleMulti  
             elif(not self.forehand):
                 if(self.cutDirection in [1,2]): #Checks is angles are easy, medium or difficult
                     self.angleDiff = hardAngleMulti
                 elif(self.cutDirection in [4,7]): 
                     self.angleDiff = medAngleMulti
-                elif(self.cutDirection in [0,3,5]): 
+                elif(self.cutDirection is 3):
+                    self.angleDiff = semiMidAngleDiff
+                elif(self.cutDirection in [0,5]): 
                     self.angleDiff = easyAngleMulti
-                #elif(self.cutDirection in[6]):#This angle is too ridiculous, forcing reset
-                #    self.angleDiff = easyAngleMulti
-                #    self.forehand = True
 
 def load_song_dat(path):
     main_path = path
@@ -189,7 +192,7 @@ def extractBloqData(songNoteArray):
             
         else:
             BloqDataArray.append(Bloq(block["_type"], block["_cutDirection"], block["_time"], 0))
-            if(BloqDataArray[-1].cutDirection not in [0, 1]):
+            if(BloqDataArray[-1].cutDirection not in [0,1,4,5,6,7]):
                 BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
 
 
@@ -205,16 +208,28 @@ def extractBloqData(songNoteArray):
             elif(len(BloqDataArray) < staminaRollingAverage):
                 BloqDataArray[-1].stamina = temp/(len(BloqDataArray))
             else:
-                BloqDataArray[-1].stamina = temp/staminaRollingAverage
+                BloqDataArray[-1].stamina = (temp/staminaRollingAverage)**3
             temp = 0
             for i in range(0,patternRollingAverage):    #Uses a rolling average to judge pattern difficulty
                 if(len(BloqDataArray) >= i+1):
                     temp += BloqDataArray[-1*(i+1)].angleDiff
-            BloqDataArray[-1].patternDiff = temp/patternRollingAverage
+            BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)**2
 
             BloqDataArray[-1].combinedDiff = BloqDataArray[-1].stamina * BloqDataArray[-1].patternDiff
 
     return BloqDataArray
+
+def combineArray(array1, array2):
+    combinedArray: list [Bloq] = []
+    size = max(len(array1),len(array2))
+    for i in range(0,size):
+        combinedArray.append()
+
+
+
+
+
+
 
 
 # Setup ------------------------------------------------------ #
