@@ -52,6 +52,24 @@ def draw_text(text, font, color, surface, x, y):
 # Data ------------------------------------------------------- #
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
+easyAngleMulti = 1
+medAngleMulti = 1.5
+hardAngleMulti = 2
+
+
+
+
+#CutDirection 
+#   0 = North, 
+#   1 = South, 
+#   2 = West, 
+#   3 = East, 
+#   4 = NW, 
+#   5 = NE, 
+#   6 = SW, 
+#   7 = SE, 
+#   8 = Dot Note
+
 # Funcs ------------------------------------------------------ #
 
 
@@ -59,12 +77,13 @@ class Bloq:
     def __init__(self, type, cutDirection, startTime, swingTime):
         self.numNotes = 1
         self.type = type
-        self.cutDirection = 0
+        self.cutDirection = cutDirection
         self.swingAngle = 200
         self.time = startTime
         self.swingTime = swingTime
         self.swingSpeed = 0
         self.forehand = True
+        self.angleDiff = 1
 
         # Non-negoitables, Up is backhand
         if self.cutDirection == 0:
@@ -80,6 +99,7 @@ class Bloq:
                 self.forehand = cutDirection in [5, 3, 7, 1]
             elif type is 1:
                 self.forehand = cutDirection in [6, 4, 2, 1]
+        self.calcAngleDiff()
 
     def addNote(self):
         self.numNotes += 1
@@ -87,7 +107,39 @@ class Bloq:
 
     def setForehand(self, hand):
         self.forehand = hand
+        self.calcAngleDiff()
 
+    def calcAngleDiff(self):
+        if(self.type == 0): #Left Hand
+            if(self.forehand):
+                if(self.cutDirection in [1,3,7]): #Checks is angles are easy, medium or difficult
+                    self.angleDiff = easyAngleMulti
+                elif(self.cutDirection in [5,6]): 
+                    self.angleDiff = medAngleMulti
+                elif(self.cutDirection in [0,2,4]): 
+                    self.angleDiff = hardAngleMulti
+            if(not self.forehand):
+                if(self.cutDirection in [1,3,7]): #Checks is angles are easy, medium or difficult
+                    self.angleDiff = hardAngleMulti
+                elif(self.cutDirection in [5,6]): 
+                    self.angleDiff = medAngleMulti
+                elif(self.cutDirection in [0,2,4]): 
+                    self.angleDiff = easyAngleMulti
+        elif(self.type == 1): #Right Hand
+            if(self.forehand):
+                if(self.cutDirection in [1,2,6]): #Checks is angles are easy, medium or difficult
+                    self.angleDiff = easyAngleMulti
+                elif(self.cutDirection in [4,7]): 
+                    self.angleDiff = medAngleMulti
+                elif(self.cutDirection in [0,3,5]): 
+                    self.angleDiff = hardAngleMulti
+            if(not self.forehand):
+                if(self.cutDirection in [1,2,6]): #Checks is angles are easy, medium or difficult
+                    self.angleDiff = hardAngleMulti
+                elif(self.cutDirection in [4,7]): 
+                    self.angleDiff = medAngleMulti
+                elif(self.cutDirection in [0,3,5]): 
+                    self.angleDiff = easyAngleMulti
 
 def load_song_dat(path):
     main_path = path
@@ -181,6 +233,7 @@ for block in song_notes_original:
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
 
+print("sucess")
 
 # saber length is 1 meter
 # distance between top and bottom notes is roughly 1.5m
@@ -201,7 +254,7 @@ BloqDataRight = extractBloqData(songNoteRight)
 # using 1/2 time between last and next block (1/2 time between last and current block + 1/2 time between current and next block), calculate max time for that swing on that block ✅
 # using swingtime, swingAngle and 1 meter saber length, calculate saber speed ✅
 
-# List off hard swing angles for both hands
+# List off hard swing angles for both hands ✅
 
 
 # Each swing entry for left and right hand array should contain
