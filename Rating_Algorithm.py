@@ -7,6 +7,7 @@ import time
 import os
 import json
 import math
+import csv
 from shutil import copyfile
 # Get ID ----------------------------------------------------- #
 try:
@@ -37,7 +38,7 @@ WINDOWHEIGHT = 500
 screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT), 0, 32)
 
 # Font ------------------------------------------------------- #
-font = pygame.font.SysFont('verdana', 10)
+font = pygame.font.SysFont('verdana', 24)
 
 # Text ------------------------------------------------------- #
 
@@ -56,8 +57,8 @@ easyAngleMulti = 1
 medAngleMulti = 1.5
 hardAngleMulti = 2
 
-
-
+sliderPrecision = 1/6
+dotSliderPrecision = 1/5
 
 #CutDirection 
 #   0 = North, 
@@ -161,7 +162,7 @@ def extractBloqData(songNoteArray):
     for i, block in enumerate(songNoteArray):
 
         # Checks if the note behind is super close, and treats it as a single swing
-        if i != 0 and (songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= 1/8):
+        if i != 0 and ((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= sliderPrecision) or ((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= dotSliderPrecision) and songNoteArray[i]["_cutDirection"] is 8)):
             # Adds 1 to keep track of how many notes in a single swing
             BloqDataArray[-1].addNote()
 
@@ -202,6 +203,7 @@ full_music_path = bs_song_path + song_folder + '/' + song_file_name
 song_dat = load_song_dat(bs_song_path + song_folder + '/' + song_diff)
 song_notes_temp = song_dat['_notes']
 song_notes = []
+
 n = 0
 for song_note in song_notes_temp:  # Filters Out Left and Right notes from all notes and shoves it into an array
     if song_note['_type'] in [0, 1]:
@@ -233,6 +235,23 @@ for block in song_notes_original:
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
 
+f = open ('export.csv', 'w',newline="")
+writer = csv.writer(f)
+for bloq in BloqDataLeft:
+    writer.writerow([bloq.time,bloq.swingSpeed])
+
+f.close()
+
+
+
+
+
+
+
+
+
+
+
 print("sucess")
 
 # saber length is 1 meter
@@ -252,6 +271,11 @@ print("sucess")
 # Block[numberOfBlocks[1 to 4], cutDirection, totalAngleNeeded[160-273.74], timeForSwing(ms), ForeHand?]✅
 
 # Final difficulty based on Total amount of notes, fastest swings using a rolling average of 4, angle difficulty average for whole map ✅
+
+
+pygame.mixer.music.load(full_music_path)
+pygame.mixer.music.play(0)
+
 last_angles = [[0,0,999],[0,0,999]]
 bpms = bpm/60/1000
 start_time = time.time()
@@ -303,8 +327,7 @@ while True:
         n += 1
     # UI ----------------------------------------------------- #
     progress_ms = pygame.mixer.music.get_pos()
-    progress_s = progress_ms/1000
-    progress_s = int(progress_s)
+    progress_s = round(progress_ms/1000,2)
     draw_text(str(progress_s), font, (255,255,255), screen, 2, 2)
 
     difficulty_r = (last_angles[1][1])**1.25/last_angles[1][2]
@@ -319,62 +342,66 @@ while True:
     pygame.draw.circle(screen,(0,0,155),[400,400],int(15*(last_angles[1][1]+1))+1,2)
     pygame.draw.circle(screen,(255,255,255),[400,400],int(15*difficulty_r)+2,2)
 
-    left_difficulty_average = 0#left_score_map[currNoteNum]
-    right_difficulty_average =0# right_score_map[currNoteNum]
-    lstam_difficulty_average =0# lstam_score_map[currNoteNum]
-    rstam_difficulty_average =0# rstam_score_map[currNoteNum]
+    left_difficulty_average = 0
+    right_difficulty_average =0
+    lstam_difficulty_average =0
+    rstam_difficulty_average =0
 
-    peak_lstam_diff = max(peak_lstam_diff,lstam_difficulty_average)
-    peak_rstam_diff = max(peak_rstam_diff,rstam_difficulty_average)
-    peak_left_diff = max(peak_left_diff,left_difficulty_average)
-    peak_right_diff = max(peak_right_diff,right_difficulty_average)
-    lstam_ghost_val -= 0.01
-    rstam_ghost_val -= 0.01
-    left_ghost_val -= 0.05
-    right_ghost_val -= 0.05
-    left_ghost_val = max(left_ghost_val,left_difficulty_average)
-    right_ghost_val = max(right_ghost_val,right_difficulty_average)
-    lstam_ghost_val = max(lstam_ghost_val,lstam_difficulty_average)
-    rstam_ghost_val = max(rstam_ghost_val,rstam_difficulty_average)
+    # left_score_map[currNoteNum]
+    # right_score_map[currNoteNum]
+    # lstam_score_map[currNoteNum]
+    # rstam_score_map[currNoteNum]
+    # peak_lstam_diff = max(peak_lstam_diff,lstam_difficulty_average)
+    # peak_rstam_diff = max(peak_rstam_diff,rstam_difficulty_average)
+    # peak_left_diff = max(peak_left_diff,left_difficulty_average)
+    # peak_right_diff = max(peak_right_diff,right_difficulty_average)
+    # lstam_ghost_val -= 0.01
+    # rstam_ghost_val -= 0.01
+    # left_ghost_val -= 0.05
+    # right_ghost_val -= 0.05
+    # left_ghost_val = max(left_ghost_val,left_difficulty_average)
+    # right_ghost_val = max(right_ghost_val,right_difficulty_average)
+    # lstam_ghost_val = max(lstam_ghost_val,lstam_difficulty_average)
+    # rstam_ghost_val = max(rstam_ghost_val,rstam_difficulty_average)
 
-    score_sum = ((left_ghost_val+lstam_ghost_val)**3 + (right_ghost_val+rstam_ghost_val)**3)**(1/3)
+    # score_sum = ((left_ghost_val+lstam_ghost_val)**3 + (right_ghost_val+rstam_ghost_val)**3)**(1/3)
 
-    score_sum_ghost_val -= 0.01
-    score_sum_ghost_val = max(score_sum,score_sum_ghost_val)
+    # score_sum_ghost_val -= 0.01
+    # score_sum_ghost_val = max(score_sum,score_sum_ghost_val)
 
-    score_sum_peak = max(score_sum_peak,score_sum)
+    # score_sum_peak = max(score_sum_peak,score_sum)
 
-    sum_ghost_rect = pygame.Rect(WINDOWWIDTH-145,WINDOWHEIGHT-7-score_sum_ghost_val*15,20,score_sum_ghost_val*15+2)
-    sum_rect = pygame.Rect(WINDOWWIDTH-145,WINDOWHEIGHT-7-score_sum*15,20,score_sum*15+2)
-    pygame.draw.rect(screen,(0,100,0),sum_ghost_rect)
-    pygame.draw.rect(screen,(0,255,0),sum_rect)
-    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-145,WINDOWHEIGHT-8-score_sum_peak*15],[WINDOWWIDTH-125,WINDOWHEIGHT-8-score_sum_peak*15],2)
+    # sum_ghost_rect = pygame.Rect(WINDOWWIDTH-145,WINDOWHEIGHT-7-score_sum_ghost_val*15,20,score_sum_ghost_val*15+2)
+    # sum_rect = pygame.Rect(WINDOWWIDTH-145,WINDOWHEIGHT-7-score_sum*15,20,score_sum*15+2)
+    # pygame.draw.rect(screen,(0,100,0),sum_ghost_rect)
+    # pygame.draw.rect(screen,(0,255,0),sum_rect)
+    # pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-145,WINDOWHEIGHT-8-score_sum_peak*15],[WINDOWWIDTH-125,WINDOWHEIGHT-8-score_sum_peak*15],2)
     
-    # ghost vals
-    lg_rect = pygame.Rect(WINDOWWIDTH-100,WINDOWHEIGHT-7-left_ghost_val*15,20,left_ghost_val*15+2)
-    rg_rect = pygame.Rect(WINDOWWIDTH-75,WINDOWHEIGHT-7-right_ghost_val*15,20,right_ghost_val*15+2)
-    pygame.draw.rect(screen,(100,0,0),lg_rect)
-    pygame.draw.rect(screen,(0,0,100),rg_rect)
-    lstamg_rect = pygame.Rect(WINDOWWIDTH-50,WINDOWHEIGHT-7-lstam_ghost_val*15,20,lstam_ghost_val*15+2)
-    rstamg_rect = pygame.Rect(WINDOWWIDTH-25,WINDOWHEIGHT-7-rstam_ghost_val*15,20,rstam_ghost_val*15+2)
-    pygame.draw.rect(screen,(100,25,0),lstamg_rect)
-    pygame.draw.rect(screen,(0,25,100),rstamg_rect)
-    # realtime vals
-    l_rect = pygame.Rect(WINDOWWIDTH-100,WINDOWHEIGHT-7-left_difficulty_average*15,20,left_difficulty_average*15+2)
-    r_rect = pygame.Rect(WINDOWWIDTH-75,WINDOWHEIGHT-7-right_difficulty_average*15,20,right_difficulty_average*15+2)
-    pygame.draw.rect(screen,(255,0,0),l_rect)
-    pygame.draw.rect(screen,(0,0,255),r_rect)
-    lstam_rect = pygame.Rect(WINDOWWIDTH-50,WINDOWHEIGHT-7-lstam_difficulty_average*15,20,lstam_difficulty_average*15+2)
-    rstam_rect = pygame.Rect(WINDOWWIDTH-25,WINDOWHEIGHT-7-rstam_difficulty_average*15,20,rstam_difficulty_average*15+2)
-    pygame.draw.rect(screen,(255,50,0),lstam_rect)
-    pygame.draw.rect(screen,(0,50,255),rstam_rect)
-    for i in range(26):
-        pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-120,WINDOWHEIGHT-5-i*15],[WINDOWWIDTH-102,WINDOWHEIGHT-5-i*15],2)
-        draw_text(str(i), font, (255,255,255), screen, WINDOWWIDTH-120, WINDOWHEIGHT-19-i*15)
-    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-100,WINDOWHEIGHT-8-peak_left_diff*15],[WINDOWWIDTH-80,WINDOWHEIGHT-8-peak_left_diff*15],2)
-    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-75,WINDOWHEIGHT-8-peak_right_diff*15],[WINDOWWIDTH-55,WINDOWHEIGHT-8-peak_right_diff*15],2)
-    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-50,WINDOWHEIGHT-8-peak_lstam_diff*15],[WINDOWWIDTH-30,WINDOWHEIGHT-8-peak_lstam_diff*15],2)
-    pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-25,WINDOWHEIGHT-8-peak_rstam_diff*15],[WINDOWWIDTH-5,WINDOWHEIGHT-8-peak_rstam_diff*15],2)
+    # # ghost vals
+    # lg_rect = pygame.Rect(WINDOWWIDTH-100,WINDOWHEIGHT-7-left_ghost_val*15,20,left_ghost_val*15+2)
+    # rg_rect = pygame.Rect(WINDOWWIDTH-75,WINDOWHEIGHT-7-right_ghost_val*15,20,right_ghost_val*15+2)
+    # pygame.draw.rect(screen,(100,0,0),lg_rect)
+    # pygame.draw.rect(screen,(0,0,100),rg_rect)
+    # lstamg_rect = pygame.Rect(WINDOWWIDTH-50,WINDOWHEIGHT-7-lstam_ghost_val*15,20,lstam_ghost_val*15+2)
+    # rstamg_rect = pygame.Rect(WINDOWWIDTH-25,WINDOWHEIGHT-7-rstam_ghost_val*15,20,rstam_ghost_val*15+2)
+    # pygame.draw.rect(screen,(100,25,0),lstamg_rect)
+    # pygame.draw.rect(screen,(0,25,100),rstamg_rect)
+    # # realtime vals
+    # l_rect = pygame.Rect(WINDOWWIDTH-100,WINDOWHEIGHT-7-left_difficulty_average*15,20,left_difficulty_average*15+2)
+    # r_rect = pygame.Rect(WINDOWWIDTH-75,WINDOWHEIGHT-7-right_difficulty_average*15,20,right_difficulty_average*15+2)
+    # pygame.draw.rect(screen,(255,0,0),l_rect)
+    # pygame.draw.rect(screen,(0,0,255),r_rect)
+    # lstam_rect = pygame.Rect(WINDOWWIDTH-50,WINDOWHEIGHT-7-lstam_difficulty_average*15,20,lstam_difficulty_average*15+2)
+    # rstam_rect = pygame.Rect(WINDOWWIDTH-25,WINDOWHEIGHT-7-rstam_difficulty_average*15,20,rstam_difficulty_average*15+2)
+    # pygame.draw.rect(screen,(255,50,0),lstam_rect)
+    # pygame.draw.rect(screen,(0,50,255),rstam_rect)
+    # for i in range(26):
+    #     pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-120,WINDOWHEIGHT-5-i*15],[WINDOWWIDTH-102,WINDOWHEIGHT-5-i*15],2)
+    #     draw_text(str(i), font, (255,255,255), screen, WINDOWWIDTH-120, WINDOWHEIGHT-19-i*15)
+    # pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-100,WINDOWHEIGHT-8-peak_left_diff*15],[WINDOWWIDTH-80,WINDOWHEIGHT-8-peak_left_diff*15],2)
+    # pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-75,WINDOWHEIGHT-8-peak_right_diff*15],[WINDOWWIDTH-55,WINDOWHEIGHT-8-peak_right_diff*15],2)
+    # pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-50,WINDOWHEIGHT-8-peak_lstam_diff*15],[WINDOWWIDTH-30,WINDOWHEIGHT-8-peak_lstam_diff*15],2)
+    # pygame.draw.line(screen,(255,255,255),[WINDOWWIDTH-25,WINDOWHEIGHT-8-peak_rstam_diff*15],[WINDOWWIDTH-5,WINDOWHEIGHT-8-peak_rstam_diff*15],2)
     # Buttons ------------------------------------------------ #
     for event in pygame.event.get():
         if event.type == QUIT:
