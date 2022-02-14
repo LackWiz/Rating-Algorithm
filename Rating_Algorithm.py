@@ -24,7 +24,7 @@ except FileNotFoundError:
 
 print('Enter song ID:')
 # song_id = input()
-song_id = "161b4"  # For Debugging
+song_id = "c32d"  # For Debugging
 print('Enter difficulty (like ExpertPlusStandard):')
 # song_diff = input() + '.dat'
 song_diff = "ExpertPlusStandard.dat"
@@ -203,7 +203,7 @@ def extractBloqData(songNoteArray):
             if(len(BloqDataArray) < staminaRollingAverage/4):       #Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
                 BloqDataArray[-1].stamina = temp/(staminaRollingAverage/4)
             elif(len(BloqDataArray) < staminaRollingAverage):
-                BloqDataArray[-1].stamina = temp/(i)
+                BloqDataArray[-1].stamina = temp/(len(BloqDataArray))
             else:
                 BloqDataArray[-1].stamina = temp/staminaRollingAverage
             temp = 0
