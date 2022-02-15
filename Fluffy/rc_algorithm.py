@@ -15,9 +15,12 @@ except FileNotFoundError:
     f.close()
 
 print('Enter song ID:')
-song_id = input()
+#song_id = input()
 print('Enter difficulty (like ExpertPlus):')
-song_diff = input() + '.dat'
+#song_diff = input() + '.dat'
+song_id = "1a37c"  # For Debugging
+song_diff = "ExpertPlusStandard.dat"
+
 # Setup pygame/window ---------------------------------------- #
 mainClock = pygame.time.Clock()
 from pygame.locals import *
