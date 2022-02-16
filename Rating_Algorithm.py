@@ -1,5 +1,6 @@
 from cmath import sqrt
-from statistics import mean
+from statistics import mean, median, stdev
+import statistics
 from pygame.locals import *
 from distutils.text_file import TextFile
 import pygame
@@ -26,9 +27,9 @@ except FileNotFoundError:
 print('Enter song ID:')
 song_id = input()
 # song_id = "1fe06"  # For Debugging
-print('Enter difficulty (like ExpertPlusStandard):')
-# song_diff = input() + '.dat'
-song_diff = "ExpertPlusStandard.dat"
+print('Enter difficulty (like ExpertPlus):')
+song_diff = input() + 'Standard.dat'
+# song_diff = "ExpertPlusStandard.dat"
 # Setup pygame/window ---------------------------------------- #
 mainClock = pygame.time.Clock()
 pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -56,8 +57,8 @@ def draw_text(text, font, color, surface, x, y):
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
 easyAngleMulti = 1  # Multiplyers for different angles
-semiMidAngleDiff = 1.2
-medAngleMulti = 1.5
+semiMidAngleDiff = 1.3
+medAngleMulti = 1.6
 hardAngleMulti = 1.75
 
 easyPosMulti = 1  # Multiplyers for different positions
@@ -300,9 +301,9 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].patternDiff = (temp/len(BloqDataArray))
             else:
                 BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
-
-            BloqDataArray[-1].combinedDiff =  math.sqrt(BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*(min(BloqDataArray[-1].stamina*4,(BloqDataArray[-1].patternDiff)))
-
+            # The best way to compound the data to get reasonable results. I have no idea why it works but it does
+            BloqDataArray[-1].combinedDiff =  6*math.sqrt(math.sqrt((BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*(min(BloqDataArray[-1].stamina*4,(BloqDataArray[-1].patternDiff)))+BloqDataArray[-1].stamina+BloqDataArray[-1].patternDiff))-2
+            #BloqDataArray[-1].combinedDiff = BloqDataArray[-1].combinedDiff-(6)
     return BloqDataArray
 
 
@@ -370,7 +371,7 @@ BloqDataRight = extractBloqData(songNoteRight)
 
 # combinedArray = combineArray(BloqDataLeft, BloqDataRight)
 
-f = open(song_id + ' export.csv', 'w', newline="")
+f = open(song_id +" "+ song_info['_songName']+" "+song_diff+ ' export.csv', 'w', newline="")
 writer = csv.writer(f)
 writer.writerow(["_Time", "L Swing Speed degree/ms", "L Angle Diff","L Pos Diff",
                 "L Stamina", "L Pattern Diff", "L CombinedDiff"])
@@ -379,6 +380,30 @@ for bloq in BloqDataLeft:
                     bloq.stamina, bloq.patternDiff, bloq.combinedDiff])
 f.close()
 
+combined_scores = []
+for val in range(len(BloqDataLeft)):
+    combined_scores.append(BloqDataLeft[val].combinedDiff)
+combined_scores.sort(reverse=True)
+top_1_percent = sum(combined_scores[:int(len(combined_scores)/100)])/int(len(combined_scores)/100)
+top_5_percent = sum(combined_scores[:int(len(combined_scores)/20)])/int(len(combined_scores)/20)
+top_20_percent = sum(combined_scores[:int(len(combined_scores)/5)])/int(len(combined_scores)/5)
+top_50_percent = sum(combined_scores[:int(len(combined_scores)/2)])/int(len(combined_scores)/2)
+top_70_percent = sum(combined_scores[:int(len(combined_scores)*0.7)])/int(len(combined_scores)*0.7)
+median = combined_scores[int(len(combined_scores)/2)]
+
+# top_2_percent = top_2_percent*bpm**1.05/300
+# top_5_percent = top_5_percent*bpm**1.05/300
+# top_20_percent = top_20_percent*bpm**1.05/300
+# top_50_percent = top_50_percent*bpm**1.05/300
+# top_70_percent = top_70_percent*bpm**1.05/300
+deviation = statistics.stdev(combined_scores)
+print(top_1_percent,top_5_percent,top_20_percent,top_50_percent,top_70_percent,median)
+print(len(BloqDataLeft))
+final_score = (top_20_percent*2+top_5_percent*3+top_1_percent*4+top_70_percent*3+median)/13/(1-deviation/20)
+print(final_score)
+
+cal_final_score = 1.0299*final_score-0.3284*final_score**2+0.1005*final_score**3-0.009504*final_score**4+0.0002828*final_score**5
+print(cal_final_score)
 
 print("sucess")
 
