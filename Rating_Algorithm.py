@@ -275,8 +275,19 @@ class Bloq:
 
 def load_song_dat(path):
     main_path = path
-    with open(main_path) as json_dat:
-        dat = json.load(json_dat)
+    try:
+        with open(main_path) as json_dat:
+            dat = json.load(json_dat)
+    except FileNotFoundError:
+        print("That map doesn't exist! Make sure it's downloaded and you spelt the map name correctly")
+        print("Huh maybe it has a weird file name")
+        print("This time I won't autocomplete it with Standard. you'll need to type out the whole map file name minus .dat")
+        print('Enter difficulty (like ExpertPlusStandard):')
+        song_diff = input()
+        main_path = bs_song_path + song_folder + '/' + song_diff + '.dat'
+        with open(main_path) as json_dat:
+            dat = json.load(json_dat)
+        
     return dat
 
 
