@@ -1,5 +1,6 @@
 from cmath import sqrt
-from statistics import mean
+from statistics import mean, median, stdev
+import statistics
 from pygame.locals import *
 from distutils.text_file import TextFile
 import pygame
@@ -26,9 +27,9 @@ except FileNotFoundError:
 print('Enter song ID:')
 song_id = input()
 # song_id = "1fe06"  # For Debugging
-print('Enter difficulty (like ExpertPlusStandard):')
-# song_diff = input() + '.dat'
-song_diff = "ExpertPlusStandard.dat"
+print('Enter difficulty (like ExpertPlus):')
+song_diff = input() + 'Standard.dat'
+# song_diff = "ExpertPlusStandard.dat"
 # Setup pygame/window ---------------------------------------- #
 mainClock = pygame.time.Clock()
 pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -56,17 +57,30 @@ def draw_text(text, font, color, surface, x, y):
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
 easyAngleMulti = 1  # Multiplyers for different angles
-semiMidAngleDiff = 1.5
-medAngleMulti = 1.75
-hardAngleMulti = 2.5
+semiMidAngleMulti = 1.3
+midAngleMulti = 1.6
+hardAngleMulti = 1.75
+
+easySideMulti = 1  # Multiplyers for different positions
+semiMidSideMulti = 1.2
+midSideMulti = 1.5
+hardSideMulti = 2.0
+
+easyVertMulti = 1  # Multiplyers for different positions
+semiMidVertMulti = 1.2
+midVertMulti = 1.5
+
+aveStaminaMulti = 1.3333
+avePatternMulti = 1
 
 # Minimum precision (how close notes are together) to consider 2 very close notes a slider
 sliderPrecision = 1/6
 dotSliderPrecision = 1/5
 
-staminaRollingAverage = 64
-patternRollingAverage = 32
-# CutDirection
+staminaRollingAverage = 128
+patternRollingAverage = 128
+combinedRollingAverage = 128
+# _cutDirection
 #   0 = North,
 #   1 = South,
 #   2 = West,
@@ -77,43 +91,75 @@ patternRollingAverage = 32
 #   7 = SE,
 #   8 = Dot Note
 
+# _lineIndex
+#
+# 0 = Far Left
+# 1 = Center Left
+# 2 = Center Right
+# 3 = Far Right
+
+# _lineLayer
+#
+# 0 = Bottom (you)
+# 1 = Center
+# 2 = Top (me)
+# 
+
+
 # Funcs ------------------------------------------------------ #
-
-
-class Bloq:
-    def __init__(self, type, cutDirection, startTime, swingTime):
+class BloqStore:
+    def __init__(self, type, cutDirection, bloqPos, startTime, swingTime):
         self.numNotes = 1
         self.type = type
         self.cutDirection = cutDirection
+        self.bloqPos = bloqPos
         self.swingAngle = 200
         self.time = startTime
         self.swingTime = swingTime
         self.swingSpeed = 0
         self.forehand = True
-        self.angleDiff = 1
+        self.angleDiff = easyAngleMulti
+        self.posDiff = easySideMulti
+        self.stamina = 0
+        self.patternDiff = 0
+        self.combinedDiff = 0
+        self.combinedDiffSmoothed = 0
+
+class Bloq:
+    def __init__(self, type, cutDirection, bloqPos, startTime, swingTime):
+        self.numNotes = 1
+        self.type = type
+        self.cutDirection = cutDirection
+        self.bloqPos = bloqPos
+        self.swingAngle = 200
+        self.time = startTime
+        self.swingTime = swingTime
+        self.swingSpeed = 0
+        self.forehand = True
+        self.angleDiff = easyAngleMulti
+        self.posDiff = easySideMulti
         self.stamina = 0
         self.patternDiff = 0
         self.combinedDiff = 0
 
         # Non-negoitables, Up and a select diagonal is backhand
         if self.cutDirection in [0, 4, 5]:  # 4 = NW Left Hand, 5 = NE Right Hand
-            if (self.type is 0 & self.cutDirection in [0, 4]):
+            if (self.type == 0 & self.cutDirection in [0, 4]):
                 self.forehand = False
-            elif (self.type is 1 & self.cutDirection in [0, 5]):
+            elif (self.type == 1 & self.cutDirection in [0, 5]):
                 self.forehand = False
         # Non-negoitables, Down and a select diagonal is forehand
         elif self.cutDirection in [1, 6, 7]:
             # 6 = SE Left Hand, 7 = SW Right Hand
-            if (self.type is 0 & self.cutDirection in [1, 7]):
+            if (self.type == 0 & self.cutDirection in [1, 7]):
                 self.forehand = True
-            elif (self.type is 1 & self.cutDirection in [1, 6]):
+            elif (self.type == 1 & self.cutDirection in [1, 6]):
                 self.forehand = True
-
         else:
-            if type is 0:
+            if type == 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
                 self.forehand = cutDirection in [5, 3, 7, 1]
-            elif type is 1:
+            elif type == 1:
                 self.forehand = cutDirection in [6, 4, 2, 1]
         self.calcAngleDiff()
 
@@ -124,48 +170,105 @@ class Bloq:
     def setForehand(self, hand):
         self.forehand = hand
         self.calcAngleDiff()
+        self.calcPosDiff()
+
+    def calcPosDiff(self):
+        if(self.type == 0):  # Left Hand Side to Side Diff
+            if(self.forehand):
+                # Checks if position is easy, medium or difficult
+                if(self.bloqPos[0] == 2):
+                    self.posDiff = easySideMulti
+                elif(self.bloqPos[0] in [1,3]):
+                    self.posDiff = semiMidSideMulti
+                elif(self.bloqPos[0] == 4):
+                    self.posDiff = midSideMulti
+            elif(not self.forehand):
+                # Checks if position is easy, medium or difficult
+                if(self.bloqPos[0] == 0):
+                    self.posDiff = hardSideMulti
+                elif(self.bloqPos[0] == 1):
+                    self.posDiff = midSideMulti
+                elif(self.bloqPos[0] == 2):
+                    self.posDiff = semiMidSideMulti
+                elif(self.bloqPos[0] == 3):
+                    self.posDiff = easySideMulti
+        elif(self.type == 1):  # Right Hand
+            if(self.forehand):
+                # Checks if position is easy, medium or difficult
+                if(self.bloqPos[0] == 1):
+                    self.posDiff = easySideMulti
+                elif(self.bloqPos[0] in [0,2]):
+                    self.posDiff = semiMidSideMulti
+                elif(self.bloqPos[0] == 3):
+                    self.posDiff = midSideMulti
+            elif(not self.forehand):
+                # Checks if position is easy, medium or difficult
+                if(self.bloqPos[0] == 3):
+                    self.posDiff = hardSideMulti
+                elif(self.bloqPos[0] == 2):
+                    self.posDiff = midSideMulti
+                elif(self.bloqPos[0] == 1):
+                    self.posDiff = semiMidSideMulti
+                elif(self.bloqPos[0] == 0):
+                    self.posDiff = easySideMulti
+        
+        # Up and Down Diff
+        if(self.forehand):
+            if(self.bloqPos[1] == 0):
+                self.posDiff = self.posDiff*easyVertMulti
+            elif(self.bloqPos[1] == 1):
+                self.posDiff = self.posDiff*semiMidVertMulti
+            elif(self.bloqPos[1] == 2):
+                self.posDiff = self.posDiff*midVertMulti
+        elif(not self.forehand):
+            if(self.bloqPos[1] == 0):
+                self.posDiff = self.posDiff*midVertMulti
+            elif(self.bloqPos[1] == 1):
+                self.posDiff = self.posDiff*semiMidVertMulti
+            elif(self.bloqPos[1] == 2):
+                self.posDiff = self.posDiff*easyVertMulti
 
     def calcAngleDiff(self):
         if(self.type == 0):  # Left Hand
             if(self.forehand):
-                # Checks is angles are easy, medium or difficult
+                # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 7]):
                     self.angleDiff = easyAngleMulti
-                elif(self.cutDirection is 3):
-                    self.angleDiff = semiMidAngleDiff
+                elif(self.cutDirection == 3):
+                    self.angleDiff = semiMidAngleMulti
                 elif(self.cutDirection in [5, 6]):
-                    self.angleDiff = medAngleMulti
+                    self.angleDiff = midAngleMulti
                 elif(self.cutDirection in [0, 2, 4]):
                     self.angleDiff = hardAngleMulti
             elif(not self.forehand):
-                # Checks is angles are easy, medium or difficult
+                # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 3]):
                     self.angleDiff = hardAngleMulti
                 elif(self.cutDirection in [5, 6]):
-                    self.angleDiff = medAngleMulti
-                elif(self.cutDirection is 2):
-                    self.angleDiff = semiMidAngleDiff
+                    self.angleDiff = midAngleMulti
+                elif(self.cutDirection == 2):
+                    self.angleDiff = semiMidAngleMulti
                 elif(self.cutDirection in [0, 4]):
                     self.angleDiff = easyAngleMulti
         elif(self.type == 1):  # Right Hand
             if(self.forehand):
-                # Checks is angles are easy, medium or difficult
+                # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 6]):
                     self.angleDiff = easyAngleMulti
-                elif(self.cutDirection is 2):
-                    self.angleDiff = semiMidAngleDiff
+                elif(self.cutDirection == 2):
+                    self.angleDiff = semiMidAngleMulti
                 elif(self.cutDirection in [4, 7]):
-                    self.angleDiff = medAngleMulti
+                    self.angleDiff = midAngleMulti
                 elif(self.cutDirection in [0, 3]):
                     self.angleDiff = hardAngleMulti
             elif(not self.forehand):
-                # Checks is angles are easy, medium or difficult
+                # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 2]):
                     self.angleDiff = hardAngleMulti
                 elif(self.cutDirection in [4, 7]):
-                    self.angleDiff = medAngleMulti
-                elif(self.cutDirection is 3):
-                    self.angleDiff = semiMidAngleDiff
+                    self.angleDiff = midAngleMulti
+                elif(self.cutDirection == 3):
+                    self.angleDiff = semiMidAngleMulti
                 elif(self.cutDirection in [0, 5]):
                     self.angleDiff = easyAngleMulti
 
@@ -190,57 +293,102 @@ def extractBloqData(songNoteArray):
     for i, block in enumerate(songNoteArray):
 
         # Checks if the note behind is super close, and treats it as a single swing
-        if i != 0 and (((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= sliderPrecision) or ((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= dotSliderPrecision) and songNoteArray[i]["_cutDirection"] is 8)) & (songNoteArray[i]['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'],8])):
+        if i != 0 and ((((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= sliderPrecision) or ((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= dotSliderPrecision) and songNoteArray[i]["_cutDirection"] == 8)) & (songNoteArray[i]['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'],8]))or(songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= 0.001)):
             # Adds 1 to keep track of how many notes in a single swing
             BloqDataArray[-1].addNote()
 
         elif i == 0:
             BloqDataArray.append(Bloq(
-                block["_type"], block["_cutDirection"], block["_time"], block["_time"] * mspb))
+                block["_type"], block["_cutDirection"],[block["_lineIndex"],block["_lineLayer"]], block["_time"], block["_time"] * mspb))
             BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
 
         else:
             BloqDataArray.append(
-                Bloq(block["_type"], block["_cutDirection"], block["_time"], 0))
+                Bloq(block["_type"], block["_cutDirection"],[block["_lineIndex"],block["_lineLayer"]], block["_time"], 0))
             if(BloqDataArray[-1].cutDirection not in [0, 1, 4, 5, 6, 7]):
                 BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
 
             # calculates swingTime and Speed and shoves into class for processing later
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -
                                            BloqDataArray[-2].time)*mspb
-            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle / \
-                BloqDataArray[-1].swingTime
+            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime
 
             temp = 0
             # Uses a rolling average to judge stamina
             for j in range(0, staminaRollingAverage):
                 if(len(BloqDataArray) >= j+1):
-                    temp += BloqDataArray[-1*(j+1)].swingSpeed
+                    temp += (BloqDataArray[-1*(j+1)].swingSpeed)
             # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
             if(len(BloqDataArray) < staminaRollingAverage/4):
-                BloqDataArray[-1].stamina = (temp/(staminaRollingAverage/4))**3
+                BloqDataArray[-1].stamina = (temp/(staminaRollingAverage/4))
             elif(len(BloqDataArray) < staminaRollingAverage):
-                BloqDataArray[-1].stamina = (temp/len(BloqDataArray))**3
+                BloqDataArray[-1].stamina = (temp/len(BloqDataArray))
             else:
-                BloqDataArray[-1].stamina = (temp/staminaRollingAverage)**3
+                BloqDataArray[-1].stamina = (temp/staminaRollingAverage)
             temp = 0
             # Uses a rolling average to judge pattern difficulty
             for i in range(0, patternRollingAverage):
                 if(len(BloqDataArray) >= i+1):
-                    temp += BloqDataArray[-1*(i+1)].angleDiff
-            BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)**2
-
-            BloqDataArray[-1].combinedDiff = math.sqrt(
-                BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)
-
+                    temp += (BloqDataArray[-1*(i+1)].angleDiff*BloqDataArray[-1*(i+1)].posDiff)
+            # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
+            if(len(BloqDataArray) < patternRollingAverage/4):
+                BloqDataArray[-1].patternDiff = (temp/(patternRollingAverage/4))
+            elif(len(BloqDataArray) < patternRollingAverage):
+                BloqDataArray[-1].patternDiff = (temp/len(BloqDataArray))
+            else:
+                BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
+            # The best way to compound the data to get reasonable results. I have no idea why it works but it does
+            #BloqDataArray[-1].combinedDiff =  6*math.sqrt(math.sqrt((BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*(min(BloqDataArray[-1].stamina*4,(BloqDataArray[-1].patternDiff)))+BloqDataArray[-1].stamina+BloqDataArray[-1].patternDiff))-6
+            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*math.sqrt(BloqDataArray[-1].stamina)
     return BloqDataArray
 
 
-# def combineArray(array1, array2):
-#     combinedArray: list[Bloq] = []
-#     size = max(len(array1), len(array2))
-#     for i in range(0, size):
-#         combinedArray.append()
+def combineArray(array1, array2):
+    #array1: list[Bloq] = []
+    #array2: list[Bloq] = []
+    combinedArray: list[BloqStore] = []
+
+    for i in range(0, len(array1)):
+        combinedArray.append(BloqStore(array1[i].type, array1[i].cutDirection, array1[i].bloqPos, array1[i].time, array1[i].swingTime))
+        combinedArray[-1].angleDiff = array1[i].angleDiff
+        combinedArray[-1].combinedDiff = array1[i].combinedDiff
+        combinedArray[-1].forehand = array1[i].forehand
+        combinedArray[-1].numNotes = array1[i].numNotes
+        combinedArray[-1].patternDiff = array1[i].patternDiff
+        combinedArray[-1].posDiff = array1[i].posDiff
+        combinedArray[-1].stamina = array1[i].stamina
+        combinedArray[-1].swingSpeed = array1[i].swingSpeed
+    for i in range(0, len(array2)):
+        combinedArray.append(BloqStore(array2[i].type, array2[i].cutDirection, array2[i].bloqPos, array2[i].time, array2[i].swingTime))
+        combinedArray[-1].angleDiff = array2[i].angleDiff
+        combinedArray[-1].combinedDiff = array2[i].combinedDiff
+        combinedArray[-1].forehand = array2[i].forehand
+        combinedArray[-1].numNotes = array2[i].numNotes
+        combinedArray[-1].patternDiff = array2[i].patternDiff
+        combinedArray[-1].posDiff = array2[i].posDiff
+        combinedArray[-1].stamina = array2[i].stamina
+        combinedArray[-1].swingSpeed = array2[i].swingSpeed
+
+    combinedArray.sort(key=lambda x: x.time)
+    temp = len(combinedArray)
+    i = 1
+    while(i < temp): #Cleans up Duplicate Times
+        if(combinedArray[i].time == combinedArray[i-1].time):
+            combinedArray[i-1].numNotes += 1
+            combinedArray.pop(i)
+            temp = len(combinedArray)
+            i = i - 1
+        i += 1
+
+    
+    for i in range(0, len(combinedArray)):
+        temp = 0
+        for j in range(0, min(combinedRollingAverage,i)): # Uses a rolling average to smooth difficulties between the hands
+            temp += combinedArray[i-min(combinedRollingAverage,j)].combinedDiff
+        combinedArray[i].combinedDiffSmoothed = 6*temp/min(combinedRollingAverage,i+1)
+    
+    
+    return combinedArray
 
 
 # Setup ------------------------------------------------------ #
@@ -298,17 +446,68 @@ for block in song_notes_original:
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
 
-# combinedArray = combineArray(BloqDataLeft, BloqDataRight)
+combinedArrayRaw = combineArray(BloqDataLeft, BloqDataRight)
+excelFileName = os.path.join('Spreadsheets',song_id +" "+ song_info['_songName']+" "+song_diff+ ' export.csv')
 
-f = open(song_id + ' export.csv', 'w', newline="")
+try:
+    f = open(excelFileName, 'w', newline="")
+    writer = csv.writer(f)
+    writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff","C Pos Diff",
+                    "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
+    for bloq in combinedArrayRaw:
+        writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff,bloq.posDiff,
+                        bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
+    f.close()
+except FileNotFoundError:
+    print('Making Spreadsheets Folder')
+    os.mkdir('Spreadsheets')
+    f = open(excelFileName, 'w', newline="")
+    writer = csv.writer(f)
+    writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff","C Pos Diff",
+                    "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
+    for bloq in combinedArrayRaw:
+        writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff,bloq.posDiff,
+                        bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
+    f.close()
+
+
+
+
+f = open(excelFileName, 'w', newline="")
 writer = csv.writer(f)
-writer.writerow(["_Time", "L Swing Speed degree/ms", "L Angle Diff",
-                "L Stamina", "L Pattern Diff", "L CombinedDiff"])
-for bloq in BloqDataLeft:
-    writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff,
-                    bloq.stamina, bloq.patternDiff, bloq.combinedDiff])
+writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff","C Pos Diff",
+                "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
+for bloq in combinedArrayRaw:
+    writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff,bloq.posDiff,
+                    bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
 f.close()
 
+combinedArray = []
+for bloq in combinedArrayRaw:
+    combinedArray.append(bloq.combinedDiffSmoothed)
+
+
+combinedArray.sort(reverse=True)
+# top_1_percent = sum(combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
+# top_5_percent = sum(combinedArray[:int(len(combinedArray)/20)])/int(len(combinedArray)/20)
+# top_20_percent = sum(combinedArray[:int(len(combinedArray)/5)])/int(len(combinedArray)/5)
+# top_50_percent = sum(combinedArray[:int(len(combinedArray)/2)])/int(len(combinedArray)/2)
+# top_70_percent = sum(combinedArray[:int(len(combinedArray)*0.7)])/int(len(combinedArray)*0.7)
+median = combinedArray[int(len(combinedArray)/2)]
+
+# top_2_percent = top_2_percent*bpm**1.05/300
+# top_5_percent = top_5_percent*bpm**1.05/300
+# top_20_percent = top_20_percent*bpm**1.05/300
+# top_50_percent = top_50_percent*bpm**1.05/300
+# top_70_percent = top_70_percent*bpm**1.05/300
+# print(top_1_percent,top_5_percent,top_20_percent,top_50_percent,top_70_percent,median)
+# print(len(BloqDataLeft))
+# final_score = (top_20_percent*2+top_5_percent*3+top_1_percent*4+top_70_percent*3+median)/13
+# print(final_score)
+# cal_final_score = 1.0299*final_score-0.3284*final_score**2+0.1005*final_score**3-0.009504*final_score**4+0.0002828*final_score**5
+# print(cal_final_score)
+
+print(median)
 
 print("sucess")
 
