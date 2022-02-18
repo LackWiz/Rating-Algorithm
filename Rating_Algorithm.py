@@ -18,11 +18,11 @@ except FileNotFoundError:
     f.close()
 
 print('Enter song ID:')
-#song_id = input()
-song_id = "1fe06"  # For Debugging
+song_id = input()
+#song_id = "1fe06"  # For Debugging
 print('Enter difficulty (like ExpertPlus):')
-#song_diff = input() + 'Standard.dat'
-song_diff = "ExpertPlusStandard.dat"
+song_diff = input() + 'Standard.dat'
+#song_diff = "ExpertPlusStandard.dat"
 
 
 #cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
@@ -366,7 +366,7 @@ songNoteLeft = []
 songNoteRight = []
 
 
-song_info = load_song_dat(bs_song_path + song_folder + '/Info.dat')
+song_info = load_song_dat(bs_song_path + song_folder + "/Info.dat")
 bpm = song_info['_beatsPerMinute']
 mspb = 60*1000/bpm  # milliseconds per beat
 
@@ -418,25 +418,6 @@ f.close()
 combinedArray = []
 for bloq in combinedArrayRaw:
     combinedArray.append(bloq.combinedDiffSmoothed)
-
-
-# top_1_percent = sum(combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
-# top_5_percent = sum(combinedArray[:int(len(combinedArray)/20)])/int(len(combinedArray)/20)
-# top_20_percent = sum(combinedArray[:int(len(combinedArray)/5)])/int(len(combinedArray)/5)
-# top_50_percent = sum(combinedArray[:int(len(combinedArray)/2)])/int(len(combinedArray)/2)
-# top_70_percent = sum(combinedArray[:int(len(combinedArray)*0.7)])/int(len(combinedArray)*0.7)
-
-# top_2_percent = top_2_percent*bpm**1.05/300
-# top_5_percent = top_5_percent*bpm**1.05/300
-# top_20_percent = top_20_percent*bpm**1.05/300
-# top_50_percent = top_50_percent*bpm**1.05/300
-# top_70_percent = top_70_percent*bpm**1.05/300
-# print(top_1_percent,top_5_percent,top_20_percent,top_50_percent,top_70_percent,median)
-# print(len(BloqDataLeft))
-# final_score = (top_20_percent*2+top_5_percent*3+top_1_percent*4+top_70_percent*3+median)/13
-# print(final_score)
-# cal_final_score = 1.0299*final_score-0.3284*final_score**2+0.1005*final_score**3-0.009504*final_score**4+0.0002828*final_score**5
-# print(cal_final_score)
 
 median = statistics.median(combinedArray)
 print(median)
