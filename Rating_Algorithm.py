@@ -5,6 +5,8 @@ import math
 import csv
 import Multi
 
+# TODO: download from scoresaber if map missing
+
 # Get ID
 try:
     f = open('bs_path.txt', 'r')
@@ -12,6 +14,7 @@ try:
     f.close()
 except FileNotFoundError:
     print('Enter Beat Saber custom songs folder:')
+    # TODO: validate path
     bs_path = input()
     f = open('bs_path.txt', 'w')
     dat = f.write(bs_path)
@@ -19,13 +22,12 @@ except FileNotFoundError:
 
 print('Enter song ID:')
 song_id = input()
-#song_id = "1fe06"  # For Debugging
+# song_id = "1fe06"  # For Debugging
 print('Enter difficulty (like ExpertPlus):')
 song_diff = input() + 'Standard.dat'
 #song_diff = "ExpertPlusStandard.dat"
 
 
-#cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 # Minimum precision (how close notes are together) to consider 2 very close notes a slider
 sliderPrecision = 1/6
 dotSliderPrecision = 1/5
@@ -35,31 +37,7 @@ patternRollingAverage = 128
 combinedRollingAverage = 128
 
 """
-_cutDirection
-0 = North,
-1 = South,
-2 = West,
-3 = East,
-4 = NW,
-5 = NE,
-6 = SW,
-7 = SE,
-8 = Dot Note
-
-4 0 5
-2 8 3
-6 1 7
-
-_lineIndex
-0 = Far Left
-1 = Center Left
-2 = Center Right
-3 = Far Right
-
-_lineLayer
-0 = Bottom (you)
-1 = Center
-2 = Top (me)
+https://bsmg.wiki/mapping/map-format.html#notes-2
 """
 
 
@@ -111,17 +89,21 @@ class Bloq:
         self.calcAngleDiff()
         self.calcPosDiff()
 
+    # TODO: shorten function
     def calcPosDiff(self):
         if(self.type == 0):  # Left Hand Side to Side Diff
             # LH centered around 2
             if(self.forehand):
                 # Checks if position is easy, medium or difficult
+
+                # TODO: probably a typo below (ranges 1-4, not 0-3)
                 if(self.bloqPos[0] == 2):
                     self.posDiff = Multi.SIDE_EASY
                 elif(self.bloqPos[0] in [1, 3]):
                     self.posDiff = Multi.SIDE_SEMI_MID
                 elif(self.bloqPos[0] == 4):
                     self.posDiff = Multi.SIDE_MID
+
             elif(not self.forehand):
                 # Checks if position is easy, medium or difficult
                 if(self.bloqPos[0] == 0):
@@ -168,6 +150,7 @@ class Bloq:
             elif(self.bloqPos[1] == 2):
                 self.posDiff *= Multi.VERT_EASY
 
+    # TODO: shorten function
     def calcAngleDiff(self):
         if(self.type == 0):  # Left Hand
             if(self.forehand):
@@ -231,6 +214,7 @@ def load_song_dat(path):
     return dat
 
 
+# TODO: sliding window instead of reactive (for future expansion)
 def extractBloqData(songNoteArray):
 
     BloqDataArray: list[Bloq] = []
@@ -238,14 +222,17 @@ def extractBloqData(songNoteArray):
     for i, block in enumerate(songNoteArray):
 
         # Checks if the note behind is super close, and treats it as a single swing
-        if i != 0 and ((((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= sliderPrecision) or ((songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= dotSliderPrecision) and songNoteArray[i]["_cutDirection"] == 8)) & (songNoteArray[i]['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'], 8])) or (songNoteArray[i]["_time"] - songNoteArray[i-1]['_time'] <= 0.001)):
-            # Adds 1 to keep track of how many notes in a single swing
-            BloqDataArray[-1].addNote()
-
-        elif i == 0:
+        if i == 0:
             BloqDataArray.append(Bloq(
                 block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], block["_time"] * mspb))
             BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
+
+        # TODO: ??????
+        elif (block["_time"] - songNoteArray[i-1]['_time'] <= (dotSliderPrecision if block["_cutDirection"] == 8 else sliderPrecision)
+              and (block['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'], 8])) or (block["_time"] - songNoteArray[i-1]['_time'] <= 0.001):
+
+            # Adds 1 to keep track of how many notes in a single swing
+            BloqDataArray[-1].addNote()
 
         else:
             BloqDataArray.append(
@@ -259,6 +246,7 @@ def extractBloqData(songNoteArray):
             BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle / \
                 BloqDataArray[-1].swingTime
 
+            # TODO: move this elsewhere, should be part of processBloqData, not extract
             temp = 0
             # Uses a rolling average to judge stamina
             for j in range(0, staminaRollingAverage):
@@ -273,10 +261,10 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].stamina = (temp/staminaRollingAverage)
             temp = 0
             # Uses a rolling average to judge pattern difficulty
-            for i in range(0, patternRollingAverage):
-                if(len(BloqDataArray) >= i+1):
-                    temp += (BloqDataArray[-1*(i+1)].angleDiff *
-                             BloqDataArray[-1*(i+1)].posDiff)
+            for j in range(0, patternRollingAverage):
+                if(len(BloqDataArray) >= j+1):
+                    temp += (BloqDataArray[-1*(j+1)].angleDiff *
+                             BloqDataArray[-1*(j+1)].posDiff)
             # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
             if(len(BloqDataArray) < patternRollingAverage/4):
                 BloqDataArray[-1].patternDiff = (temp /
@@ -291,18 +279,14 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*math.sqrt(BloqDataArray[-1].stamina)
     return BloqDataArray
 
+# TODO: misleading function name
+
 
 def combineArray(array1, array2):
-    #array1: list[Bloq] = []
-    #array2: list[Bloq] = []
-    combinedArray: list[Bloq] = []
-
-    for i in range(0, len(array1)):
-        combinedArray.append(array1[i])
-    for i in range(0, len(array2)):
-        combinedArray.append(array2[i])
-
+    combinedArray: list[Bloq] = array1 + array2
     combinedArray.sort(key=lambda x: x.time)
+
+    # TODO: ask Lack what this does
     temp = len(combinedArray)
     i = 1
     while(i < temp):  # Cleans up Duplicate Times
@@ -313,6 +297,7 @@ def combineArray(array1, array2):
             i = i - 1
         i += 1
 
+    # TODO: change from n**2 to sliding window
     for i in range(0, len(combinedArray)):
         temp = 0
         # Uses a rolling average to smooth difficulties between the hands
@@ -342,61 +327,37 @@ for song in song_folder_contents:
 
 #---------------Where Stuff Happens-----------------------------------------------------------------------------#
 
-# Loads the Full song music file into variable full_music_path
-full_music_path = bs_song_path + song_folder + '/' + song_file_name
-
 song_dat = load_song_dat(bs_song_path + song_folder + '/' + song_diff)
-song_notes_temp = song_dat['_notes']
-song_notes = []
-
-n = 0
-for song_note in song_notes_temp:  # Filters Out Left and Right notes from all notes and shoves it into an array
-    if song_note['_type'] in [0, 1]:
-        song_notes.append([float(song_note['_time']), n, song_note])
-        n += 1
-song_notes.sort(reverse=True)
-
-song_notes_original = []
-for song_note in song_notes_temp:
-    if song_note['_type'] in [0, 1]:
-        song_notes_original.append(song_note.copy())
-
-
-songNoteLeft = []
-songNoteRight = []
-
-
 song_info = load_song_dat(bs_song_path + song_folder + "/Info.dat")
+
 bpm = song_info['_beatsPerMinute']
 mspb = 60*1000/bpm  # milliseconds per beat
 
-for block in song_notes_original:
-    if block['_type'] == 0:  # left
-        songNoteLeft.append(block.copy())
-for block in song_notes_original:
-    if block['_type'] == 1:  # right
-        songNoteRight.append(block.copy())
+song_notes = song_dat['_notes']
+
+# remove the bombs
+song_notes = list(filter(lambda x: x['_type'] in [0, 1], song_notes))
+
+# split into red and blue notes
+songNoteLeft = [block for block in song_notes if block['_type'] == 0]
+songNoteRight = [block for block in song_notes if block['_type'] == 1]
 
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
 
 combinedArrayRaw = combineArray(BloqDataLeft, BloqDataRight)
+
+# export results to spreadsheet
 excelFileName = os.path.join(
-    'Spreadsheets', song_id + " " + song_info['_songName']+" "+song_diff + ' export.csv')
+    f"Spreadsheets/{song_id} {song_info['_songName']} {song_diff} export.csv")
 
 try:
     f = open(excelFileName, 'w', newline="")
-    writer = csv.writer(f)
-    writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff", "C Pos Diff",
-                    "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
-    for bloq in combinedArrayRaw:
-        writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff, bloq.posDiff,
-                        bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
-    f.close()
 except FileNotFoundError:
     print('Making Spreadsheets Folder')
     os.mkdir('Spreadsheets')
     f = open(excelFileName, 'w', newline="")
+finally:
     writer = csv.writer(f)
     writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff", "C Pos Diff",
                     "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
@@ -405,24 +366,10 @@ except FileNotFoundError:
                         bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
     f.close()
 
-
-f = open(excelFileName, 'w', newline="")
-writer = csv.writer(f)
-writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff", "C Pos Diff",
-                "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
-for bloq in combinedArrayRaw:
-    writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff, bloq.posDiff,
-                    bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
-f.close()
-
-combinedArray = []
-for bloq in combinedArrayRaw:
-    combinedArray.append(bloq.combinedDiffSmoothed)
-
+# calculate final difficulty
+combinedArray = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
 median = statistics.median(combinedArray)
 print(median)
-
-print("sucess")
 
 # saber length is 1 meter
 # distance between top and bottom notes is roughly 1.5m
