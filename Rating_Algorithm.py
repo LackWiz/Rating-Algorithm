@@ -274,7 +274,10 @@ class Bloq:
                     self.angleDiff = semiMidAngleMulti
                 elif(self.cutDirection in [0, 5]):
                     self.angleDiff = easyAngleMulti
-        self.angleDiff = self.angleDiff*(self.numNotes/12)
+        if(self.angleDiff >= midAngleMulti):
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/3))
+        else:
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/6))   
 
 
 def load_song_dat(path):
