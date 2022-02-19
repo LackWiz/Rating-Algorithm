@@ -1,6 +1,8 @@
 from cmath import sqrt
+from multiprocessing.connection import wait
 from statistics import mean, median, stdev
 import statistics
+from tracemalloc import stop
 from pygame.locals import *
 from distutils.text_file import TextFile
 import pygame
@@ -357,7 +359,7 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
         
             # The best way to compound the data to get reasonable results. I have no idea why it works but it does
-            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**1.5 + BloqDataArray[-1].patternDiff**2)*min(math.sqrt(BloqDataArray[-1].stamina),BloqDataArray[-1].patternDiff**2)
+            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*min(math.sqrt(BloqDataArray[-1].stamina),BloqDataArray[-1].patternDiff**2)
 
     return BloqDataArray
 
@@ -404,7 +406,7 @@ def combineArray(array1, array2):
         temp = 0
         for j in range(0, min(combinedRollingAverage,i)): # Uses a rolling average to smooth difficulties between the hands
             temp += combinedArray[i-min(combinedRollingAverage,j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = 7.07*temp/min(combinedRollingAverage,i+1) # 6
+        combinedArray[i].combinedDiffSmoothed = 6.182*temp/min(combinedRollingAverage,i+1) # 6
     
     
     return combinedArray
@@ -419,7 +421,13 @@ for song in song_options:
     if song.find(song_id) != -1:
         song_folder = song
         break
-song_folder_contents = os.listdir(bs_song_path + song_folder + '/')
+try:
+    song_folder_contents = os.listdir(bs_song_path + song_folder + '/')
+except NameError:
+    print("Not Downloaded or wrong song code!")
+    print("Press Enter to Exit!")
+    input()
+    exit()
 for song in song_folder_contents:
     if song[-4:] in ['.egg', '.ogg']:
         song_file_name = song
