@@ -61,17 +61,20 @@ class Bloq:
 
         # Non-negoitables, Up and a select diagonal is backhand
         if self.cutDirection in [0, 4, 5]:  # 4 = NW Left Hand, 5 = NE Right Hand
-            if (self.type == 0 & self.cutDirection in [0, 4]):
+            if ((self.type == 0) & (self.cutDirection in [0, 4])):
                 self.forehand = False
-            elif (self.type == 1 & self.cutDirection in [0, 5]):
+            elif ((self.type == 1) & (self.cutDirection in [0, 5])):
                 self.forehand = False
         # Non-negoitables, Down and a select diagonal is forehand
         elif self.cutDirection in [1, 6, 7]:
             # 6 = SE Left Hand, 7 = SW Right Hand
-            if (self.type == 0 & self.cutDirection in [1, 7]):
+            if ((self.type == 0) & (self.cutDirection in [1, 7])):
+                
                 self.forehand = True
-            elif (self.type == 1 & self.cutDirection in [1, 6]):
+            elif ((self.type == 1) & (self.cutDirection in [1, 6])):
+                
                 self.forehand = True
+                
         else:
             if type == 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
@@ -194,6 +197,10 @@ class Bloq:
                     self.angleDiff = Multi.ANGLE_SEMI_MID
                 elif(self.cutDirection in [0, 5]):
                     self.angleDiff = Multi.ANGLE_EASY
+        if(self.angleDiff >= Multi.ANGLE_MID):
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/4))
+        else:
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/8))   
 
 
 def load_song_dat(path):
@@ -204,7 +211,7 @@ def load_song_dat(path):
     except FileNotFoundError:
         print("That map doesn't exist! Make sure it's downloaded and you spelt the map name correctly")
         print("Huh maybe it has a weird file name")
-        print("This time I won't autocomplete it with Standard. you'll need to type out the whole map file name minus .dat")
+        print("This time I won't autocomplete it by adding 'Standard'. you'll need to type out the whole map file name minus .dat")
         print('Enter difficulty (like ExpertPlusStandard):')
         song_diff = input()
         main_path = bs_song_path + song_folder + '/' + song_diff + '.dat'
@@ -273,10 +280,10 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].patternDiff = (temp/len(BloqDataArray))
             else:
                 BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
+        
             # The best way to compound the data to get reasonable results. I have no idea why it works but it does
-            #BloqDataArray[-1].combinedDiff =  6*math.sqrt(math.sqrt((BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*(min(BloqDataArray[-1].stamina*4,(BloqDataArray[-1].patternDiff)))+BloqDataArray[-1].stamina+BloqDataArray[-1].patternDiff))-6
-            BloqDataArray[-1].combinedDiff = math.sqrt(
-                BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*math.sqrt(BloqDataArray[-1].stamina)
+            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**1.5 + BloqDataArray[-1].patternDiff**2)*min(math.sqrt(BloqDataArray[-1].stamina),BloqDataArray[-1].patternDiff**2)
+
     return BloqDataArray
 
 # TODO: misleading function name
@@ -300,13 +307,11 @@ def combineArray(array1, array2):
     # TODO: change from n**2 to sliding window
     for i in range(0, len(combinedArray)):
         temp = 0
-        # Uses a rolling average to smooth difficulties between the hands
-        for j in range(0, min(combinedRollingAverage, i)):
-            temp += combinedArray[i -
-                                  min(combinedRollingAverage, j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = 6 * \
-            temp/min(combinedRollingAverage, i+1)
-
+        for j in range(0, min(combinedRollingAverage,i)): # Uses a rolling average to smooth difficulties between the hands
+            temp += combinedArray[i-min(combinedRollingAverage,j)].combinedDiff
+        combinedArray[i].combinedDiffSmoothed = 7.07*temp/min(combinedRollingAverage,i+1) # 6
+    
+    
     return combinedArray
 
 
