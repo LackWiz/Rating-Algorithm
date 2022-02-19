@@ -275,9 +275,9 @@ class Bloq:
                 elif(self.cutDirection in [0, 5]):
                     self.angleDiff = easyAngleMulti
         if(self.angleDiff >= midAngleMulti):
-            self.angleDiff = self.angleDiff*(self.numNotes**(1/3))
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/4))
         else:
-            self.angleDiff = self.angleDiff*(self.numNotes**(1/6))   
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/8))   
 
 
 def load_song_dat(path):
@@ -404,7 +404,7 @@ def combineArray(array1, array2):
         temp = 0
         for j in range(0, min(combinedRollingAverage,i)): # Uses a rolling average to smooth difficulties between the hands
             temp += combinedArray[i-min(combinedRollingAverage,j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = 6.21*temp/min(combinedRollingAverage,i+1) # 6
+        combinedArray[i].combinedDiffSmoothed = 7.07*temp/min(combinedRollingAverage,i+1) # 6
     
     
     return combinedArray
