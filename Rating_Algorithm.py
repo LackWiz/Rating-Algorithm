@@ -289,7 +289,7 @@ def load_song_dat(path):
         print("That map doesn't exist! Make sure it's downloaded and you spelt the map name correctly")
         print("Huh maybe it has a weird file name")
         print("This time I won't autocomplete it by adding 'Standard'. you'll need to type out the whole map file name minus .dat")
-        print('Enter difficulty (like ExpertPlusStandard):')
+        print('Enter the exact difficulty file name (like ExpertPlusStandard):')
         song_diff = input()
         main_path = bs_song_path + song_folder + '/' + song_diff + '.dat'
         with open(main_path) as json_dat:
