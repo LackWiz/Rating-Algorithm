@@ -144,17 +144,20 @@ class Bloq:
 
         # Non-negoitables, Up and a select diagonal is backhand
         if self.cutDirection in [0, 4, 5]:  # 4 = NW Left Hand, 5 = NE Right Hand
-            if (self.type == 0 & self.cutDirection in [0, 4]):
+            if ((self.type == 0) & (self.cutDirection in [0, 4])):
                 self.forehand = False
-            elif (self.type == 1 & self.cutDirection in [0, 5]):
+            elif ((self.type == 1) & (self.cutDirection in [0, 5])):
                 self.forehand = False
         # Non-negoitables, Down and a select diagonal is forehand
         elif self.cutDirection in [1, 6, 7]:
             # 6 = SE Left Hand, 7 = SW Right Hand
-            if (self.type == 0 & self.cutDirection in [1, 7]):
+            if ((self.type == 0) & (self.cutDirection in [1, 7])):
+                
                 self.forehand = True
-            elif (self.type == 1 & self.cutDirection in [1, 6]):
+            elif ((self.type == 1) & (self.cutDirection in [1, 6])):
+                
                 self.forehand = True
+                
         else:
             if type == 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
@@ -271,6 +274,7 @@ class Bloq:
                     self.angleDiff = semiMidAngleMulti
                 elif(self.cutDirection in [0, 5]):
                     self.angleDiff = easyAngleMulti
+        self.angleDiff =self.angleDiff*(self.numNotes**(1/3))
 
 
 def load_song_dat(path):
@@ -350,7 +354,7 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
             # The best way to compound the data to get reasonable results. I have no idea why it works but it does
             #BloqDataArray[-1].combinedDiff =  6*math.sqrt(math.sqrt((BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*(min(BloqDataArray[-1].stamina*4,(BloqDataArray[-1].patternDiff)))+BloqDataArray[-1].stamina+BloqDataArray[-1].patternDiff))-6
-            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*math.sqrt(BloqDataArray[-1].stamina)
+            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*min(math.sqrt(BloqDataArray[-1].stamina),BloqDataArray[-1].patternDiff)
     return BloqDataArray
 
 
@@ -396,7 +400,7 @@ def combineArray(array1, array2):
         temp = 0
         for j in range(0, min(combinedRollingAverage,i)): # Uses a rolling average to smooth difficulties between the hands
             temp += combinedArray[i-min(combinedRollingAverage,j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = 6*temp/min(combinedRollingAverage,i+1)
+        combinedArray[i].combinedDiffSmoothed = 6.21*temp/min(combinedRollingAverage,i+1) # 6
     
     
     return combinedArray
