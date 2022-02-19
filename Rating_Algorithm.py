@@ -114,9 +114,12 @@ class BloqStore:
         self.numNotes = 1
         self.type = type
         self.cutDirection = cutDirection
+        self.angleChange = 0
+        self.angleChangeTime = 0
         self.bloqPos = bloqPos
         self.swingAngle = 200
         self.time = startTime
+        self.timeMS = self.time * mspb * 1000
         self.swingTime = swingTime
         self.swingSpeed = 0
         self.forehand = True
@@ -132,9 +135,12 @@ class Bloq:
         self.numNotes = 1
         self.type = type
         self.cutDirection = cutDirection
+        self.angleChange = 0
+        self.angleChangeTime = 0
         self.bloqPos = bloqPos
         self.swingAngle = 200
         self.time = startTime
+        self.timeMS = self.time * mspb * 1000
         self.swingTime = swingTime
         self.swingSpeed = 0
         self.forehand = True
@@ -277,9 +283,12 @@ class Bloq:
                 elif(self.cutDirection in [0, 5]):
                     self.angleDiff = easyAngleMulti
         if(self.angleDiff >= midAngleMulti):
-            self.angleDiff = self.angleDiff*(self.numNotes**(1/4))
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/3))
         else:
-            self.angleDiff = self.angleDiff*(self.numNotes**(1/8))   
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/6))
+    #def changeAngleDiff(self, angleChange):
+    #    if(angleChange >= 90):
+    #        self.angleDiff = self.angleDiff*(math.sqrt(angleChange/45))
 
 
 def load_song_dat(path):
@@ -328,10 +337,14 @@ def extractBloqData(songNoteArray):
             if(BloqDataArray[-1].cutDirection not in [0, 1, 4, 5, 6, 7]):
                 BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
 
-            # calculates swingTime and Speed and shoves into class for processing later
-            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -
+            # calculates swingTime in ms and Speed and shoves into class for processing later
+            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time - #Swing time in ms
                                            BloqDataArray[-2].time)*mspb
-            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime
+            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime #Swing Speed in degrees/ms
+
+            BloqDataArray[-1].timeMS = BloqDataArray[-1].time * mspb * 1000
+            BloqDataArray[-1].angleChange = abs(180-abs(cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection]))
+            BloqDataArray[-1].angleChangeTime = BloqDataArray[-1].angleChange/BloqDataArray[-1].swingTime*1000 #Change in cut angle swing in degrees/second
 
             temp = 0
             # Uses a rolling average to judge stamina
@@ -349,7 +362,7 @@ def extractBloqData(songNoteArray):
             # Uses a rolling average to judge pattern difficulty
             for i in range(0, patternRollingAverage):
                 if(len(BloqDataArray) >= i+1):
-                    temp += (BloqDataArray[-1*(i+1)].angleDiff*BloqDataArray[-1*(i+1)].posDiff)
+                    temp += (BloqDataArray[-1*(i+1)].angleDiff*BloqDataArray[-1*(i+1)].posDiff*BloqDataArray[-1*(i+1)].angleChangeTime)
             # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
             if(len(BloqDataArray) < patternRollingAverage/4):
                 BloqDataArray[-1].patternDiff = (temp/(patternRollingAverage/4))
@@ -372,6 +385,7 @@ def combineArray(array1, array2):
     for i in range(0, len(array1)):
         combinedArray.append(BloqStore(array1[i].type, array1[i].cutDirection, array1[i].bloqPos, array1[i].time, array1[i].swingTime))
         combinedArray[-1].angleDiff = array1[i].angleDiff
+        combinedArray[-1].angleChange = array1[i].angleChange
         combinedArray[-1].combinedDiff = array1[i].combinedDiff
         combinedArray[-1].forehand = array1[i].forehand
         combinedArray[-1].numNotes = array1[i].numNotes
@@ -382,6 +396,7 @@ def combineArray(array1, array2):
     for i in range(0, len(array2)):
         combinedArray.append(BloqStore(array2[i].type, array2[i].cutDirection, array2[i].bloqPos, array2[i].time, array2[i].swingTime))
         combinedArray[-1].angleDiff = array2[i].angleDiff
+        combinedArray[-1].angleChange = array2[i].angleChange
         combinedArray[-1].combinedDiff = array2[i].combinedDiff
         combinedArray[-1].forehand = array2[i].forehand
         combinedArray[-1].numNotes = array2[i].numNotes
@@ -556,7 +571,7 @@ print("sucess")
 
 # Final difficulty based on Total amount of notes, fastest swings using a rolling average of 4, angle difficulty average for whole map ✅
 
-
+"""
 pygame.mixer.music.load(full_music_path)
 pygame.mixer.music.play(0)
 
@@ -707,3 +722,4 @@ while True:
     # Update ------------------------------------------------- #
     pygame.display.update()
     mainClock.tick(60)
+"""
