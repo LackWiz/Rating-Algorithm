@@ -59,22 +59,21 @@ class Bloq:
         self.combinedDiff = 0
         self.combinedDiffSmoothed = 0
 
+        # Code below needs work
         # Non-negoitables, Up and a select diagonal is backhand
         if self.cutDirection in [0, 4, 5]:  # 4 = NW Left Hand, 5 = NE Right Hand
             if ((self.type == 0) & (self.cutDirection in [0, 4])):
                 self.forehand = False
             elif ((self.type == 1) & (self.cutDirection in [0, 5])):
                 self.forehand = False
+
         # Non-negoitables, Down and a select diagonal is forehand
         elif self.cutDirection in [1, 6, 7]:
             # 6 = SE Left Hand, 7 = SW Right Hand
             if ((self.type == 0) & (self.cutDirection in [1, 7])):
-                
                 self.forehand = True
             elif ((self.type == 1) & (self.cutDirection in [1, 6])):
-                
                 self.forehand = True
-                
         else:
             if type == 0:
                 # If it's the first note, assign most likely, correct Forehand/backhand assignment
@@ -92,13 +91,10 @@ class Bloq:
         self.calcAngleDiff()
         self.calcPosDiff()
 
-    # TODO: shorten function
-    def calcPosDiff(self):
+    def calcPosDiff(self):  # Checks if position is easy, medium or difficult
         if(self.type == 0):  # Left Hand Side to Side Diff
             # LH centered around 2
             if(self.forehand):
-                # Checks if position is easy, medium or difficult
-
                 # TODO: probably a typo below (ranges 1-4, not 0-3)
                 if(self.bloqPos[0] == 2):
                     self.posDiff = Multi.SIDE_EASY
@@ -108,50 +104,17 @@ class Bloq:
                     self.posDiff = Multi.SIDE_MID
 
             elif(not self.forehand):
-                # Checks if position is easy, medium or difficult
-                if(self.bloqPos[0] == 0):
-                    self.posDiff = Multi.SIDE_HARD
-                elif(self.bloqPos[0] == 1):
-                    self.posDiff = Multi.SIDE_MID
-                elif(self.bloqPos[0] == 2):
-                    self.posDiff = Multi.SIDE_SEMI_MID
-                elif(self.bloqPos[0] == 3):
-                    self.posDiff = Multi.SIDE_EASY
+                self.posDiff = [Multi.SIDE_HARD, Multi.SIDE_MID, Multi.SIDE_SEMI_MID, Multi.SIDE_EASY][self.bloqPos[0]]
+
         elif(self.type == 1):  # Right Hand
             if(self.forehand):
-                # Checks if position is easy, medium or difficult
-                if(self.bloqPos[0] == 1):
-                    self.posDiff = Multi.SIDE_EASY
-                elif(self.bloqPos[0] in [0, 2]):
-                    self.posDiff = Multi.SIDE_SEMI_MID
-                elif(self.bloqPos[0] == 3):
-                    self.posDiff = Multi.SIDE_MID
+                self.posDiff = [Multi.SIDE_SEMI_MID, Multi.SIDE_EASY, Multi.SIDE_SEMI_MID, Multi.SIDE_MID][self.bloqPos[0]]
             elif(not self.forehand):
-                # Checks if position is easy, medium or difficult
-                if(self.bloqPos[0] == 3):
-                    self.posDiff = Multi.SIDE_HARD
-                elif(self.bloqPos[0] == 2):
-                    self.posDiff = Multi.SIDE_MID
-                elif(self.bloqPos[0] == 1):
-                    self.posDiff = Multi.SIDE_SEMI_MID
-                elif(self.bloqPos[0] == 0):
-                    self.posDiff = Multi.SIDE_EASY
+                self.posDiff = [Multi.SIDE_EASY, Multi.SIDE_SEMI_MID, Multi.SIDE_MID, Multi.SIDE_HARD][self.bloqPos[0]]
 
         # Up and Down Diff
-        if(self.forehand):
-            if(self.bloqPos[1] == 0):
-                self.posDiff *= Multi.VERT_EASY
-            elif(self.bloqPos[1] == 1):
-                self.posDiff *= Multi.VERT_SEMI_MID
-            elif(self.bloqPos[1] == 2):
-                self.posDiff *= Multi.VERT_MID
-        elif(not self.forehand):
-            if(self.bloqPos[1] == 0):
-                self.posDiff *= Multi.VERT_MID
-            elif(self.bloqPos[1] == 1):
-                self.posDiff *= Multi.VERT_SEMI_MID
-            elif(self.bloqPos[1] == 2):
-                self.posDiff *= Multi.VERT_EASY
+        self.posDiff *= [Multi.VERT_EASY, Multi.VERT_SEMI_MID,
+                         Multi.VERT_MID][abs(2 * (not self.forehand) - self.bloqPos[1])]
 
     # TODO: shorten function
     def calcAngleDiff(self):
@@ -200,7 +163,7 @@ class Bloq:
         if(self.angleDiff >= Multi.ANGLE_MID):
             self.angleDiff = self.angleDiff*(self.numNotes**(1/4))
         else:
-            self.angleDiff = self.angleDiff*(self.numNotes**(1/8))   
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/8))
 
 
 def load_song_dat(path):
@@ -280,9 +243,10 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].patternDiff = (temp/len(BloqDataArray))
             else:
                 BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
-        
+
             # The best way to compound the data to get reasonable results. I have no idea why it works but it does
-            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**1.5 + BloqDataArray[-1].patternDiff**2)*min(math.sqrt(BloqDataArray[-1].stamina),BloqDataArray[-1].patternDiff**2)
+            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**1.5 + BloqDataArray[-1].patternDiff**2)*min(
+                math.sqrt(BloqDataArray[-1].stamina), BloqDataArray[-1].patternDiff**2)
 
     return BloqDataArray
 
@@ -307,11 +271,13 @@ def combineArray(array1, array2):
     # TODO: change from n**2 to sliding window
     for i in range(0, len(combinedArray)):
         temp = 0
-        for j in range(0, min(combinedRollingAverage,i)): # Uses a rolling average to smooth difficulties between the hands
-            temp += combinedArray[i-min(combinedRollingAverage,j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = 7.07*temp/min(combinedRollingAverage,i+1) # 6
-    
-    
+        # Uses a rolling average to smooth difficulties between the hands
+        for j in range(0, min(combinedRollingAverage, i)):
+            temp += combinedArray[i -
+                                  min(combinedRollingAverage, j)].combinedDiff
+        combinedArray[i].combinedDiffSmoothed = 7.07 * \
+            temp/min(combinedRollingAverage, i+1)  # 6
+
     return combinedArray
 
 
