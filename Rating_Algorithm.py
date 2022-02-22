@@ -1,19 +1,12 @@
-from cmath import sqrt
-from multiprocessing.connection import wait
-from statistics import mean, median, stdev
+#Nickname pog sub and follow
+from statistics import median
 import statistics
-from tracemalloc import stop
 from pygame.locals import *
-from distutils.text_file import TextFile
 import pygame
-import sys
-import random
-import time
 import os
 import json
 import math
 import csv
-from shutil import copyfile
 # Get ID ----------------------------------------------------- #
 try:
     f = open('bs_path.txt', 'r')
@@ -59,21 +52,26 @@ def draw_text(text, font, color, surface, x, y):
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
 easyAngleMulti = 1  # Multiplyers for different angles
-semiMidAngleMulti = 1.3
-midAngleMulti = 1.6
-hardAngleMulti = 1.75
+semiMidAngleMulti = 1.1
+midAngleMulti = 1.3
+hardAngleMulti = 1.5
 
 easySideMulti = 1  # Multiplyers for different positions
-semiMidSideMulti = 1.2
-midSideMulti = 1.5
-hardSideMulti = 2.0
+semiMidSideMulti = 1.05
+midSideMulti = 1.2
+hardSideMulti = 1.5
 
 easyVertMulti = 1  # Multiplyers for different positions
-semiMidVertMulti = 1.2
-midVertMulti = 1.5
+semiMidVertMulti = 1.05
+midVertMulti = 1.2
 
-aveStaminaMulti = 1.3333
-avePatternMulti = 1
+
+angleDiv = 90
+
+staminaPower = 2
+patternPower = 2
+
+combinedArrayScale = 4.319
 
 # Minimum precision (how close notes are together) to consider 2 very close notes a slider
 sliderPrecision = 1/6
@@ -119,14 +117,16 @@ class BloqStore:
         self.bloqPos = bloqPos
         self.swingAngle = 200
         self.time = startTime
-        self.timeMS = self.time * mspb * 1000
+        self.timeMS = self.time * mspb
         self.swingTime = swingTime
         self.swingSpeed = 0
         self.forehand = True
         self.angleDiff = easyAngleMulti
+        self.angleChangeDiff = 0
         self.posDiff = easySideMulti
         self.stamina = 0
         self.patternDiff = 0
+        self.combinedStamina = 0
         self.combinedDiff = 0
         self.combinedDiffSmoothed = 0
 
@@ -140,11 +140,12 @@ class Bloq:
         self.bloqPos = bloqPos
         self.swingAngle = 200
         self.time = startTime
-        self.timeMS = self.time * mspb * 1000
+        self.timeMS = self.time * mspb
         self.swingTime = swingTime
         self.swingSpeed = 0
         self.forehand = True
         self.angleDiff = easyAngleMulti
+        self.angleChangeDiff = 0
         self.posDiff = easySideMulti
         self.stamina = 0
         self.patternDiff = 0
@@ -186,42 +187,15 @@ class Bloq:
     def calcPosDiff(self):
         if(self.type == 0):  # Left Hand Side to Side Diff
             if(self.forehand):
-                # Checks if position is easy, medium or difficult
-                if(self.bloqPos[0] == 2):
-                    self.posDiff = easySideMulti
-                elif(self.bloqPos[0] in [1,3]):
-                    self.posDiff = semiMidSideMulti
-                elif(self.bloqPos[0] == 4):
-                    self.posDiff = midSideMulti
+                self.posDiff = [semiMidSideMulti, easySideMulti, semiMidSideMulti, midSideMulti][self.bloqPos[0]]
             elif(not self.forehand):
-                # Checks if position is easy, medium or difficult
-                if(self.bloqPos[0] == 0):
-                    self.posDiff = hardSideMulti
-                elif(self.bloqPos[0] == 1):
-                    self.posDiff = midSideMulti
-                elif(self.bloqPos[0] == 2):
-                    self.posDiff = semiMidSideMulti
-                elif(self.bloqPos[0] == 3):
-                    self.posDiff = easySideMulti
+                self.posDiff = [hardSideMulti, midSideMulti, semiMidSideMulti, easySideMulti][self.bloqPos[0]]
+            
         elif(self.type == 1):  # Right Hand
             if(self.forehand):
-                # Checks if position is easy, medium or difficult
-                if(self.bloqPos[0] == 1):
-                    self.posDiff = easySideMulti
-                elif(self.bloqPos[0] in [0,2]):
-                    self.posDiff = semiMidSideMulti
-                elif(self.bloqPos[0] == 3):
-                    self.posDiff = midSideMulti
+                self.posDiff = [midSideMulti, semiMidSideMulti, easySideMulti, semiMidSideMulti][self.bloqPos[0]]
             elif(not self.forehand):
-                # Checks if position is easy, medium or difficult
-                if(self.bloqPos[0] == 3):
-                    self.posDiff = hardSideMulti
-                elif(self.bloqPos[0] == 2):
-                    self.posDiff = midSideMulti
-                elif(self.bloqPos[0] == 1):
-                    self.posDiff = semiMidSideMulti
-                elif(self.bloqPos[0] == 0):
-                    self.posDiff = easySideMulti
+                self.posDiff = [hardSideMulti, midSideMulti, semiMidSideMulti, easySideMulti][self.bloqPos[0]]
         
         # Up and Down Diff
         if(self.forehand):
@@ -243,13 +217,13 @@ class Bloq:
         if(self.type == 0):  # Left Hand
             if(self.forehand):
                 # Checks if angle is easy, medium or difficult
-                if(self.cutDirection in [1, 7]):
+                if(self.cutDirection in [1, 7, 8]):
                     self.angleDiff = easyAngleMulti
                 elif(self.cutDirection == 3):
                     self.angleDiff = semiMidAngleMulti
                 elif(self.cutDirection in [5, 6]):
                     self.angleDiff = midAngleMulti
-                elif(self.cutDirection in [0, 2, 4]):
+                elif(self.cutDirection in [0, 2]):
                     self.angleDiff = hardAngleMulti
             elif(not self.forehand):
                 # Checks if angle is easy, medium or difficult
@@ -259,12 +233,12 @@ class Bloq:
                     self.angleDiff = midAngleMulti
                 elif(self.cutDirection == 2):
                     self.angleDiff = semiMidAngleMulti
-                elif(self.cutDirection in [0, 4]):
+                elif(self.cutDirection in [0, 4, 8]):
                     self.angleDiff = easyAngleMulti
         elif(self.type == 1):  # Right Hand
             if(self.forehand):
                 # Checks if angle is easy, medium or difficult
-                if(self.cutDirection in [1, 6]):
+                if(self.cutDirection in [1, 6, 8]):
                     self.angleDiff = easyAngleMulti
                 elif(self.cutDirection == 2):
                     self.angleDiff = semiMidAngleMulti
@@ -280,15 +254,14 @@ class Bloq:
                     self.angleDiff = midAngleMulti
                 elif(self.cutDirection == 3):
                     self.angleDiff = semiMidAngleMulti
-                elif(self.cutDirection in [0, 5]):
+                elif(self.cutDirection in [0, 5], 8):
                     self.angleDiff = easyAngleMulti
-        if(self.angleDiff >= midAngleMulti):
+        if(self.angleDiff >= midAngleMulti):    
             self.angleDiff = self.angleDiff*(self.numNotes**(1/3))
         else:
             self.angleDiff = self.angleDiff*(self.numNotes**(1/6))
-    #def changeAngleDiff(self, angleChange):
-    #    if(angleChange >= 90):
-    #        self.angleDiff = self.angleDiff*(math.sqrt(angleChange/45))
+
+        
 
 
 def load_song_dat(path):
@@ -341,10 +314,12 @@ def extractBloqData(songNoteArray):
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time - #Swing time in ms
                                            BloqDataArray[-2].time)*mspb
             BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime #Swing Speed in degrees/ms
-
-            BloqDataArray[-1].timeMS = BloqDataArray[-1].time * mspb * 1000
-            BloqDataArray[-1].angleChange = abs(180-abs(cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection]))
-            BloqDataArray[-1].angleChangeTime = BloqDataArray[-1].angleChange/BloqDataArray[-1].swingTime*1000 #Change in cut angle swing in degrees/second
+            if((BloqDataArray[-1].cutDirection != 8) and (BloqDataArray[-2].cutDirection != 8)):
+                BloqDataArray[-1].angleChange = abs(180-abs(cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection])) #Calculates Angle Change After parity. e.g. up and down is 0, but up to side is 90
+            else:
+                BloqDataArray[-1].angleChange = 0
+            BloqDataArray[-1].angleChangeTime = BloqDataArray[-1].angleChange/(BloqDataArray[-1].swingTime) #Change in cut angle swing in degrees/millisecond
+            BloqDataArray[-1].angleChangeDiff =  1+((max(BloqDataArray[-1].angleChange,45)-45)/angleDiv)**2
 
             temp = 0
             # Uses a rolling average to judge stamina
@@ -360,9 +335,9 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].stamina = (temp/staminaRollingAverage)
             temp = 0
             # Uses a rolling average to judge pattern difficulty
-            for i in range(0, patternRollingAverage):
-                if(len(BloqDataArray) >= i+1):
-                    temp += (BloqDataArray[-1*(i+1)].angleDiff*BloqDataArray[-1*(i+1)].posDiff*BloqDataArray[-1*(i+1)].angleChangeTime)
+            for j in range(0, patternRollingAverage):
+                if(len(BloqDataArray) >= j+1):
+                    temp += (BloqDataArray[-1*(j+1)].angleDiff*BloqDataArray[-1*(j+1)].posDiff*BloqDataArray[-1*(j+1)].angleChangeDiff)
             # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
             if(len(BloqDataArray) < patternRollingAverage/4):
                 BloqDataArray[-1].patternDiff = (temp/(patternRollingAverage/4))
@@ -370,9 +345,10 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].patternDiff = (temp/len(BloqDataArray))
             else:
                 BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
-        
+            
+            
             # The best way to compound the data to get reasonable results. I have no idea why it works but it does
-            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**2 + BloqDataArray[-1].patternDiff**2)*min(math.sqrt(BloqDataArray[-1].stamina),BloqDataArray[-1].patternDiff**2)
+            # BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**staminaPower + BloqDataArray[-1].patternDiff**patternPower)*min(math.sqrt(BloqDataArray[-1].stamina**staminaPower),BloqDataArray[-1].patternDiff**patternPower)
 
     return BloqDataArray
 
@@ -384,27 +360,35 @@ def combineArray(array1, array2):
 
     for i in range(0, len(array1)):
         combinedArray.append(BloqStore(array1[i].type, array1[i].cutDirection, array1[i].bloqPos, array1[i].time, array1[i].swingTime))
+        combinedArray[-1].timeMS = array1[i].timeMS
         combinedArray[-1].angleDiff = array1[i].angleDiff
         combinedArray[-1].angleChange = array1[i].angleChange
+        combinedArray[-1].angleChangeTime = array1[i].angleChangeTime
         combinedArray[-1].combinedDiff = array1[i].combinedDiff
         combinedArray[-1].forehand = array1[i].forehand
         combinedArray[-1].numNotes = array1[i].numNotes
         combinedArray[-1].patternDiff = array1[i].patternDiff
         combinedArray[-1].posDiff = array1[i].posDiff
         combinedArray[-1].stamina = array1[i].stamina
+        combinedArray[-1].angleChangeDiff = array1[i].angleChangeDiff
         combinedArray[-1].swingSpeed = array1[i].swingSpeed
     for i in range(0, len(array2)):
         combinedArray.append(BloqStore(array2[i].type, array2[i].cutDirection, array2[i].bloqPos, array2[i].time, array2[i].swingTime))
+        combinedArray[-1].timeMS = array2[i].timeMS
         combinedArray[-1].angleDiff = array2[i].angleDiff
         combinedArray[-1].angleChange = array2[i].angleChange
+        combinedArray[-1].angleChangeTime = array2[i].angleChangeTime
         combinedArray[-1].combinedDiff = array2[i].combinedDiff
         combinedArray[-1].forehand = array2[i].forehand
         combinedArray[-1].numNotes = array2[i].numNotes
         combinedArray[-1].patternDiff = array2[i].patternDiff
         combinedArray[-1].posDiff = array2[i].posDiff
         combinedArray[-1].stamina = array2[i].stamina
+        combinedArray[-1].angleChangeDiff = array2[i].angleChangeDiff
         combinedArray[-1].swingSpeed = array2[i].swingSpeed
-
+    for i in range(1,len(combinedArray)):
+        combinedArray[i].combinedStamina = math.sqrt(combinedArray[i].stamina**2 + combinedArray[i-1].stamina**2)
+        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedStamina**staminaPower + combinedArray[i].patternDiff**patternPower) * min(math.sqrt(combinedArray[i].combinedStamina**staminaPower),combinedArray[i].patternDiff**patternPower)
     combinedArray.sort(key=lambda x: x.time)
     temp = len(combinedArray)
     i = 1
@@ -421,7 +405,7 @@ def combineArray(array1, array2):
         temp = 0
         for j in range(0, min(combinedRollingAverage,i)): # Uses a rolling average to smooth difficulties between the hands
             temp += combinedArray[i-min(combinedRollingAverage,j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = 6.182*temp/min(combinedRollingAverage,i+1) # 6
+        combinedArray[i].combinedDiffSmoothed = combinedArrayScale*temp/min(combinedRollingAverage,i+1) # 6
     
     
     return combinedArray
@@ -487,42 +471,31 @@ for block in song_notes_original:
 
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
-
 combinedArrayRaw = combineArray(BloqDataLeft, BloqDataRight)
+
 excelFileName = os.path.join('Spreadsheets',song_id +" "+ song_info['_songName']+" "+song_diff+ ' export.csv')
 
 try:
     f = open(excelFileName, 'w', newline="")
-    writer = csv.writer(f)
-    writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff","C Pos Diff",
-                    "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
-    for bloq in combinedArrayRaw:
-        writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff,bloq.posDiff,
-                        bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
-    f.close()
+    
 except FileNotFoundError:
     print('Making Spreadsheets Folder')
     os.mkdir('Spreadsheets')
     f = open(excelFileName, 'w', newline="")
+    
+finally:
     writer = csv.writer(f)
-    writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff","C Pos Diff",
+    writer.writerow(["TimeMS","Beat","Type","Forehand","numNotes", "SwingSpeed", "Angle Diff", "AngleChangeDiff","Pos Diff",
                     "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
     for bloq in combinedArrayRaw:
-        writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff,bloq.posDiff,
-                        bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
+        writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
+                        bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
     f.close()
 
 
 
 
-f = open(excelFileName, 'w', newline="")
-writer = csv.writer(f)
-writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff","C Pos Diff",
-                "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
-for bloq in combinedArrayRaw:
-    writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff,bloq.posDiff,
-                    bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
-f.close()
+
 
 combinedArray = []
 for bloq in combinedArrayRaw:
@@ -530,12 +503,14 @@ for bloq in combinedArrayRaw:
 
 
 combinedArray.sort(reverse=True)
-# top_1_percent = sum(combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
+top_1_percent = sum(combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
 # top_5_percent = sum(combinedArray[:int(len(combinedArray)/20)])/int(len(combinedArray)/20)
 # top_20_percent = sum(combinedArray[:int(len(combinedArray)/5)])/int(len(combinedArray)/5)
 # top_50_percent = sum(combinedArray[:int(len(combinedArray)/2)])/int(len(combinedArray)/2)
 # top_70_percent = sum(combinedArray[:int(len(combinedArray)*0.7)])/int(len(combinedArray)*0.7)
-median = combinedArray[int(len(combinedArray)/2)]
+median = statistics.median(combinedArray)
+
+final_score = (top_1_percent*7 + median*3)/10
 
 # top_2_percent = top_2_percent*bpm**1.05/300
 # top_5_percent = top_5_percent*bpm**1.05/300
@@ -549,7 +524,7 @@ median = combinedArray[int(len(combinedArray)/2)]
 # cal_final_score = 1.0299*final_score-0.3284*final_score**2+0.1005*final_score**3-0.009504*final_score**4+0.0002828*final_score**5
 # print(cal_final_score)
 
-print(median)
+print(final_score)
 
 print("sucess")
 
