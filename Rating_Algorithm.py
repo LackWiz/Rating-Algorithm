@@ -21,13 +21,11 @@ finally:
 
 print('Enter song ID:')
 song_id = input()
+#TODO: show found difficulties
 print('Enter difficulty (like ExpertPlus):')
 song_diff = input() + 'Standard.dat'
 
 angleDiv = 90
-
-staminaPower = 2
-patternPower = 2
 
 combinedArrayScale = 4.319
 
@@ -230,7 +228,6 @@ def extractBloqData(songNoteArray):
                 block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], block["_time"] * mspb))
             BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
 
-        # TODO: ??????
         elif (block["_time"] - songNoteArray[i-1]['_time'] <= (dotSliderPrecision if block["_cutDirection"] == 8 else sliderPrecision)
               and (block['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'], 8])) or (block["_time"] - songNoteArray[i-1]['_time'] <= 0.001):
 
@@ -295,7 +292,7 @@ def combineArray(array1, array2):
     
     for i in range(1,len(combinedArray)):
         combinedArray[i].combinedStamina = math.sqrt(combinedArray[i].stamina**2 + combinedArray[i-1].stamina**2)
-        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedStamina**staminaPower + combinedArray[i].patternDiff**patternPower) * min(math.sqrt(combinedArray[i].combinedStamina**staminaPower),combinedArray[i].patternDiff**patternPower)
+        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedStamina**Multi.STAMINA_POWER + combinedArray[i].patternDiff**Multi.PATTERN_POWER) * min(math.sqrt(combinedArray[i].combinedStamina**Multi.STAMINA_POWER),combinedArray[i].patternDiff**Multi.PATTERN_POWER)
 
     combinedArray.sort(key=lambda x: x.time)
 
