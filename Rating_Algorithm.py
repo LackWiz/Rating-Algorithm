@@ -27,6 +27,12 @@ print('Enter difficulty (like ExpertPlus):')
 song_diff = input() + 'Standard.dat'
 #song_diff = "ExpertPlusStandard.dat"
 
+angleDiv = 90
+
+staminaPower = 2
+patternPower = 2
+
+combinedArrayScale = 4.319
 
 # Minimum precision (how close notes are together) to consider 2 very close notes a slider
 sliderPrecision = 1/6
@@ -36,9 +42,39 @@ staminaRollingAverage = 128
 patternRollingAverage = 128
 combinedRollingAverage = 128
 
+cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
+
 """
 https://bsmg.wiki/mapping/map-format.html#notes-2
 """
+
+# _cutDirection
+#   0 = North,
+#   1 = South,
+#   2 = West,
+#   3 = East,
+#   4 = NW,
+#   5 = NE,
+#   6 = SW,
+#   7 = SE,
+#   8 = Dot Note
+
+# _lineIndex
+#
+# 0 = Far Left
+# 1 = Center Left
+# 2 = Center Right
+# 3 = Far Right
+
+# _lineLayer
+#
+# 0 = Bottom (you)
+# 1 = Center
+# 2 = Top (me)
+# 
+
+
+# Funcs ------------------------------------------------------ #
 
 
 class Bloq:
@@ -46,14 +82,18 @@ class Bloq:
         self.numNotes = 1
         self.type = type
         self.cutDirection = cutDirection
+        self.angleChange = 0
+        self.angleChangeTime = 0
         self.bloqPos = bloqPos
         self.swingAngle = 200
         self.time = startTime
+        self.timeMS = self.time * mspb
         self.swingTime = swingTime
         self.swingSpeed = 0
         self.forehand = True
         self.angleDiff = Multi.ANGLE_EASY
         self.posDiff = Multi.SIDE_EASY
+        self.angleChangeDiff = 0
         self.stamina = 0
         self.patternDiff = 0
         self.combinedDiff = 0
@@ -95,23 +135,16 @@ class Bloq:
         if(self.type == 0):  # Left Hand Side to Side Diff
             # LH centered around 2
             if(self.forehand):
-                # TODO: probably a typo below (ranges 1-4, not 0-3)
-                if(self.bloqPos[0] == 2):
-                    self.posDiff = Multi.SIDE_EASY
-                elif(self.bloqPos[0] in [1, 3]):
-                    self.posDiff = Multi.SIDE_SEMI_MID
-                elif(self.bloqPos[0] == 4):
-                    self.posDiff = Multi.SIDE_MID
-
-            elif(not self.forehand):
-                self.posDiff = [Multi.SIDE_HARD, Multi.SIDE_MID, Multi.SIDE_SEMI_MID, Multi.SIDE_EASY][self.bloqPos[0]]
-
-        elif(self.type == 1):  # Right Hand
-            if(self.forehand):
                 self.posDiff = [Multi.SIDE_SEMI_MID, Multi.SIDE_EASY, Multi.SIDE_SEMI_MID, Multi.SIDE_MID][self.bloqPos[0]]
             elif(not self.forehand):
-                self.posDiff = [Multi.SIDE_EASY, Multi.SIDE_SEMI_MID, Multi.SIDE_MID, Multi.SIDE_HARD][self.bloqPos[0]]
-
+                self.posDiff = [Multi.SIDE_HARD, Multi.SIDE_MID, Multi.SIDE_SEMI_MID, Multi.SIDE_EASY][self.bloqPos[0]]
+            
+        elif(self.type == 1):  # Right Hand
+            if(self.forehand):
+                self.posDiff = [Multi.SIDE_MID, Multi.SIDE_SEMI_MID, Multi.SIDE_EASY, Multi.SIDE_SEMI_MID][self.bloqPos[0]]
+            elif(not self.forehand):
+                self.posDiff = [Multi.SIDE_HARD, Multi.SIDE_MID, Multi.SIDE_SEMI_MID, Multi.SIDE_EASY][self.bloqPos[0]]
+        
         # Up and Down Diff
         self.posDiff *= [Multi.VERT_EASY, Multi.VERT_SEMI_MID,
                          Multi.VERT_MID][abs(2 * (not self.forehand) - self.bloqPos[1])]
@@ -121,13 +154,13 @@ class Bloq:
         if(self.type == 0):  # Left Hand
             if(self.forehand):
                 # Checks if angle is easy, medium or difficult
-                if(self.cutDirection in [1, 7]):
+                if(self.cutDirection in [1, 7, 8]):
                     self.angleDiff = Multi.ANGLE_EASY
                 elif(self.cutDirection == 3):
                     self.angleDiff = Multi.ANGLE_SEMI_MID
                 elif(self.cutDirection in [5, 6]):
                     self.angleDiff = Multi.ANGLE_MID
-                elif(self.cutDirection in [0, 2, 4]):
+                elif(self.cutDirection in [0, 2]):
                     self.angleDiff = Multi.ANGLE_HARD
             elif(not self.forehand):
                 # Checks if angle is easy, medium or difficult
@@ -137,12 +170,12 @@ class Bloq:
                     self.angleDiff = Multi.ANGLE_MID
                 elif(self.cutDirection == 2):
                     self.angleDiff = Multi.ANGLE_SEMI_MID
-                elif(self.cutDirection in [0, 4]):
+                elif(self.cutDirection in [0, 4, 8]):
                     self.angleDiff = Multi.ANGLE_EASY
         elif(self.type == 1):  # Right Hand
             if(self.forehand):
                 # Checks if angle is easy, medium or difficult
-                if(self.cutDirection in [1, 6]):
+                if(self.cutDirection in [1, 6, 8]):
                     self.angleDiff = Multi.ANGLE_EASY
                 elif(self.cutDirection == 2):
                     self.angleDiff = Multi.ANGLE_SEMI_MID
@@ -158,12 +191,14 @@ class Bloq:
                     self.angleDiff = Multi.ANGLE_MID
                 elif(self.cutDirection == 3):
                     self.angleDiff = Multi.ANGLE_SEMI_MID
-                elif(self.cutDirection in [0, 5]):
+                elif(self.cutDirection in [0, 5], 8):
                     self.angleDiff = Multi.ANGLE_EASY
-        if(self.angleDiff >= Multi.ANGLE_MID):
-            self.angleDiff = self.angleDiff*(self.numNotes**(1/4))
+        if(self.angleDiff >= Multi.ANGLE_MID):    
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/3))
         else:
-            self.angleDiff = self.angleDiff*(self.numNotes**(1/8))
+            self.angleDiff = self.angleDiff*(self.numNotes**(1/6))
+
+        
 
 
 def load_song_dat(path):
@@ -175,7 +210,7 @@ def load_song_dat(path):
         print("That map doesn't exist! Make sure it's downloaded and you spelt the map name correctly")
         print("Huh maybe it has a weird file name")
         print("This time I won't autocomplete it by adding 'Standard'. you'll need to type out the whole map file name minus .dat")
-        print('Enter difficulty (like ExpertPlusStandard):')
+        print('Enter the exact difficulty file name (like ExpertPlusStandard):')
         song_diff = input()
         main_path = bs_song_path + song_folder + '/' + song_diff + '.dat'
         with open(main_path) as json_dat:
@@ -210,11 +245,16 @@ def extractBloqData(songNoteArray):
             if(BloqDataArray[-1].cutDirection not in [0, 1, 4, 5, 6, 7]):
                 BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
 
-            # calculates swingTime and Speed and shoves into class for processing later
-            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -
+            # calculates swingTime in ms and Speed and shoves into class for processing later
+            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time - #Swing time in ms
                                            BloqDataArray[-2].time)*mspb
-            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle / \
-                BloqDataArray[-1].swingTime
+            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime #Swing Speed in degrees/ms
+            if((BloqDataArray[-1].cutDirection != 8) and (BloqDataArray[-2].cutDirection != 8)):
+                BloqDataArray[-1].angleChange = abs(180-abs(cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection])) #Calculates Angle Change After parity. e.g. up and down is 0, but up to side is 90
+            else:
+                BloqDataArray[-1].angleChange = 0
+            BloqDataArray[-1].angleChangeTime = BloqDataArray[-1].angleChange/(BloqDataArray[-1].swingTime) #Change in cut angle swing in degrees/millisecond
+            BloqDataArray[-1].angleChangeDiff =  1+((max(BloqDataArray[-1].angleChange,45)-45)/angleDiv)**2
 
             # TODO: move this elsewhere, should be part of processBloqData, not extract
             temp = 0
@@ -233,8 +273,7 @@ def extractBloqData(songNoteArray):
             # Uses a rolling average to judge pattern difficulty
             for j in range(0, patternRollingAverage):
                 if(len(BloqDataArray) >= j+1):
-                    temp += (BloqDataArray[-1*(j+1)].angleDiff *
-                             BloqDataArray[-1*(j+1)].posDiff)
+                    temp += (BloqDataArray[-1*(j+1)].angleDiff*BloqDataArray[-1*(j+1)].posDiff*BloqDataArray[-1*(j+1)].angleChangeDiff)
             # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
             if(len(BloqDataArray) < patternRollingAverage/4):
                 BloqDataArray[-1].patternDiff = (temp /
@@ -243,10 +282,10 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].patternDiff = (temp/len(BloqDataArray))
             else:
                 BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
-
+            
+            
             # The best way to compound the data to get reasonable results. I have no idea why it works but it does
-            BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**1.5 + BloqDataArray[-1].patternDiff**2)*min(
-                math.sqrt(BloqDataArray[-1].stamina), BloqDataArray[-1].patternDiff**2)
+            # BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**staminaPower + BloqDataArray[-1].patternDiff**patternPower)*min(math.sqrt(BloqDataArray[-1].stamina**staminaPower),BloqDataArray[-1].patternDiff**patternPower)
 
     return BloqDataArray
 
@@ -271,13 +310,11 @@ def combineArray(array1, array2):
     # TODO: change from n**2 to sliding window
     for i in range(0, len(combinedArray)):
         temp = 0
-        # Uses a rolling average to smooth difficulties between the hands
-        for j in range(0, min(combinedRollingAverage, i)):
-            temp += combinedArray[i -
-                                  min(combinedRollingAverage, j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = 7.07 * \
-            temp/min(combinedRollingAverage, i+1)  # 6
-
+        for j in range(0, min(combinedRollingAverage,i)): # Uses a rolling average to smooth difficulties between the hands
+            temp += combinedArray[i-min(combinedRollingAverage,j)].combinedDiff
+        combinedArray[i].combinedDiffSmoothed = combinedArrayScale*temp/min(combinedRollingAverage,i+1) # 6
+    
+    
     return combinedArray
 
 
@@ -290,7 +327,13 @@ for song in song_options:
     if song.find(song_id) != -1:
         song_folder = song
         break
-song_folder_contents = os.listdir(bs_song_path + song_folder + '/')
+try:
+    song_folder_contents = os.listdir(bs_song_path + song_folder + '/')
+except NameError:
+    print("Not Downloaded or wrong song code!")
+    print("Press Enter to Exit!")
+    input()
+    exit()
 for song in song_folder_contents:
     if song[-4:] in ['.egg', '.ogg']:
         song_file_name = song
@@ -315,7 +358,6 @@ songNoteRight = [block for block in song_notes if block['_type'] == 1]
 
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
-
 combinedArrayRaw = combineArray(BloqDataLeft, BloqDataRight)
 
 # export results to spreadsheet
@@ -328,19 +370,49 @@ except FileNotFoundError:
     print('Making Spreadsheets Folder')
     os.mkdir('Spreadsheets')
     f = open(excelFileName, 'w', newline="")
+    
 finally:
     writer = csv.writer(f)
-    writer.writerow(["_Time", "C Swing Speed degree/ms", "C Angle Diff", "C Pos Diff",
+    writer.writerow(["TimeMS","Beat","Type","Forehand","numNotes", "SwingSpeed", "Angle Diff", "AngleChangeDiff","Pos Diff",
                     "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
     for bloq in combinedArrayRaw:
-        writer.writerow([bloq.time, bloq.swingSpeed, bloq.angleDiff, bloq.posDiff,
-                        bloq.stamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
+        writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
+                        bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
     f.close()
 
-# calculate final difficulty
-combinedArray = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
+
+
+
+
+
+combinedArray = []
+for bloq in combinedArrayRaw:
+    combinedArray.append(bloq.combinedDiffSmoothed)
+
+
+combinedArray.sort(reverse=True)
+top_1_percent = sum(combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
+# top_5_percent = sum(combinedArray[:int(len(combinedArray)/20)])/int(len(combinedArray)/20)
+# top_20_percent = sum(combinedArray[:int(len(combinedArray)/5)])/int(len(combinedArray)/5)
+# top_50_percent = sum(combinedArray[:int(len(combinedArray)/2)])/int(len(combinedArray)/2)
+# top_70_percent = sum(combinedArray[:int(len(combinedArray)*0.7)])/int(len(combinedArray)*0.7)
 median = statistics.median(combinedArray)
-print(median)
+
+final_score = (top_1_percent*7 + median*3)/10
+
+# top_2_percent = top_2_percent*bpm**1.05/300
+# top_5_percent = top_5_percent*bpm**1.05/300
+# top_20_percent = top_20_percent*bpm**1.05/300
+# top_50_percent = top_50_percent*bpm**1.05/300
+# top_70_percent = top_70_percent*bpm**1.05/300
+# print(top_1_percent,top_5_percent,top_20_percent,top_50_percent,top_70_percent,median)
+# print(len(BloqDataLeft))
+# final_score = (top_20_percent*2+top_5_percent*3+top_1_percent*4+top_70_percent*3+median)/13
+# print(final_score)
+# cal_final_score = 1.0299*final_score-0.3284*final_score**2+0.1005*final_score**3-0.009504*final_score**4+0.0002828*final_score**5
+# print(cal_final_score)
+
+print(final_score)
 
 # saber length is 1 meter
 # distance between top and bottom notes is roughly 1.5m
