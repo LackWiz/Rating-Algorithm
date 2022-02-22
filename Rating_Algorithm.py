@@ -5,26 +5,6 @@ import math
 import csv
 import Multi
 
-# TODO: download from scoresaber if map missing
-
-try:
-    f = open('bs_path.txt', 'r')
-    bs_path = f.read()
-except FileNotFoundError:
-    print('Enter Beat Saber custom songs folder:')
-    # TODO: validate path
-    bs_path = input()
-    f = open('bs_path.txt', 'w')
-    dat = f.write(bs_path)
-finally:
-    f.close()
-
-print('Enter song ID:')
-song_id = input()
-#TODO: show found difficulties
-print('Enter difficulty (like ExpertPlus):')
-song_diff = input() + 'Standard.dat'
-
 angleDiv = 90
 
 combinedArrayScale = 4.319
@@ -196,7 +176,7 @@ class Bloq:
 
         
 
-
+#TODO: refactor, user input misleading
 def load_song_dat(path):
     main_path = path
     try:
@@ -208,7 +188,7 @@ def load_song_dat(path):
         print("This time I won't autocomplete it by adding 'Standard'. you'll need to type out the whole map file name minus .dat")
         print('Enter the exact difficulty file name (like ExpertPlusStandard):')
         song_diff = input()
-        main_path = bs_song_path + song_folder + '/' + song_diff + '.dat'
+        main_path = bs_path + song_folder + '/' + song_diff + '.dat'
         with open(main_path) as json_dat:
             dat = json.load(json_dat)
 
@@ -284,9 +264,8 @@ def extractBloqData(songNoteArray):
 
     return BloqDataArray
 
+
 # TODO: misleading function name
-
-
 def combineArray(array1, array2):
     combinedArray: list[Bloq] = array1 + array2
     
@@ -319,30 +298,54 @@ def combineArray(array1, array2):
 
 
 # Setup ------------------------------------------------------ #
-bs_song_path = bs_path
-if bs_song_path[-1] not in ['\\', '/']:  # Checks if song path is empty
-    bs_song_path += '/'
-song_options = os.listdir(bs_song_path)
+try:
+    f = open('bs_path.txt', 'r')
+    bs_path = f.read()
+except FileNotFoundError:
+    print('Enter Beat Saber custom songs folder:')
+    # TODO: validate path
+    bs_path = input()
+    if bs_path[-1] not in ['\\', '/']:  # Checks if song path is empty
+        bs_path += '/'
+    f = open('bs_path.txt', 'w')
+    dat = f.write(bs_path)
+finally:
+    f.close()
+
+print('Enter song ID:')
+song_id = input()
+
+song_options = os.listdir(bs_path)
+songFound = False
 for song in song_options:
     if song.find(song_id) != -1:
         song_folder = song
+        songFound = True
         break
-try:
-    song_folder_contents = os.listdir(bs_song_path + song_folder + '/')
-except NameError:
+
+if not songFound:
+    # TODO: download from scoresaber if map missing
     print("Not Downloaded or wrong song code!")
     print("Press Enter to Exit!")
     input()
     exit()
-for song in song_folder_contents:
-    if song[-4:] in ['.egg', '.ogg']:
-        song_file_name = song
-        break
+
+difficulties = os.listdir(bs_path + "/" + song_folder)
+difficulties = list(filter(lambda x : x.endswith(".dat") and x != "Info.dat", difficulties))
+
+print("Select a difficulty: ")
+for i in range(0, len(difficulties)):
+    print(f"[{i + 1}] {difficulties[i]}")
+
+while (diff := int(input())) <= 0 or diff > len(difficulties):
+    print(f"Input not in range 1-{len(difficulties)}, try again")
+
+song_diff = difficulties[diff - 1] 
 
 #---------------Where Stuff Happens-----------------------------------------------------------------------------#
 
-song_dat = load_song_dat(bs_song_path + song_folder + '/' + song_diff)
-song_info = load_song_dat(bs_song_path + song_folder + "/Info.dat")
+song_dat = load_song_dat(bs_path + song_folder + '/' + song_diff)
+song_info = load_song_dat(bs_path + song_folder + "/Info.dat")
 
 bpm = song_info['_beatsPerMinute']
 mspb = 60*1000/bpm  # milliseconds per beat
@@ -388,30 +391,14 @@ for bloq in combinedArrayRaw:
 
 combinedArray.sort(reverse=True)
 top_1_percent = sum(combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
-# top_5_percent = sum(combinedArray[:int(len(combinedArray)/20)])/int(len(combinedArray)/20)
-# top_20_percent = sum(combinedArray[:int(len(combinedArray)/5)])/int(len(combinedArray)/5)
-# top_50_percent = sum(combinedArray[:int(len(combinedArray)/2)])/int(len(combinedArray)/2)
-# top_70_percent = sum(combinedArray[:int(len(combinedArray)*0.7)])/int(len(combinedArray)*0.7)
+
 median = statistics.median(combinedArray)
-
 final_score = (top_1_percent*7 + median*3)/10
-
-# top_2_percent = top_2_percent*bpm**1.05/300
-# top_5_percent = top_5_percent*bpm**1.05/300
-# top_20_percent = top_20_percent*bpm**1.05/300
-# top_50_percent = top_50_percent*bpm**1.05/300
-# top_70_percent = top_70_percent*bpm**1.05/300
-# print(top_1_percent,top_5_percent,top_20_percent,top_50_percent,top_70_percent,median)
-# print(len(BloqDataLeft))
-# final_score = (top_20_percent*2+top_5_percent*3+top_1_percent*4+top_70_percent*3+median)/13
-# print(final_score)
-# cal_final_score = 1.0299*final_score-0.3284*final_score**2+0.1005*final_score**3-0.009504*final_score**4+0.0002828*final_score**5
-# print(cal_final_score)
 
 print(final_score)
 print("Press Enter to Exit!")
 input()
-exit()
+
 # saber length is 1 meter
 # distance between top and bottom notes is roughly 1.5m
 # distance between side to side notes it roughly 2m
