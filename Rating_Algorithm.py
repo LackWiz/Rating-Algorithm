@@ -7,25 +7,22 @@ import Multi
 
 # TODO: download from scoresaber if map missing
 
-# Get ID
 try:
     f = open('bs_path.txt', 'r')
     bs_path = f.read()
-    f.close()
 except FileNotFoundError:
     print('Enter Beat Saber custom songs folder:')
     # TODO: validate path
     bs_path = input()
     f = open('bs_path.txt', 'w')
     dat = f.write(bs_path)
+finally:
     f.close()
 
 print('Enter song ID:')
 song_id = input()
-# song_id = "1fe06"  # For Debugging
 print('Enter difficulty (like ExpertPlus):')
 song_diff = input() + 'Standard.dat'
-#song_diff = "ExpertPlusStandard.dat"
 
 angleDiv = 90
 
@@ -97,6 +94,7 @@ class Bloq:
         self.stamina = 0
         self.patternDiff = 0
         self.combinedDiff = 0
+        self.combinedStamina = 0
         self.combinedDiffSmoothed = 0
 
         # Code below needs work
@@ -294,6 +292,11 @@ def extractBloqData(songNoteArray):
 
 def combineArray(array1, array2):
     combinedArray: list[Bloq] = array1 + array2
+    
+    for i in range(1,len(combinedArray)):
+        combinedArray[i].combinedStamina = math.sqrt(combinedArray[i].stamina**2 + combinedArray[i-1].stamina**2)
+        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedStamina**staminaPower + combinedArray[i].patternDiff**patternPower) * min(math.sqrt(combinedArray[i].combinedStamina**staminaPower),combinedArray[i].patternDiff**patternPower)
+
     combinedArray.sort(key=lambda x: x.time)
 
     # TODO: ask Lack what this does
@@ -381,10 +384,6 @@ finally:
     f.close()
 
 
-
-
-
-
 combinedArray = []
 for bloq in combinedArrayRaw:
     combinedArray.append(bloq.combinedDiffSmoothed)
@@ -413,7 +412,9 @@ final_score = (top_1_percent*7 + median*3)/10
 # print(cal_final_score)
 
 print(final_score)
-
+print("Press Enter to Exit!")
+input()
+exit()
 # saber length is 1 meter
 # distance between top and bottom notes is roughly 1.5m
 # distance between side to side notes it roughly 2m
