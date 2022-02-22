@@ -3,6 +3,7 @@ import os
 import json
 import math
 import csv
+import MapDownloader
 import Multi
 
 angleDiv = 90
@@ -175,22 +176,9 @@ class Bloq:
             self.angleDiff = self.angleDiff*(self.numNotes**(1/6))
 
         
-
-#TODO: refactor, user input misleading
 def load_song_dat(path):
-    main_path = path
-    try:
-        with open(main_path) as json_dat:
-            dat = json.load(json_dat)
-    except FileNotFoundError:
-        print("That map doesn't exist! Make sure it's downloaded and you spelt the map name correctly")
-        print("Huh maybe it has a weird file name")
-        print("This time I won't autocomplete it by adding 'Standard'. you'll need to type out the whole map file name minus .dat")
-        print('Enter the exact difficulty file name (like ExpertPlusStandard):')
-        song_diff = input()
-        main_path = bs_path + song_folder + '/' + song_diff + '.dat'
-        with open(main_path) as json_dat:
-            dat = json.load(json_dat)
+    with open(path) as json_dat:
+        dat = json.load(json_dat)
 
     return dat
 
@@ -276,13 +264,11 @@ def combineArray(array1, array2):
     combinedArray.sort(key=lambda x: x.time)
 
     # TODO: ask Lack what this does
-    temp = len(combinedArray)
     i = 1
-    while(i < temp):  # Cleans up Duplicate Times
+    while(i < len(combinedArray)):  # Cleans up Duplicate Times
         if(combinedArray[i].time == combinedArray[i-1].time):
             combinedArray[i-1].numNotes += 1
             combinedArray.pop(i)
-            temp = len(combinedArray)
             i = i - 1
         i += 1
 
@@ -300,37 +286,42 @@ def combineArray(array1, array2):
 # Setup ------------------------------------------------------ #
 try:
     f = open('bs_path.txt', 'r')
-    bs_path = f.read()
+    bsPath = f.read()
 except FileNotFoundError:
     print('Enter Beat Saber custom songs folder:')
     # TODO: validate path
-    bs_path = input()
-    if bs_path[-1] not in ['\\', '/']:  # Checks if song path is empty
-        bs_path += '/'
+    bsPath = input()
+    if bsPath[-1] not in ['\\', '/']:  # Checks if song path is empty
+        bsPath += '/'
     f = open('bs_path.txt', 'w')
-    dat = f.write(bs_path)
+    dat = f.write(bsPath)
 finally:
     f.close()
 
+#possible overlapping hashes bug
 print('Enter song ID:')
 song_id = input()
 
-song_options = os.listdir(bs_path)
+song_options = os.listdir(bsPath)
 songFound = False
 for song in song_options:
     if song.find(song_id) != -1:
-        song_folder = song
+        songFolder = song
         songFound = True
         break
 
 if not songFound:
     # TODO: download from scoresaber if map missing
     print("Not Downloaded or wrong song code!")
-    print("Press Enter to Exit!")
-    input()
-    exit()
+    print("Would you like to download this song? (Y/N)")
+    if(response := input().capitalize() == "Y"):
+        if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
+            print(f"Download of {id} failed. Exiting...")
+            exit()
+    else:
+        exit()
 
-difficulties = os.listdir(bs_path + "/" + song_folder)
+difficulties = os.listdir(bsPath + "/" + songFolder)
 difficulties = list(filter(lambda x : x.endswith(".dat") and x != "Info.dat", difficulties))
 
 print("Select a difficulty: ")
@@ -344,16 +335,14 @@ song_diff = difficulties[diff - 1]
 
 #---------------Where Stuff Happens-----------------------------------------------------------------------------#
 
-song_dat = load_song_dat(bs_path + song_folder + '/' + song_diff)
-song_info = load_song_dat(bs_path + song_folder + "/Info.dat")
+song_dat = load_song_dat(bsPath + songFolder + '/' + song_diff)
+song_info = load_song_dat(bsPath + songFolder + "/Info.dat")
 
 bpm = song_info['_beatsPerMinute']
 mspb = 60*1000/bpm  # milliseconds per beat
 
-song_notes = song_dat['_notes']
-
 # remove the bombs
-song_notes = list(filter(lambda x: x['_type'] in [0, 1], song_notes))
+song_notes = list(filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
 
 # split into red and blue notes
 songNoteLeft = [block for block in song_notes if block['_type'] == 0]
@@ -384,10 +373,7 @@ finally:
     f.close()
 
 
-combinedArray = []
-for bloq in combinedArrayRaw:
-    combinedArray.append(bloq.combinedDiffSmoothed)
-
+combinedArray = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
 
 combinedArray.sort(reverse=True)
 top_1_percent = sum(combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
