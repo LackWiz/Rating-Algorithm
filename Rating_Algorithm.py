@@ -1,8 +1,6 @@
 #Nickname pog sub and follow
 from statistics import median
 import statistics
-from pygame.locals import *
-import pygame
 import os
 import json
 import math
@@ -26,26 +24,26 @@ print('Enter difficulty (like ExpertPlus):')
 song_diff = input() + 'Standard.dat'
 # song_diff = "ExpertPlusStandard.dat"
 # Setup pygame/window ---------------------------------------- #
-mainClock = pygame.time.Clock()
-pygame.mixer.pre_init(44100, -16, 2, 512)
-pygame.init()
-pygame.mixer.set_num_channels(128)
-pygame.display.set_caption('rc_algorithm')
+# mainClock = pygame.time.Clock()
+# pygame.mixer.pre_init(44100, -16, 2, 512)
+# pygame.init()
+# pygame.mixer.set_num_channels(128)
+# pygame.display.set_caption('rc_algorithm')
 WINDOWWIDTH = 750
 WINDOWHEIGHT = 500
-screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT), 0, 32)
+# screen = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT), 0, 32)
 
 # Font ------------------------------------------------------- #
-font = pygame.font.SysFont('verdana', 24)
+# font = pygame.font.SysFont('verdana', 24)
 
 # Text ------------------------------------------------------- #
 
 
-def draw_text(text, font, color, surface, x, y):
-    textobj = font.render(text, 1, color)
-    textrect = textobj.get_rect()
-    textrect.topleft = (x, y)
-    screen.blit(textobj, textrect)
+# def draw_text(text, font, color, surface, x, y):
+#     textobj = font.render(text, 1, color)
+#     textrect = textobj.get_rect()
+#     textrect.topleft = (x, y)
+#     screen.blit(textobj, textrect)
 
 
 # Data ------------------------------------------------------- #
@@ -282,10 +280,10 @@ def load_song_dat(path):
     return dat
 
 
-def draw_triangle(surf, point, angle, radius):
-    points = [point, [point[0]+radius*math.cos(math.radians(angle+45)), point[1]+radius*math.sin(math.radians(angle+45))], [
-        point[0]+radius*math.cos(math.radians(angle-45)), point[1]+radius*math.sin(math.radians(angle-45))]]
-    pygame.draw.polygon(surf, (255, 255, 255), points)
+# def draw_triangle(surf, point, angle, radius):
+#     points = [point, [point[0]+radius*math.cos(math.radians(angle+45)), point[1]+radius*math.sin(math.radians(angle+45))], [
+#         point[0]+radius*math.cos(math.radians(angle-45)), point[1]+radius*math.sin(math.radians(angle-45))]]
+#     pygame.draw.polygon(surf, (255, 255, 255), points)
 
 
 def extractBloqData(songNoteArray):
@@ -698,3 +696,7 @@ while True:
     pygame.display.update()
     mainClock.tick(60)
 """
+
+print("Press Enter to Exit!")
+input()
+exit()
