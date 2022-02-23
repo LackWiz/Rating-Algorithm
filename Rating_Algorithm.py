@@ -319,7 +319,7 @@ if not songFound:
         exit()
 
 difficulties = os.listdir(bsPath + "/" + songFolder)
-difficulties = list(filter(lambda x : x.endswith(".dat") and x != "Info.dat", difficulties))
+difficulties = list(filter(lambda x : x.endswith(".dat") and x.lower() != "info.dat", difficulties))
 
 print("Select a difficulty: ")
 for i in range(0, len(difficulties)):
