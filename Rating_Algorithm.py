@@ -1,10 +1,14 @@
 import statistics
 import os
 import json
+import yaml
 import math
 import csv
 import MapDownloader
 import Multi
+import tkinter as tk
+from tkinter.filedialog import askdirectory
+tk.Tk().withdraw()
 
 angleDiv = 90
 
@@ -168,7 +172,7 @@ class Bloq:
                     self.angleDiff = Multi.ANGLE_MID
                 elif(self.cutDirection == 3):
                     self.angleDiff = Multi.ANGLE_SEMI_MID
-                elif(self.cutDirection in [0, 5, 8]):
+                elif(self.cutDirection in [0, 5], 8):
                     self.angleDiff = Multi.ANGLE_EASY
         if(self.angleDiff >= Multi.ANGLE_MID):    
             self.angleDiff = self.angleDiff*(self.numNotes**(1/3))
@@ -177,7 +181,7 @@ class Bloq:
 
         
 def load_song_dat(path):
-    with open(path) as json_dat:
+    with open(path, encoding = 'utf8') as json_dat:
         dat = json.load(json_dat)
 
     return dat
@@ -245,10 +249,6 @@ def extractBloqData(songNoteArray):
                 BloqDataArray[-1].patternDiff = (temp/len(BloqDataArray))
             else:
                 BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
-            
-            
-            # The best way to compound the data to get reasonable results. I have no idea why it works but it does
-            # BloqDataArray[-1].combinedDiff = math.sqrt(BloqDataArray[-1].stamina**staminaPower + BloqDataArray[-1].patternDiff**patternPower)*min(math.sqrt(BloqDataArray[-1].stamina**staminaPower),BloqDataArray[-1].patternDiff**patternPower)
 
     return BloqDataArray
 
@@ -289,9 +289,8 @@ try:
     bsPath = f.read()
 except FileNotFoundError:
     print('Enter Beat Saber custom songs folder:')
-    while not os.path.isdir(bsPath := input()):
-        print("Path does not exist, try again: ")
-
+    # TODO: validate path
+    bsPath = askdirectory()
     if bsPath[-1] not in ['\\', '/']:  # Checks if song path is empty
         bsPath += '/'
     f = open('bs_path.txt', 'w')
@@ -299,10 +298,10 @@ except FileNotFoundError:
 finally:
     f.close()
 
-# TODO: possible overlapping hashes bug
-song_id = input("Enter song ID: ")
+#possible overlapping hashes bug
+print('Enter song ID:')
+song_id = input()
 
-# Locate the song's folder
 song_options = os.listdir(bsPath)
 songFound = False
 for song in song_options:
@@ -311,20 +310,19 @@ for song in song_options:
         songFound = True
         break
 
-# Possibly download the song if not found
 if not songFound:
+    # TODO: download from scoresaber if map missing
     print("Not Downloaded or wrong song code!")
-    if(response := input("Would you like to download this song? (Y/N)").capitalize() == "Y"):
+    print("Would you like to download this song? (Y/N)")
+    if(response := input().capitalize() == "Y"):
         if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
             print(f"Download of {id} failed. Exiting...")
             exit()
     else:
         exit()
 
-# Select the song difficulty
 difficulties = os.listdir(bsPath + "/" + songFolder)
-difficulties = list(filter(lambda x: x.endswith(".dat")
-                    and x != "Info.dat", difficulties))
+difficulties = list(filter(lambda x : x.endswith(".dat") and x != "Info.dat", difficulties))
 
 print("Select a difficulty: ")
 for i in range(0, len(difficulties)):
@@ -333,7 +331,7 @@ for i in range(0, len(difficulties)):
 while (diff := int(input())) <= 0 or diff > len(difficulties):
     print(f"Input not in range 1-{len(difficulties)}, try again")
 
-song_diff = difficulties[diff - 1]
+song_diff = difficulties[diff - 1] 
 
 #---------------Where Stuff Happens-----------------------------------------------------------------------------#
 
@@ -350,7 +348,6 @@ song_notes = list(filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
 songNoteLeft = [block for block in song_notes if block['_type'] == 0]
 songNoteRight = [block for block in song_notes if block['_type'] == 1]
 
-# group notes into "Blocks"
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
 combinedArrayRaw = combineArray(BloqDataLeft, BloqDataRight)
@@ -365,9 +362,10 @@ except FileNotFoundError:
     print('Making Spreadsheets Folder')
     os.mkdir('Spreadsheets')
     f = open(excelFileName, 'w', newline="")
+    
 finally:
     writer = csv.writer(f)
-    writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
+    writer.writerow(["TimeMS","Beat","Type","Forehand","numNotes", "SwingSpeed", "Angle Diff", "AngleChangeDiff","Pos Diff",
                     "C Stamina", "C Pattern Diff", "C CombinedDiff", "C SmoothedDiff"])
     for bloq in combinedArrayRaw:
         writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
@@ -378,8 +376,7 @@ finally:
 combinedArray = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
 
 combinedArray.sort(reverse=True)
-top_1_percent = sum(
-    combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
+top_1_percent = sum(combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
 
 median = statistics.median(combinedArray)
 final_score = (top_1_percent*7 + median*3)/10
