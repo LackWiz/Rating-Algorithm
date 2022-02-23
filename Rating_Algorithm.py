@@ -11,7 +11,7 @@ import Multi
 
 angleDiv = 90
 
-combinedArrayScale = 4.109
+combinedArrayScale = 4.069
 
 # Minimum precision (how close notes are together) to consider 2 very close notes a slider
 sliderPrecision = 1/6
@@ -69,7 +69,7 @@ class Bloq:
         self.timeMS = self.time * mspb
         self.swingTime = swingTime
         self.swingSpeed = 0
-        self.forehand = True
+        self.forehand = None
         self.angleDiff = Multi.ANGLE_EASY
         self.posDiff = Multi.SIDE_EASY
         self.angleChangeDiff = 0
@@ -87,33 +87,27 @@ class Bloq:
                 self.forehand = False
             elif ((self.type == 1) & (self.cutDirection in [0, 5])):
                 self.forehand = False
-
+            
         # Non-negoitables, Down and a select diagonal is forehand
         elif self.cutDirection in [1, 6, 7]:
-            # 6 = SE Left Hand, 7 = SW Right Hand
+            # 6 = SW Right Hand, 7 = SE Left Hand
             if ((self.type == 0) & (self.cutDirection in [1, 7])):
                 self.forehand = True
             elif ((self.type == 1) & (self.cutDirection in [1, 6])):
                 self.forehand = True
-        else:
-            if type == 0:
-                # If it's the first note, assign most likely, correct Forehand/backhand assignment
-                self.forehand = cutDirection in [5, 3, 7, 1]
-            elif type == 1:
-                self.forehand = cutDirection in [6, 4, 2, 1]
+        
         self.calcAngleDiff()
         self.calcPosDiff()
-        self.calcStackDiff()
 
     def addNote(self):
         self.numNotes += 1
         self.swingAngle += 36.87
+        self.calcStackDiff()
 
     def setForehand(self, hand):
         self.forehand = hand
         self.calcAngleDiff()
         self.calcPosDiff()
-        self.calcStackDiff()
 
     def calcPosDiff(self):  # Checks if position is easy, medium or difficult
         if(self.type == 0):  # Left Hand Side to Side Diff
@@ -130,8 +124,7 @@ class Bloq:
                 self.posDiff = [Multi.SIDE_HARD, Multi.SIDE_MID, Multi.SIDE_SEMI_MID, Multi.SIDE_EASY][self.bloqPos[0]]
         
         # Up and Down Diff
-        self.posDiff *= [Multi.VERT_EASY, Multi.VERT_SEMI_MID,
-                         Multi.VERT_MID][abs(2 * (not self.forehand) - self.bloqPos[1])]
+        self.posDiff *= [Multi.VERT_EASY, Multi.VERT_SEMI_MID,Multi.VERT_MID][abs(2 * (not self.forehand) - self.bloqPos[1])]
 
     # TODO: shorten function
     def calcAngleDiff(self):
@@ -203,10 +196,10 @@ def extractBloqData(songNoteArray):
         if i == 0:
             BloqDataArray.append(Bloq(
                 block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], block["_time"] * mspb))
-            BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
+            BloqDataArray[-1].setForehand(block['_lineLayer'] != 2) #Forehand if note is not in top section
 
         elif (block["_time"] - songNoteArray[i-1]['_time'] <= (dotSliderPrecision if block["_cutDirection"] == 8 else sliderPrecision)
-              and (block['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'], 8])) or (block["_time"] - songNoteArray[i-1]['_time'] <= 0.001):
+              and (block['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'], 8])) or (block["_time"] - songNoteArray[i-1]['_time'] <= 1/32):
 
             # Adds 1 to keep track of how many notes in a single swing
             BloqDataArray[-1].addNote()
@@ -215,22 +208,18 @@ def extractBloqData(songNoteArray):
             BloqDataArray.append(
                 Bloq(block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], 0))
             
-            if((BloqDataArray[-1].cutDirection != 8) and (BloqDataArray[-2].cutDirection != 8)):
-                BloqDataArray[-1].angleChange = abs(180-abs(cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection])) #Calculates Angle Change After parity. e.g. up and down is 0, but up to side is 90
-            else:
-                BloqDataArray[-1].angleChange = 0
-            BloqDataArray[-1].angleChangeDiff =  1+((max(BloqDataArray[-1].angleChange,45)-45)/angleDiv)**2
-
-            if(BloqDataArray[-1].cutDirection not in [0, 1, 4, 5, 6, 7]):
+            if BloqDataArray[-1].cutDirection in [2,3,8] or BloqDataArray[-1].forehand is None: #If Left/Right/Dot, just toggle between forehand/backhand
                 BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
 
-            if(BloqDataArray[-1].forehand == BloqDataArray[-2].forehand):
+            if(BloqDataArray[-1].forehand == BloqDataArray[-2].forehand): #If Hands reset, e.g. bomb resets, bad mapping
                 if((BloqDataArray[-1].cutDirection != 8) and (BloqDataArray[-2].cutDirection != 8)):
                     BloqDataArray[-1].angleChange = abs(cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection]) #Calculates Angle Change After parity. e.g. up and down is 0, but up to side is 90
-                else:
-                    BloqDataArray[-1].angleChange = 0
-                BloqDataArray[-1].angleChangeDiff =  1+((max(BloqDataArray[-1].angleChange,45)-45)/angleDiv)**2
-            
+            else:
+                if((BloqDataArray[-1].cutDirection != 8) and (BloqDataArray[-2].cutDirection != 8)):
+                    BloqDataArray[-1].angleChange = abs(180-abs(cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection])) #Calculates Angle Change After parity. e.g. up and down is 0, but up to side is 90
+
+            BloqDataArray[-1].angleChangeDiff =  min(1+((max(BloqDataArray[-1].angleChange,45)-45)/angleDiv)**2,2)
+            BloqDataArray[-1].calcStackDiff()
             # calculates swingTime in ms and Speed and shoves into class for processing later
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time - #Swing time in ms
                                            BloqDataArray[-2].time)*mspb
