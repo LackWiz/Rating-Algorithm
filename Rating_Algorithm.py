@@ -11,7 +11,7 @@ import Multi
 
 angleDiv = 90
 
-combinedArrayScale = 4.319
+combinedArrayScale = 4.109
 
 # Minimum precision (how close notes are together) to consider 2 very close notes a slider
 sliderPrecision = 1/6
@@ -73,6 +73,7 @@ class Bloq:
         self.angleDiff = Multi.ANGLE_EASY
         self.posDiff = Multi.SIDE_EASY
         self.angleChangeDiff = 0
+        self.stackDiff = 0
         self.stamina = 0
         self.patternDiff = 0
         self.combinedDiff = 0
@@ -101,6 +102,8 @@ class Bloq:
             elif type == 1:
                 self.forehand = cutDirection in [6, 4, 2, 1]
         self.calcAngleDiff()
+        self.calcPosDiff()
+        self.calcStackDiff()
 
     def addNote(self):
         self.numNotes += 1
@@ -110,6 +113,7 @@ class Bloq:
         self.forehand = hand
         self.calcAngleDiff()
         self.calcPosDiff()
+        self.calcStackDiff()
 
     def calcPosDiff(self):  # Checks if position is easy, medium or difficult
         if(self.type == 0):  # Left Hand Side to Side Diff
@@ -117,7 +121,7 @@ class Bloq:
             if(self.forehand):
                 self.posDiff = [Multi.SIDE_SEMI_MID, Multi.SIDE_EASY, Multi.SIDE_SEMI_MID, Multi.SIDE_MID][self.bloqPos[0]]
             elif(not self.forehand):
-                self.posDiff = [Multi.SIDE_HARD, Multi.SIDE_MID, Multi.SIDE_SEMI_MID, Multi.SIDE_EASY][self.bloqPos[0]]
+                self.posDiff = [Multi.SIDE_EASY, Multi.SIDE_SEMI_MID, Multi.SIDE_SEMI_MID, Multi.SIDE_HARD][self.bloqPos[0]]
             
         elif(self.type == 1):  # Right Hand
             if(self.forehand):
@@ -171,12 +175,14 @@ class Bloq:
                     self.angleDiff = Multi.ANGLE_MID
                 elif(self.cutDirection == 3):
                     self.angleDiff = Multi.ANGLE_SEMI_MID
-                elif(self.cutDirection in [0, 5], 8):
+                elif(self.cutDirection in [0, 5, 8]):
                     self.angleDiff = Multi.ANGLE_EASY
-        if(self.angleDiff >= Multi.ANGLE_MID):    
-            self.angleDiff = self.angleDiff*(self.numNotes**(1/3))
+
+    def calcStackDiff(self):
+        if(self.angleChangeDiff >= Multi.ANGLE_MID):
+            self.stackDiff = self.numNotes**Multi.NUM_NOTE_HARD_POWER
         else:
-            self.angleDiff = self.angleDiff*(self.numNotes**(1/6))
+            self.stackDiff = self.numNotes**Multi.NUM_NOTE_EASY_POWER 
 
         
 def load_song_dat(path):
@@ -208,19 +214,30 @@ def extractBloqData(songNoteArray):
         else:
             BloqDataArray.append(
                 Bloq(block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], 0))
-            if(BloqDataArray[-1].cutDirection not in [0, 1, 4, 5, 6, 7]):
-                BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
-
-            # calculates swingTime in ms and Speed and shoves into class for processing later
-            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time - #Swing time in ms
-                                           BloqDataArray[-2].time)*mspb
-            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime #Swing Speed in degrees/ms
+            
             if((BloqDataArray[-1].cutDirection != 8) and (BloqDataArray[-2].cutDirection != 8)):
                 BloqDataArray[-1].angleChange = abs(180-abs(cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection])) #Calculates Angle Change After parity. e.g. up and down is 0, but up to side is 90
             else:
                 BloqDataArray[-1].angleChange = 0
-            BloqDataArray[-1].angleChangeTime = BloqDataArray[-1].angleChange/(BloqDataArray[-1].swingTime) #Change in cut angle swing in degrees/millisecond
             BloqDataArray[-1].angleChangeDiff =  1+((max(BloqDataArray[-1].angleChange,45)-45)/angleDiv)**2
+
+            if(BloqDataArray[-1].cutDirection not in [0, 1, 4, 5, 6, 7]):
+                BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
+
+            if(BloqDataArray[-1].forehand == BloqDataArray[-2].forehand):
+                if((BloqDataArray[-1].cutDirection != 8) and (BloqDataArray[-2].cutDirection != 8)):
+                    BloqDataArray[-1].angleChange = abs(cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection]) #Calculates Angle Change After parity. e.g. up and down is 0, but up to side is 90
+                else:
+                    BloqDataArray[-1].angleChange = 0
+                BloqDataArray[-1].angleChangeDiff =  1+((max(BloqDataArray[-1].angleChange,45)-45)/angleDiv)**2
+            
+            # calculates swingTime in ms and Speed and shoves into class for processing later
+            BloqDataArray[-1].swingTime = (BloqDataArray[-1].time - #Swing time in ms
+                                           BloqDataArray[-2].time)*mspb
+            BloqDataArray[-1].swingSpeed = BloqDataArray[-1].swingAngle/BloqDataArray[-1].swingTime #Swing Speed in degrees/ms
+            
+            BloqDataArray[-1].angleChangeTime = BloqDataArray[-1].angleChange/(BloqDataArray[-1].swingTime) #Change in cut angle swing in degrees/millisecond
+            
 
             # TODO: move this elsewhere, should be part of processBloqData, not extract
             temp = 0
@@ -239,7 +256,7 @@ def extractBloqData(songNoteArray):
             # Uses a rolling average to judge pattern difficulty
             for j in range(0, patternRollingAverage):
                 if(len(BloqDataArray) >= j+1):
-                    temp += (BloqDataArray[-1*(j+1)].angleDiff*BloqDataArray[-1*(j+1)].posDiff*BloqDataArray[-1*(j+1)].angleChangeDiff)
+                    temp += (BloqDataArray[-1*(j+1)].angleDiff*BloqDataArray[-1*(j+1)].posDiff*BloqDataArray[-1*(j+1)].angleChangeDiff*BloqDataArray[-1*(j+1)].stackDiff)
             # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
             if(len(BloqDataArray) < patternRollingAverage/4):
                 BloqDataArray[-1].patternDiff = (temp /
@@ -261,15 +278,6 @@ def combineArray(array1, array2):
         combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedStamina**Multi.STAMINA_POWER + combinedArray[i].patternDiff**Multi.PATTERN_POWER) * min(math.sqrt(combinedArray[i].combinedStamina**Multi.STAMINA_POWER),combinedArray[i].patternDiff**Multi.PATTERN_POWER)
 
     combinedArray.sort(key=lambda x: x.time)
-
-    # TODO: ask Lack what this does
-    i = 1
-    while(i < len(combinedArray)):  # Cleans up Duplicate Times
-        if(combinedArray[i].time == combinedArray[i-1].time):
-            combinedArray[i-1].numNotes += 1
-            combinedArray.pop(i)
-            i = i - 1
-        i += 1
 
     # TODO: change from n**2 to sliding window
     for i in range(0, len(combinedArray)):
