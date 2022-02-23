@@ -400,7 +400,7 @@ top_1_percent = sum(
 
 median = statistics.median(combinedArray)
 final_score = (top_1_percent*7 + median*3)/10
-
+print(song_id+" "+song_info['_songName']+" "+song_diff)
 print("Weighted Score:" + str(final_score))
 print("Median:" + str(median))
 print("Press Enter to Exit!")
