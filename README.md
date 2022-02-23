@@ -3,6 +3,8 @@ Welcome to the Rating-Algorithm wiki!
 
 umm
 
+You'll need to run: *python -m pip install -r requirements.txt* in powershell or CMD before the python script will work. This will simply download and install any missing modules/libraries
+
 get python?
 
 run code?
