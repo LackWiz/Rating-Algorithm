@@ -1,14 +1,13 @@
 import statistics
 import os
 import json
-import yaml
 import math
 import csv
 import MapDownloader
 import Multi
-import tkinter as tk
-from tkinter.filedialog import askdirectory
-tk.Tk().withdraw()
+#import tkinter as tk
+#from tkinter.filedialog import askdirectory
+#tk.Tk().withdraw()
 
 angleDiv = 90
 
@@ -290,7 +289,8 @@ try:
 except FileNotFoundError:
     print('Enter Beat Saber custom songs folder:')
     # TODO: validate path
-    bsPath = askdirectory()
+    #bsPath = askdirectory()
+    bsPath = input()
     if bsPath[-1] not in ['\\', '/']:  # Checks if song path is empty
         bsPath += '/'
     f = open('bs_path.txt', 'w')
