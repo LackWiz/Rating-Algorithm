@@ -17,8 +17,9 @@ combinedArrayScale = 4.069
 sliderPrecision = 1/6
 dotSliderPrecision = 1/5
 
-staminaRollingAverage = 128
+swingSpeedS_LB = 32
 patternRollingAverage = 128
+staminaHistory = 256
 combinedRollingAverage = 128
 
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
@@ -69,6 +70,7 @@ class Bloq:
         self.timeMS = self.time * mspb
         self.swingTime = swingTime
         self.swingSpeed = 0
+        self.swingSpeedSmoothed = 0
         self.forehand = None
         self.angleDiff = Multi.ANGLE_EASY
         self.posDiff = Multi.SIDE_EASY
@@ -78,6 +80,7 @@ class Bloq:
         self.patternDiff = 0
         self.combinedDiff = 0
         self.combinedStamina = 0
+        self.combinedSwingSpeedSmoothed = 0
         self.combinedDiffSmoothed = 0
 
         # Code below needs work
@@ -246,17 +249,14 @@ def extractBloqData(songNoteArray):
 
             # TODO: move this elsewhere, should be part of processBloqData, not extract
             temp = 0
-            # Uses a rolling average to judge stamina
-            for j in range(0, staminaRollingAverage):
-                if(len(BloqDataArray) >= j+1):
-                    temp += (BloqDataArray[-1*(j+1)].swingSpeed)
-            # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
-            if(len(BloqDataArray) < staminaRollingAverage/4):
-                BloqDataArray[-1].stamina = (temp/(staminaRollingAverage/4))
-            elif(len(BloqDataArray) < staminaRollingAverage):
-                BloqDataArray[-1].stamina = (temp/len(BloqDataArray))
+            # Uses a rolling average to asses peak swing speed
+            for j in range(1, min(swingSpeedS_LB,len(BloqDataArray)-1)):
+                if(len(BloqDataArray) >= j):
+                    temp += (BloqDataArray[-1*j].swingSpeed)
+            if(len(BloqDataArray) < swingSpeedS_LB):
+                BloqDataArray[-1].swingSpeedSmoothed = (temp/len(BloqDataArray))
             else:
-                BloqDataArray[-1].stamina = (temp/staminaRollingAverage)
+                BloqDataArray[-1].swingSpeedSmoothed = (temp/swingSpeedS_LB)
             temp = 0
             # Uses a rolling average to judge pattern difficulty
             for j in range(0, patternRollingAverage):
@@ -275,27 +275,24 @@ def extractBloqData(songNoteArray):
     return BloqDataArray
 
 
-# TODO: misleading function name
-def combineArray(array1, array2):
+
+def combineAndProcessArray(array1, array2):
     combinedArray: list[Bloq] = array1 + array2
-
+    combinedArray.sort(key=lambda x: x.time) #once combined, sort by time
     for i in range(1, len(combinedArray)):
-        combinedArray[i].combinedStamina = math.sqrt(
-            combinedArray[i].stamina**2 + combinedArray[i-1].stamina**2)
-        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedStamina**Multi.STAMINA_POWER + combinedArray[i].patternDiff**Multi.PATTERN_POWER) * min(
-            math.sqrt(combinedArray[i].combinedStamina**Multi.STAMINA_POWER), combinedArray[i].patternDiff**Multi.PATTERN_POWER)
-
-    combinedArray.sort(key=lambda x: x.time)
+        combinedArray[i].combinedSwingSpeedSmoothed = math.sqrt(
+            combinedArray[i].swingSpeedSmoothed**2 + combinedArray[i-1].swingSpeedSmoothed**2)
+            # TODO Fix Combine function with new variables
+        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Multi.STAMINA_POWER + combinedArray[i].patternDiff**Multi.PATTERN_POWER) * min(
+            math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Multi.STAMINA_POWER), combinedArray[i].patternDiff**Multi.PATTERN_POWER)
 
     # TODO: change from n**2 to sliding window
     for i in range(0, len(combinedArray)):
         temp = 0
         # Uses a rolling average to smooth difficulties between the hands
         for j in range(0, min(combinedRollingAverage, i)):
-            temp += combinedArray[i -
-                                  min(combinedRollingAverage, j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = combinedArrayScale * \
-            temp/min(combinedRollingAverage, i+1)  # 6
+            temp += combinedArray[i - min(combinedRollingAverage, j)].combinedDiff
+        combinedArray[i].combinedDiffSmoothed = combinedArrayScale * temp/min(combinedRollingAverage, i+1)
 
     return combinedArray
 
@@ -369,7 +366,17 @@ songNoteRight = [block for block in song_notes if block['_type'] == 1]
 
 BloqDataLeft = extractBloqData(songNoteLeft)
 BloqDataRight = extractBloqData(songNoteRight)
-combinedArrayRaw = combineArray(BloqDataLeft, BloqDataRight)
+combinedArrayRaw = combineAndProcessArray(BloqDataLeft, BloqDataRight)
+
+SmoothDiff = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
+
+SmoothDiff.sort(reverse=True)
+top_1_percent = sum(
+    SmoothDiff[:int(len(SmoothDiff)/100)])/int(len(SmoothDiff)/100)
+
+median = statistics.median(SmoothDiff)
+average = statistics.mean(SmoothDiff)
+final_score = (top_1_percent*7 + median*3)/10
 
 # export results to spreadsheet
 excelFileName = os.path.join(
@@ -382,27 +389,48 @@ except FileNotFoundError:
     os.mkdir('Spreadsheets')
     f = open(excelFileName, 'w', newline="")
 
+
 finally:
     writer = csv.writer(f)
-    writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
-                    "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff"])
+    writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed","SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
+                    "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff","","Weighted","Median","Average"])
+    writer.writerow(["","","",statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.numNotes for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.swingSpeed for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.swingSpeedSmoothed for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.angleDiff for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.angleChangeDiff for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.posDiff for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.combinedStamina for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.patternDiff for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.combinedDiff for bloq in combinedArrayRaw]),
+        statistics.mean([bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]),
+        "",
+        final_score,median,average])
     for bloq in combinedArrayRaw:
-        writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
+        writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed,bloq.swingSpeedSmoothed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
                         bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
     f.close()
 
 
-combinedArray = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
 
-combinedArray.sort(reverse=True)
-top_1_percent = sum(
-    combinedArray[:int(len(combinedArray)/100)])/int(len(combinedArray)/100)
 
-median = statistics.median(combinedArray)
-final_score = (top_1_percent*7 + median*3)/10
+
+
+
+
+
+
+
+
+
+
+
+
 print(song_id+" "+song_info['_songName']+" "+song_diff)
 print("Weighted Score:" + str(final_score))
 print("Median:" + str(median))
+print("Average: " + str(average))
 print("Press Enter to Exit!")
 input()
 
