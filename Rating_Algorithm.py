@@ -4,7 +4,7 @@ import json
 import math
 import csv
 import MapDownloader
-import Multi
+import Variables
 #import tkinter as tk
 #from tkinter.filedialog import askdirectory
 # tk.Tk().withdraw()
@@ -72,8 +72,8 @@ class Bloq:
         self.swingSpeed = 0
         self.swingSpeedSmoothed = 0
         self.forehand = None
-        self.angleDiff = Multi.ANGLE_EASY
-        self.posDiff = Multi.SIDE_EASY
+        self.angleDiff = Variables.ANGLE_EASY
+        self.posDiff = Variables.SIDE_EASY
         self.angleChangeDiff = 0
         self.stackDiff = 0
         self.stamina = 0
@@ -116,23 +116,23 @@ class Bloq:
         if(self.type == 0):  # Left Hand Side to Side Diff
             # LH centered around 2
             if(self.forehand):
-                self.posDiff = [Multi.SIDE_SEMI_MID, Multi.SIDE_EASY,
-                                Multi.SIDE_SEMI_MID, Multi.SIDE_MID][self.bloqPos[0]]
+                self.posDiff = [Variables.SIDE_SEMI_MID, Variables.SIDE_EASY,
+                                Variables.SIDE_SEMI_MID, Variables.SIDE_MID][self.bloqPos[0]]
             elif(not self.forehand):
-                self.posDiff = [Multi.SIDE_EASY, Multi.SIDE_SEMI_MID,
-                                Multi.SIDE_SEMI_MID, Multi.SIDE_HARD][self.bloqPos[0]]
+                self.posDiff = [Variables.SIDE_EASY, Variables.SIDE_SEMI_MID,
+                                Variables.SIDE_SEMI_MID, Variables.SIDE_HARD][self.bloqPos[0]]
 
         elif(self.type == 1):  # Right Hand
             if(self.forehand):
-                self.posDiff = [Multi.SIDE_MID, Multi.SIDE_SEMI_MID,
-                                Multi.SIDE_EASY, Multi.SIDE_SEMI_MID][self.bloqPos[0]]
+                self.posDiff = [Variables.SIDE_MID, Variables.SIDE_SEMI_MID,
+                                Variables.SIDE_EASY, Variables.SIDE_SEMI_MID][self.bloqPos[0]]
             elif(not self.forehand):
-                self.posDiff = [Multi.SIDE_HARD, Multi.SIDE_MID,
-                                Multi.SIDE_SEMI_MID, Multi.SIDE_EASY][self.bloqPos[0]]
+                self.posDiff = [Variables.SIDE_HARD, Variables.SIDE_MID,
+                                Variables.SIDE_SEMI_MID, Variables.SIDE_EASY][self.bloqPos[0]]
 
         # Up and Down Diff
-        self.posDiff *= [Multi.VERT_EASY, Multi.VERT_SEMI_MID,
-                         Multi.VERT_MID][abs(2 * (not self.forehand) - self.bloqPos[1])]
+        self.posDiff *= [Variables.VERT_EASY, Variables.VERT_SEMI_MID,
+                         Variables.VERT_MID][abs(2 * (not self.forehand) - self.bloqPos[1])]
 
     # TODO: shorten function
     def calcAngleDiff(self):
@@ -140,50 +140,50 @@ class Bloq:
             if(self.forehand):
                 # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 7, 8]):
-                    self.angleDiff = Multi.ANGLE_EASY
+                    self.angleDiff = Variables.ANGLE_EASY
                 elif(self.cutDirection == 3):
-                    self.angleDiff = Multi.ANGLE_SEMI_MID
+                    self.angleDiff = Variables.ANGLE_SEMI_MID
                 elif(self.cutDirection in [5, 6]):
-                    self.angleDiff = Multi.ANGLE_MID
+                    self.angleDiff = Variables.ANGLE_MID
                 elif(self.cutDirection in [0, 2]):
-                    self.angleDiff = Multi.ANGLE_HARD
+                    self.angleDiff = Variables.ANGLE_HARD
             elif(not self.forehand):
                 # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 3]):
-                    self.angleDiff = Multi.ANGLE_HARD
+                    self.angleDiff = Variables.ANGLE_HARD
                 elif(self.cutDirection in [5, 6]):
-                    self.angleDiff = Multi.ANGLE_MID
+                    self.angleDiff = Variables.ANGLE_MID
                 elif(self.cutDirection == 2):
-                    self.angleDiff = Multi.ANGLE_SEMI_MID
+                    self.angleDiff = Variables.ANGLE_SEMI_MID
                 elif(self.cutDirection in [0, 4, 8]):
-                    self.angleDiff = Multi.ANGLE_EASY
+                    self.angleDiff = Variables.ANGLE_EASY
         elif(self.type == 1):  # Right Hand
             if(self.forehand):
                 # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 6, 8]):
-                    self.angleDiff = Multi.ANGLE_EASY
+                    self.angleDiff = Variables.ANGLE_EASY
                 elif(self.cutDirection == 2):
-                    self.angleDiff = Multi.ANGLE_SEMI_MID
+                    self.angleDiff = Variables.ANGLE_SEMI_MID
                 elif(self.cutDirection in [4, 7]):
-                    self.angleDiff = Multi.ANGLE_MID
+                    self.angleDiff = Variables.ANGLE_MID
                 elif(self.cutDirection in [0, 3]):
-                    self.angleDiff = Multi.ANGLE_HARD
+                    self.angleDiff = Variables.ANGLE_HARD
             elif(not self.forehand):
                 # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 2]):
-                    self.angleDiff = Multi.ANGLE_HARD
+                    self.angleDiff = Variables.ANGLE_HARD
                 elif(self.cutDirection in [4, 7]):
-                    self.angleDiff = Multi.ANGLE_MID
+                    self.angleDiff = Variables.ANGLE_MID
                 elif(self.cutDirection == 3):
-                    self.angleDiff = Multi.ANGLE_SEMI_MID
+                    self.angleDiff = Variables.ANGLE_SEMI_MID
                 elif(self.cutDirection in [0, 5, 8]):
-                    self.angleDiff = Multi.ANGLE_EASY
+                    self.angleDiff = Variables.ANGLE_EASY
 
     def calcStackDiff(self):
-        if(self.angleChangeDiff >= Multi.ANGLE_MID):
-            self.stackDiff = self.numNotes**Multi.NUM_NOTE_HARD_POWER
+        if(self.angleChangeDiff >= Variables.ANGLE_MID):
+            self.stackDiff = self.numNotes**Variables.NUM_NOTE_HARD_POWER
         else:
-            self.stackDiff = self.numNotes**Multi.NUM_NOTE_EASY_POWER
+            self.stackDiff = self.numNotes**Variables.NUM_NOTE_EASY_POWER
 
 
 def load_song_dat(path):
@@ -283,8 +283,8 @@ def combineAndProcessArray(array1, array2):
         combinedArray[i].combinedSwingSpeedSmoothed = math.sqrt(
             combinedArray[i].swingSpeedSmoothed**2 + combinedArray[i-1].swingSpeedSmoothed**2)
             # TODO Fix Combine function with new variables
-        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Multi.STAMINA_POWER + combinedArray[i].patternDiff**Multi.PATTERN_POWER) * min(
-            math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Multi.STAMINA_POWER), combinedArray[i].patternDiff**Multi.PATTERN_POWER)
+        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.STAMINA_POWER + combinedArray[i].patternDiff**Variables.PATTERN_POWER) * min(
+            math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.STAMINA_POWER), combinedArray[i].patternDiff**Variables.PATTERN_POWER)
 
     # TODO: change from n**2 to sliding window
     for i in range(0, len(combinedArray)):
@@ -340,25 +340,8 @@ def getSongPath(song_id):
     difficulties = os.listdir(bsPath + "/" + songFolder)
     difficulties = list(filter(lambda x: x.endswith(
         ".dat") and x.lower() != "info.dat", difficulties))
-    difficulty_order = [
-        "ExpertPlusStandard.dat",
-        "ExpertPlus.dat",
-        "ExpertStandard.dat",
-        "Expert.dat",
-        "HardStandard.dat",
-        "Hard.dat",
-        "NormalStandard.dat",
-        "Normal.dat",
-        "EasyStandard.dat",
-        "Easy.dat",
-        # "ExpertPlusLawless.dat",
-        # "ExpertLawless.dat",
-        # "HardLawless.dat",
-        # "NormalLawless.dat",
-        # "EasyLawless.dat"
-    ]
-    difficulties = sorted(difficulties,key=difficulty_order.index)
     
+    difficulties = sorted(difficulties,key=Variables.DIFFICULTY_ORDER.index)
     print(song_id+" "+song_info['_songName'], end= " ")
     print("Select a difficulty: ")
     for i in range(0, len(difficulties)):
