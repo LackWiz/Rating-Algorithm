@@ -58,7 +58,7 @@ https://bsmg.wiki/mapping/map-format.html#notes-2
 
 
 class Bloq:
-    def __init__(self, type, cutDirection, bloqPos, startTime, swingTime):
+    def __init__(self, type, cutDirection, bloqPos, startTime, swingTime, mspb):
         self.numNotes = 1
         self.type = type
         self.cutDirection = cutDirection
@@ -194,7 +194,7 @@ def load_song_dat(path):
 
 
 # TODO: sliding window instead of reactive (for future expansion)
-def extractBloqData(songNoteArray):
+def extractBloqData(songNoteArray, mspb):
 
     BloqDataArray: list[Bloq] = []
 
@@ -203,7 +203,7 @@ def extractBloqData(songNoteArray):
         # Checks if the note behind is super close, and treats it as a single swing
         if i == 0:
             BloqDataArray.append(Bloq(
-                block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], block["_time"] * mspb))
+                block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], block["_time"] * mspb, mspb))
             # Forehand if note is not in top section
             BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
 
@@ -216,7 +216,7 @@ def extractBloqData(songNoteArray):
 
         else:
             BloqDataArray.append(
-                Bloq(block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], 0))
+                Bloq(block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], 0, mspb))
 
             # If Left/Right/Dot, just toggle between forehand/backhand
             if BloqDataArray[-1].cutDirection in [2, 3, 8] or BloqDataArray[-1].forehand is None:
@@ -296,143 +296,162 @@ def combineAndProcessArray(array1, array2):
 
     return combinedArray
 
+def askSongID():
+    print('Enter song ID:')
+    song_id = input()
+    return song_id
+
+def getSongPath(song_id):
+    song_id = str(song_id)
+    try:
+        f = open('bs_path.txt', 'r')
+        bsPath = f.read()
+    except FileNotFoundError:
+        print('Enter Beat Saber custom songs folder:')
+        # TODO: validate path
+        #bsPath = askdirectory()
+        bsPath = input()
+        if bsPath[-1] not in ['\\', '/']:  # Checks if song path is empty
+            bsPath += '/'
+        f = open('bs_path.txt', 'w')
+        dat = f.write(bsPath)
+    finally:
+        f.close()
+    song_options = os.listdir(bsPath)
+    songFound = False
+    for song in song_options:
+        if song.find(song_id) != -1:
+            songFolder = song
+            songFound = True
+            break
+
+    if not songFound:
+        # TODO: download from scoresaber if map missing
+        print(song_id + " Not Downloaded or wrong song code!")
+        print("Would you like to download this song? (Y/N)")
+        if(response := input().capitalize() == "Y"):
+            if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
+                print(f"Download of {id} failed. Exiting...")
+                exit()
+        else:
+            exit()
+
+    difficulties = os.listdir(bsPath + "/" + songFolder)
+    difficulties = list(filter(lambda x: x.endswith(
+        ".dat") and x.lower() != "info.dat", difficulties))
+    difficulty_order = [
+        "ExpertPlusStandard.dat",
+        "ExpertPlus.dat",
+        "ExpertStandard.dat",
+        "Expert.dat",
+        "HardStandard.dat",
+        "Hard.dat",
+        "NormalStandard.dat",
+        "Normal.dat",
+        "EasyStandard.dat",
+        "Easy.dat"
+    ]
+    difficulties = sorted(difficulties,key=difficulty_order.index)
+    print("Select a difficulty: ")
+    for i in range(0, len(difficulties)):
+        print(f"[{i + 1}] {difficulties[i]}")
+    while (diff := int(input())) <= 0 or diff > len(difficulties):
+        print(f"Input not in range 1-{len(difficulties)}, try again")
+
+    song_diff = difficulties[diff - 1]
+    folder_path = bsPath + songFolder + '/'
+    return folder_path, song_diff
+
+def Main(folder_path, song_diff, song_id):
+    song_id = str(song_id)
+    song_dat = load_song_dat(folder_path + song_diff)
+    song_info = load_song_dat(folder_path + "Info.dat")
+
+    bpm = song_info['_beatsPerMinute']
+    mspb = 60*1000/bpm  # milliseconds per beat
+
+    # remove the bombs
+    song_notes = list(filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
+
+    # split into red and blue notes
+    songNoteLeft = [block for block in song_notes if block['_type'] == 0]
+    songNoteRight = [block for block in song_notes if block['_type'] == 1]
+
+    BloqDataLeft = extractBloqData(songNoteLeft,mspb)
+    BloqDataRight = extractBloqData(songNoteRight,mspb)
+    combinedArrayRaw = combineAndProcessArray(BloqDataLeft, BloqDataRight)
+
+    SmoothDiff = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
+
+    SmoothDiff.sort(reverse=True)
+    top_1_percent = sum(
+        SmoothDiff[:int(len(SmoothDiff)/100)])/int(len(SmoothDiff)/100)
+
+    median = statistics.median(SmoothDiff)
+    average = statistics.mean(SmoothDiff)
+    final_score = (top_1_percent*7 + median*3)/10
+
+    # export results to spreadsheet
+    excelFileName = os.path.join(
+        f"Spreadsheets/{song_id} {song_info['_songName']} {song_diff} export.csv")
+    excelFileName.replace("*", "")
+    try:
+        f = open(excelFileName, 'w', newline="")
+    except FileNotFoundError:
+        print('Making Spreadsheets Folder')
+        os.mkdir('Spreadsheets')
+        f = open(excelFileName, 'w', newline="")
+
+
+    finally:
+        writer = csv.writer(f)
+        writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed","SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
+                        "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff","","Weighted","Median","Average"])
+        writer.writerow(["","","",statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.numNotes for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.swingSpeed for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.swingSpeedSmoothed for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.angleDiff for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.angleChangeDiff for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.posDiff for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.combinedStamina for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.patternDiff for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.combinedDiff for bloq in combinedArrayRaw]),
+            statistics.mean([bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]),
+            "",
+            final_score,median,average])
+        for bloq in combinedArrayRaw:
+            writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed,bloq.swingSpeedSmoothed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
+                            bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
+        f.close()
+    final_score = str(final_score)
+    median = str(median)
+    average = str(average)
+    print(song_id+" "+song_info['_songName']+" "+song_diff)
+    print("Weighted Score:" + final_score)
+    print("Median:" + median)
+    print("Average: " + average)
+    
+    return song_id+" "+song_info['_songName']+" "+song_diff, final_score, median, average
+
+
+
 
 # Setup ------------------------------------------------------ #
-try:
-    f = open('bs_path.txt', 'r')
-    bsPath = f.read()
-except FileNotFoundError:
-    print('Enter Beat Saber custom songs folder:')
-    # TODO: validate path
-    #bsPath = askdirectory()
-    bsPath = input()
-    if bsPath[-1] not in ['\\', '/']:  # Checks if song path is empty
-        bsPath += '/'
-    f = open('bs_path.txt', 'w')
-    dat = f.write(bsPath)
-finally:
-    f.close()
+
 
 # possible overlapping hashes bug
-print('Enter song ID:')
-song_id = input()
 
-song_options = os.listdir(bsPath)
-songFound = False
-for song in song_options:
-    if song.find(song_id) != -1:
-        songFolder = song
-        songFound = True
-        break
 
-if not songFound:
-    # TODO: download from scoresaber if map missing
-    print("Not Downloaded or wrong song code!")
-    print("Would you like to download this song? (Y/N)")
-    if(response := input().capitalize() == "Y"):
-        if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
-            print(f"Download of {id} failed. Exiting...")
-            exit()
-    else:
-        exit()
 
-difficulties = os.listdir(bsPath + "/" + songFolder)
-difficulties = list(filter(lambda x: x.endswith(
-    ".dat") and x.lower() != "info.dat", difficulties))
-
-print("Select a difficulty: ")
-for i in range(0, len(difficulties)):
-    print(f"[{i + 1}] {difficulties[i]}")
-
-while (diff := int(input())) <= 0 or diff > len(difficulties):
-    print(f"Input not in range 1-{len(difficulties)}, try again")
-
-song_diff = difficulties[diff - 1]
 
 #---------------Where Stuff Happens-----------------------------------------------------------------------------#
 
-song_dat = load_song_dat(bsPath + songFolder + '/' + song_diff)
-song_info = load_song_dat(bsPath + songFolder + "/Info.dat")
-
-bpm = song_info['_beatsPerMinute']
-mspb = 60*1000/bpm  # milliseconds per beat
-
-# remove the bombs
-song_notes = list(filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
-
-# split into red and blue notes
-songNoteLeft = [block for block in song_notes if block['_type'] == 0]
-songNoteRight = [block for block in song_notes if block['_type'] == 1]
-
-BloqDataLeft = extractBloqData(songNoteLeft)
-BloqDataRight = extractBloqData(songNoteRight)
-combinedArrayRaw = combineAndProcessArray(BloqDataLeft, BloqDataRight)
-
-SmoothDiff = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
-
-SmoothDiff.sort(reverse=True)
-top_1_percent = sum(
-    SmoothDiff[:int(len(SmoothDiff)/100)])/int(len(SmoothDiff)/100)
-
-median = statistics.median(SmoothDiff)
-average = statistics.mean(SmoothDiff)
-final_score = (top_1_percent*7 + median*3)/10
-
-# export results to spreadsheet
-excelFileName = os.path.join(
-    f"Spreadsheets/{song_id} {song_info['_songName']} {song_diff} export.csv")
-excelFileName.replace("*", "")
-try:
-    f = open(excelFileName, 'w', newline="")
-except FileNotFoundError:
-    print('Making Spreadsheets Folder')
-    os.mkdir('Spreadsheets')
-    f = open(excelFileName, 'w', newline="")
+# songID = askSongID
+# folder_path, song_diff = getSongPath(songID)
+# Main(folder_path, song_diff)
 
 
-finally:
-    writer = csv.writer(f)
-    writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed","SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
-                    "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff","","Weighted","Median","Average"])
-    writer.writerow(["","","",statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.numNotes for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.swingSpeed for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.swingSpeedSmoothed for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.angleDiff for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.angleChangeDiff for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.posDiff for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.combinedStamina for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.patternDiff for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.combinedDiff for bloq in combinedArrayRaw]),
-        statistics.mean([bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]),
-        "",
-        final_score,median,average])
-    for bloq in combinedArrayRaw:
-        writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed,bloq.swingSpeedSmoothed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
-                        bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
-    f.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-print(song_id+" "+song_info['_songName']+" "+song_diff)
-print("Weighted Score:" + str(final_score))
-print("Median:" + str(median))
-print("Average: " + str(average))
-print("Press Enter to Exit!")
-input()
 
 # saber length is 1 meter
 # distance between top and bottom notes is roughly 1.5m
