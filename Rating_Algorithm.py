@@ -335,7 +335,8 @@ def getSongPath(song_id):
                 exit()
         else:
             exit()
-
+    folder_path = bsPath + songFolder + '/'
+    song_info = load_song_dat(folder_path + "Info.dat")
     difficulties = os.listdir(bsPath + "/" + songFolder)
     difficulties = list(filter(lambda x: x.endswith(
         ".dat") and x.lower() != "info.dat", difficulties))
@@ -349,17 +350,26 @@ def getSongPath(song_id):
         "NormalStandard.dat",
         "Normal.dat",
         "EasyStandard.dat",
-        "Easy.dat"
+        "Easy.dat",
+        # "ExpertPlusLawless.dat",
+        # "ExpertLawless.dat",
+        # "HardLawless.dat",
+        # "NormalLawless.dat",
+        # "EasyLawless.dat"
     ]
     difficulties = sorted(difficulties,key=difficulty_order.index)
+    
+    print(song_id+" "+song_info['_songName'], end= " ")
     print("Select a difficulty: ")
     for i in range(0, len(difficulties)):
         print(f"[{i + 1}] {difficulties[i]}")
     while (diff := int(input())) <= 0 or diff > len(difficulties):
         print(f"Input not in range 1-{len(difficulties)}, try again")
-
     song_diff = difficulties[diff - 1]
-    folder_path = bsPath + songFolder + '/'
+    print(song_diff)
+    
+
+
     return folder_path, song_diff
 
 def Main(folder_path, song_diff, song_id):
@@ -427,7 +437,7 @@ def Main(folder_path, song_diff, song_id):
     final_score = str(final_score)
     median = str(median)
     average = str(average)
-    print(song_id+" "+song_info['_songName']+" "+song_diff)
+    #print(song_id+" "+song_info['_songName']+" "+song_diff)
     print("Weighted Score:" + final_score)
     print("Median:" + median)
     print("Average: " + average)
