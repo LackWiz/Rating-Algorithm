@@ -51,7 +51,7 @@ for i, song in enumerate(hash_list):
             print("The Results may be different due to possible different local map versus hosted map")
             print("If you just have an old entry but no song, a new version of the song will be downloaded but you'll need to update the playlist manually")
             print("Press Enter to Continue")
-            input()
+            #input()
         folder_path, song_diff = Rating_Algorithm.selectDiff(song_id)
         for i, index in enumerate(song_diff):
             queue_list.append([folder_path, index, song_id])
@@ -61,7 +61,7 @@ for i, song in enumerate(hash_list):
             print(f"Song Hash {hash_list[i]} Not Found!")
             print("Song was either deleted or doesn't exist")
             print("Press Enter to Continue")
-            input()
+            #input()
 
 for i, index in enumerate(queue_list):
     diff_list.append(Rating_Algorithm.Main(index[0], index[1], index[2]))

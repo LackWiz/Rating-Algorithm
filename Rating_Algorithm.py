@@ -114,26 +114,29 @@ class Bloq:
         self.calcPosDiff()
 
     def calcPosDiff(self):  # Checks if position is easy, medium or difficult
-        if(self.type == 0):  # Left Hand Side to Side Diff
-            # LH centered around 2
-            if(self.forehand):
-                self.posDiff = [Variables.SIDE_SEMI_MID, Variables.SIDE_EASY,
-                                Variables.SIDE_SEMI_MID, Variables.SIDE_MID][self.bloqPos[0]]
-            elif(not self.forehand):
-                self.posDiff = [Variables.SIDE_EASY, Variables.SIDE_SEMI_MID,
-                                Variables.SIDE_SEMI_MID, Variables.SIDE_HARD][self.bloqPos[0]]
+        try:
+            if(self.type == 0):  # Left Hand Side to Side Diff
+                # LH centered around 2
+                if(self.forehand):
+                    self.posDiff = [Variables.SIDE_SEMI_MID, Variables.SIDE_EASY,
+                                    Variables.SIDE_SEMI_MID, Variables.SIDE_MID][self.bloqPos[0]]
+                elif(not self.forehand):
+                    self.posDiff = [Variables.SIDE_EASY, Variables.SIDE_SEMI_MID,
+                                    Variables.SIDE_SEMI_MID, Variables.SIDE_HARD][self.bloqPos[0]]
 
-        elif(self.type == 1):  # Right Hand
-            if(self.forehand):
-                self.posDiff = [Variables.SIDE_MID, Variables.SIDE_SEMI_MID,
-                                Variables.SIDE_EASY, Variables.SIDE_SEMI_MID][self.bloqPos[0]]
-            elif(not self.forehand):
-                self.posDiff = [Variables.SIDE_HARD, Variables.SIDE_MID,
-                                Variables.SIDE_SEMI_MID, Variables.SIDE_EASY][self.bloqPos[0]]
+            elif(self.type == 1):  # Right Hand
+                if(self.forehand):
+                    self.posDiff = [Variables.SIDE_MID, Variables.SIDE_SEMI_MID,
+                                    Variables.SIDE_EASY, Variables.SIDE_SEMI_MID][self.bloqPos[0]]
+                elif(not self.forehand):
+                    self.posDiff = [Variables.SIDE_HARD, Variables.SIDE_MID,
+                                    Variables.SIDE_SEMI_MID, Variables.SIDE_EASY][self.bloqPos[0]]
 
-        # Up and Down Diff
-        self.posDiff *= [Variables.VERT_EASY, Variables.VERT_SEMI_MID,
-                         Variables.VERT_MID][abs(2 * (not self.forehand) - self.bloqPos[1])]
+            # Up and Down Diff
+            self.posDiff *= [Variables.VERT_EASY, Variables.VERT_SEMI_MID,
+                            Variables.VERT_MID][abs(2 * (not self.forehand) - self.bloqPos[1])]
+        except:
+            self.posDiff = 1
 
     # TODO: shorten function
     def calcAngleDiff(self):
@@ -217,7 +220,10 @@ def findDiffs(bsPath, songFolder):
     difficulties = os.listdir(bsPath + "/" + songFolder)
     difficulties = list(filter(lambda x: x.endswith(
         ".dat") and x.lower() != "info.dat", difficulties))
-    difficulties = sorted(difficulties,key=Variables.DIFFICULTY_ORDER.index)
+    try: 
+        difficulties = sorted(difficulties,key=Variables.DIFFICULTY_ORDER.index)
+    except ValueError:
+        print("Couldn't Sort LOOK AT NUMBERING")
     return difficulties
 
 def selectDiff(song_id):
@@ -236,10 +242,11 @@ def selectDiff(song_id):
 
     print(song_id+" "+song_info['_songName'], end= " ")
     print("Select a difficulty: ")
-    print("[a] for all diffs")
+    print("[a] for all diffs, separate using comma for multiple diffs")
     for i in range(0, len(difficulties)):
         print(f"[{i + 1}] {difficulties[i]}")
-    selectedDiffs = input()
+    #selectedDiffs = input()
+    selectedDiffs = "a" 
     if selectedDiffs != "a":
         selectedDiffs = selectedDiffs.replace(" ", "")
         selectedDiffs = selectedDiffs.split(",")
@@ -265,7 +272,8 @@ def extractBloqData(songNoteArray, mspb):
     BloqDataArray: list[Bloq] = []
 
     for i, block in enumerate(songNoteArray):
-
+        block['_cutDirection'] = min(block['_cutDirection'], 8)
+             
         # Checks if the note behind is super close, and treats it as a single swing
         if i == 0:
             BloqDataArray.append(Bloq(
@@ -401,15 +409,19 @@ def Main(folder_path, song_diff, song_id):
     else:
         final_score = "No Score Can Be Made"
     # export results to spreadsheet
+    
     excelFileName = os.path.join(
-        f"Spreadsheets/{song_id} {song_info['_songName']} {song_diff} export.csv")
-    excelFileName.replace("*", "")
+        f"Spreadsheets/{song_id} {song_info['_songName'].replace('/', '')} {song_diff} export.csv")
+    excelFileName = excelFileName.replace("*", "")
+    
+    # new_str = excelFileName.encode("ascii", "ignore")
+    # excelFileName = new_str.decode()
     try:
-        f = open(excelFileName, 'w', newline="")
+        f = open(excelFileName, 'w', newline="", encoding='utf8')
     except FileNotFoundError:
         print('Making Spreadsheets Folder')
         os.mkdir('Spreadsheets')
-        f = open(excelFileName, 'w', newline="")
+        f = open(excelFileName, 'w', newline="", encoding='utf8')
 
 
     finally:
