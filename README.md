@@ -3,8 +3,9 @@ Welcome to the Rating-Algorithm wiki!
 
 umm
 1. install python?
-2. You'll need to run: "*py -m pip install -r requirements.txt*" in powershell or CMD before the python script will work. This will simply download and install any missing modules/libraries
-3. run script either single_runner.py or batch_runner.py, depending on what you need and
+2. Download and unzip entire repository into a folder
+3. You'll need to run: "*py -m pip install -r requirements.txt*" in powershell or CMD before the python script will work. This will simply download and install any missing modules/libraries
+4. run script either single_runner.py or batch_runner.py, depending on what you need and
 
 It'll spit out an CSV file with all the numbers you can graph in excel
 
