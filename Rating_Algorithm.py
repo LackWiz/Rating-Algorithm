@@ -5,6 +5,7 @@ import math
 import csv
 import MapDownloader
 import Variables
+import setup
 #import tkinter as tk
 #from tkinter.filedialog import askdirectory
 # tk.Tk().withdraw()
@@ -189,9 +190,74 @@ class Bloq:
 def load_song_dat(path):
     with open(path, encoding='utf8') as json_dat:
         dat = json.load(json_dat)
-
     return dat
 
+def findSongFolder(song_id):
+    bsPath = setup.checkFolderPath()
+    song_options = os.listdir(bsPath)
+    songFound = False
+    for song in song_options:
+        if song.find(song_id) != -1:
+            songFolder = song
+            songFound = True
+            break
+    if not songFound:
+        # TODO: download from scoresaber if map missing
+        print(song_id + " Not Downloaded or wrong song code!")
+        print("Would you like to download this song? (Y/N)")
+        if(response := input().capitalize() == "Y"):
+            if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
+                print(f"Download of {id} failed. Exiting...")
+                exit()
+        else:
+            exit()
+    return songFolder
+
+def findDiffs(bsPath, songFolder):
+    difficulties = os.listdir(bsPath + "/" + songFolder)
+    difficulties = list(filter(lambda x: x.endswith(
+        ".dat") and x.lower() != "info.dat", difficulties))
+    difficulties = sorted(difficulties,key=Variables.DIFFICULTY_ORDER.index)
+    return difficulties
+
+def selectDiff(song_id):
+    song_diff = []
+    song_id = str(song_id)
+    f = open('bs_path.txt', 'r')
+    bsPath = f.read()
+    f.close
+    
+    songFolder = findSongFolder(song_id)
+
+    folder_path = bsPath + songFolder + '/'
+
+    song_info = load_song_dat(folder_path + "Info.dat")
+    difficulties = findDiffs(bsPath, songFolder)
+
+    print(song_id+" "+song_info['_songName'], end= " ")
+    print("Select a difficulty: ")
+    print("[a] for all diffs")
+    for i in range(0, len(difficulties)):
+        print(f"[{i + 1}] {difficulties[i]}")
+    selectedDiffs = input()
+    if selectedDiffs != "a":
+        selectedDiffs = selectedDiffs.replace(" ", "")
+        selectedDiffs = selectedDiffs.split(",")
+        while all(int(flag) <= 0 for (flag) in selectedDiffs) or all(int(flag) > len(difficulties) for (flag) in selectedDiffs):
+            print(f"Input not in range 1-{len(difficulties)}, try again")
+            selectedDiffs = input()
+            selectedDiffs = selectedDiffs.replace(" ", "")
+            selectedDiffs = selectedDiffs.split(",")
+    else:
+        selectedDiffs = []
+        for i, index in enumerate(difficulties):
+            selectedDiffs.append(i+1)
+    for i, index in enumerate(selectedDiffs):
+        song_diff.append(difficulties[int(index) - 1])
+
+    print(song_diff)
+    
+    return folder_path, song_diff
 
 # TODO: sliding window instead of reactive (for future expansion)
 def extractBloqData(songNoteArray, mspb):
@@ -274,8 +340,6 @@ def extractBloqData(songNoteArray, mspb):
 
     return BloqDataArray
 
-
-
 def combineAndProcessArray(array1, array2):
     combinedArray: list[Bloq] = array1 + array2
     combinedArray.sort(key=lambda x: x.time) #once combined, sort by time
@@ -296,65 +360,6 @@ def combineAndProcessArray(array1, array2):
 
     return combinedArray
 
-def askSongID():
-    print('Enter song ID:')
-    song_id = input()
-    return song_id
-
-def getSongPath(song_id):
-    song_id = str(song_id)
-    try:
-        f = open('bs_path.txt', 'r')
-        bsPath = f.read()
-    except FileNotFoundError:
-        print('Enter Beat Saber custom songs folder:')
-        # TODO: validate path
-        #bsPath = askdirectory()
-        bsPath = input()
-        if bsPath[-1] not in ['\\', '/']:  # Checks if song path is empty
-            bsPath += '/'
-        f = open('bs_path.txt', 'w')
-        dat = f.write(bsPath)
-    finally:
-        f.close()
-    song_options = os.listdir(bsPath)
-    songFound = False
-    for song in song_options:
-        if song.find(song_id) != -1:
-            songFolder = song
-            songFound = True
-            break
-
-    if not songFound:
-        # TODO: download from scoresaber if map missing
-        print(song_id + " Not Downloaded or wrong song code!")
-        print("Would you like to download this song? (Y/N)")
-        if(response := input().capitalize() == "Y"):
-            if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
-                print(f"Download of {id} failed. Exiting...")
-                exit()
-        else:
-            exit()
-    folder_path = bsPath + songFolder + '/'
-    song_info = load_song_dat(folder_path + "Info.dat")
-    difficulties = os.listdir(bsPath + "/" + songFolder)
-    difficulties = list(filter(lambda x: x.endswith(
-        ".dat") and x.lower() != "info.dat", difficulties))
-    
-    difficulties = sorted(difficulties,key=Variables.DIFFICULTY_ORDER.index)
-    print(song_id+" "+song_info['_songName'], end= " ")
-    print("Select a difficulty: ")
-    for i in range(0, len(difficulties)):
-        print(f"[{i + 1}] {difficulties[i]}")
-    while (diff := int(input())) <= 0 or diff > len(difficulties):
-        print(f"Input not in range 1-{len(difficulties)}, try again")
-    song_diff = difficulties[diff - 1]
-    print(song_diff)
-    
-
-
-    return folder_path, song_diff
-
 def Main(folder_path, song_diff, song_id):
     song_id = str(song_id)
     song_dat = load_song_dat(folder_path + song_diff)
@@ -363,7 +368,7 @@ def Main(folder_path, song_diff, song_id):
     bpm = song_info['_beatsPerMinute']
     mspb = 60*1000/bpm  # milliseconds per beat
 
-    # remove the bombs
+    # Keep only the notes
     song_notes = list(filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
 
     # split into red and blue notes
@@ -377,13 +382,24 @@ def Main(folder_path, song_diff, song_id):
     SmoothDiff = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
 
     SmoothDiff.sort(reverse=True)
-    top_1_percent = sum(
-        SmoothDiff[:int(len(SmoothDiff)/100)])/int(len(SmoothDiff)/100)
-
-    median = statistics.median(SmoothDiff)
-    average = statistics.mean(SmoothDiff)
-    final_score = (top_1_percent*7 + median*3)/10
-
+    Failed = False
+    try:
+        top_1_percent = sum(
+            SmoothDiff[:int(len(SmoothDiff)/100)])/(len(SmoothDiff)/100)
+    except ZeroDivisionError:
+        top_1_percent = "Cannot Divide by Zero"
+        Failed = True
+    try:
+        median = statistics.median(SmoothDiff)
+        average = statistics.mean(SmoothDiff)
+    except statistics.StatisticsError:
+        median = "No Data"
+        average = "No Data"
+        Failed = True
+    if not Failed:
+        final_score = (top_1_percent*7 + median*3)/10
+    else:
+        final_score = "No Score Can Be Made"
     # export results to spreadsheet
     excelFileName = os.path.join(
         f"Spreadsheets/{song_id} {song_info['_songName']} {song_diff} export.csv")
@@ -400,22 +416,26 @@ def Main(folder_path, song_diff, song_id):
         writer = csv.writer(f)
         writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed","SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
                         "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff","","Weighted","Median","Average"])
-        writer.writerow(["","","",statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.numNotes for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.swingSpeed for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.swingSpeedSmoothed for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.angleDiff for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.angleChangeDiff for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.posDiff for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.combinedStamina for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.patternDiff for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.combinedDiff for bloq in combinedArrayRaw]),
-            statistics.mean([bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]),
-            "",
-            final_score,median,average])
-        for bloq in combinedArrayRaw:
-            writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed,bloq.swingSpeedSmoothed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
-                            bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
+        try:
+            writer.writerow(["","","",statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.numNotes for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.swingSpeed for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.swingSpeedSmoothed for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.angleDiff for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.angleChangeDiff for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.posDiff for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.combinedStamina for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.patternDiff for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.combinedDiff for bloq in combinedArrayRaw]),
+                statistics.mean([bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]),
+                "",
+                final_score,median,average])
+        except statistics.StatisticsError:
+            writer.writerow(["Failed to get averages"])
+        finally:
+            for bloq in combinedArrayRaw:
+                writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed,bloq.swingSpeedSmoothed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
+                                bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
         f.close()
     final_score = str(final_score)
     median = str(median)
@@ -438,28 +458,4 @@ def Main(folder_path, song_diff, song_id):
 
 
 
-#---------------Where Stuff Happens-----------------------------------------------------------------------------#
 
-# songID = askSongID
-# folder_path, song_diff = getSongPath(songID)
-# Main(folder_path, song_diff)
-
-
-
-# saber length is 1 meter
-# distance between top and bottom notes is roughly 1.5m
-# distance between side to side notes it roughly 2m
-# totalSwingAnglec = 200degrees + numberOfBlocks * RadToDegrees(tan-1(0.75/1))
-
-# Import song dat file✅
-# Filter note dat file into Left and Right Block arrays✅
-# Identify stacks/sliders (maybe pauls/poodles) and turn the 2-4 Blocks into a single Block with a large swing angle ✅
-# Calculate Block distance into seconds or ms 73.74 ✅
-# using 100 degree in, 60 degree out rule to calculate beginning and end points of the saber✅
-# using swingtime, swingAngle and 1 meter saber length, calculate saber speed ✅
-# List off hard swing angles for both hands + Appended angle diff to class✅
-
-# Each swing entry for left and right hand array should contain
-# Block[numberOfBlocks[1 to 4], cutDirection, totalAngleNeeded[160-273.74], timeForSwing(ms), ForeHand?]✅
-
-# Final difficulty based on Total amount of notes, fastest swings using a rolling average of 4, angle difficulty average for whole map ✅
