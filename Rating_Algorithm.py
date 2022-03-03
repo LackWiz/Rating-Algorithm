@@ -236,7 +236,7 @@ def selectDiff(song_id):
 
     print(song_id+" "+song_info['_songName'], end= " ")
     print("Select a difficulty: ")
-    print("[a] for all diffs")
+    print("[a] for all diffs, separate using comma for multiple diffs")
     for i in range(0, len(difficulties)):
         print(f"[{i + 1}] {difficulties[i]}")
     selectedDiffs = input()
