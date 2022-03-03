@@ -1,9 +1,9 @@
 import Rating_Algorithm
-
+import setup
 print('Enter song ID:')
 songID = input()
-
-folder_path, song_diff = Rating_Algorithm.getSongPath(songID)
+setup.checkFolderPath()
+folder_path, song_diff = Rating_Algorithm.selectDiff(songID)
 Rating_Algorithm.Main(folder_path, song_diff, songID)
 
 

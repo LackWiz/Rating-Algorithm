@@ -5,6 +5,7 @@ import math
 import csv
 import MapDownloader
 import Variables
+import setup
 #import tkinter as tk
 #from tkinter.filedialog import askdirectory
 # tk.Tk().withdraw()
@@ -301,22 +302,8 @@ def askSongID():
     song_id = input()
     return song_id
 
-def getSongPath(song_id):
-    song_id = str(song_id)
-    try:
-        f = open('bs_path.txt', 'r')
-        bsPath = f.read()
-    except FileNotFoundError:
-        print('Enter Beat Saber custom songs folder:')
-        # TODO: validate path
-        #bsPath = askdirectory()
-        bsPath = input()
-        if bsPath[-1] not in ['\\', '/']:  # Checks if song path is empty
-            bsPath += '/'
-        f = open('bs_path.txt', 'w')
-        dat = f.write(bsPath)
-    finally:
-        f.close()
+def findSongFolder(song_id):
+    bsPath = setup.checkFolderPath()
     song_options = os.listdir(bsPath)
     songFound = False
     for song in song_options:
@@ -324,7 +311,7 @@ def getSongPath(song_id):
             songFolder = song
             songFound = True
             break
-
+    
     if not songFound:
         # TODO: download from scoresaber if map missing
         print(song_id + " Not Downloaded or wrong song code!")
@@ -335,13 +322,28 @@ def getSongPath(song_id):
                 exit()
         else:
             exit()
-    folder_path = bsPath + songFolder + '/'
-    song_info = load_song_dat(folder_path + "Info.dat")
+    return songFolder
+
+def findDiffs(bsPath, songFolder):
     difficulties = os.listdir(bsPath + "/" + songFolder)
     difficulties = list(filter(lambda x: x.endswith(
         ".dat") and x.lower() != "info.dat", difficulties))
-    
     difficulties = sorted(difficulties,key=Variables.DIFFICULTY_ORDER.index)
+    return difficulties
+
+def selectDiff(song_id):
+    song_id = str(song_id)
+    f = open('bs_path.txt', 'r')
+    bsPath = f.read()
+    f.close
+    
+    songFolder = findSongFolder(song_id)
+
+    folder_path = bsPath + songFolder + '/'
+
+    song_info = load_song_dat(folder_path + "Info.dat")
+    difficulties = findDiffs(bsPath, songFolder)
+
     print(song_id+" "+song_info['_songName'], end= " ")
     print("Select a difficulty: ")
     for i in range(0, len(difficulties)):
@@ -351,9 +353,13 @@ def getSongPath(song_id):
     song_diff = difficulties[diff - 1]
     print(song_diff)
     
-
-
     return folder_path, song_diff
+
+
+
+
+
+
 
 def Main(folder_path, song_diff, song_id):
     song_id = str(song_id)
@@ -438,28 +444,4 @@ def Main(folder_path, song_diff, song_id):
 
 
 
-#---------------Where Stuff Happens-----------------------------------------------------------------------------#
 
-# songID = askSongID
-# folder_path, song_diff = getSongPath(songID)
-# Main(folder_path, song_diff)
-
-
-
-# saber length is 1 meter
-# distance between top and bottom notes is roughly 1.5m
-# distance between side to side notes it roughly 2m
-# totalSwingAnglec = 200degrees + numberOfBlocks * RadToDegrees(tan-1(0.75/1))
-
-# Import song dat file✅
-# Filter note dat file into Left and Right Block arrays✅
-# Identify stacks/sliders (maybe pauls/poodles) and turn the 2-4 Blocks into a single Block with a large swing angle ✅
-# Calculate Block distance into seconds or ms 73.74 ✅
-# using 100 degree in, 60 degree out rule to calculate beginning and end points of the saber✅
-# using swingtime, swingAngle and 1 meter saber length, calculate saber speed ✅
-# List off hard swing angles for both hands + Appended angle diff to class✅
-
-# Each swing entry for left and right hand array should contain
-# Block[numberOfBlocks[1 to 4], cutDirection, totalAngleNeeded[160-273.74], timeForSwing(ms), ForeHand?]✅
-
-# Final difficulty based on Total amount of notes, fastest swings using a rolling average of 4, angle difficulty average for whole map ✅
