@@ -12,8 +12,7 @@ def checkFolderPath():
         if bsPath[-1] not in ['\\', '/']:  # Checks if song path is empty
             bsPath += '/'
         f = open('bs_path.txt', 'w')
-        dat = f.write(bsPath)
+        f.write(bsPath)
     finally:
         f.close()
     return bsPath
-
