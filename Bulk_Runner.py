@@ -70,18 +70,9 @@ for i, entry in enumerate(diff_list): #List Off all the songs, diffs, and scores
     print(diff_list[i])
 
 #----------------------Export to CSV-----------------------------------------------#
-excelFileName = os.path.join(f"BulkResults/{BulkRunName} export.csv")
-try:
-    x = open(excelFileName, 'w', newline="", encoding='utf8')
-except FileNotFoundError:
-    print('Making BulkResults Folder')
-    os.mkdir('BulkResults')
-    x = open(excelFileName, 'w', newline="")
-finally:
-    writer = csv.writer(x)
-    writer.writerow(["Name", "Weighted/Score", "Median", "Average"])
-    writer.writerows(diff_list)
-    x.close
+
+setup.writeToExcel("BulkResults",BulkRunName,["Name", "Weighted/Score", "Median", "Average"],diff_list)
+
 print("Press Enter to Exit")
 input()
 
