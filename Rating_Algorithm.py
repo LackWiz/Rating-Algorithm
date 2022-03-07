@@ -6,22 +6,14 @@ import csv
 import MapDownloader
 import Variables
 import setup
+from collections import deque
 #import tkinter as tk
 #from tkinter.filedialog import askdirectory
 # tk.Tk().withdraw()
 
-angleDiv = 45
-
-combinedArrayScale = 4.069
-
 # Minimum precision (how close notes are together) to consider 2 very close notes a slider
 sliderPrecision = 1/6
 dotSliderPrecision = 1/5
-
-swingSpeedS_LB = 32
-patternRollingAverage = 128
-staminaHistory = 256
-combinedRollingAverage = 128
 
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
@@ -73,8 +65,8 @@ class Bloq:
         self.swingSpeed = 0
         self.swingSpeedSmoothed = 0
         self.forehand = None
-        self.angleDiff = Variables.ANGLE_EASY
-        self.posDiff = Variables.SIDE_EASY
+        self.angleDiff = Variables.angle_Easy
+        self.posDiff = Variables.side_Easy
         self.angleChangeDiff = 0
         self.stackDiff = 0
         self.stamina = 0
@@ -118,23 +110,23 @@ class Bloq:
             if(self.type == 0):  # Left Hand Side to Side Diff
                 # LH centered around 2
                 if(self.forehand):
-                    self.posDiff = [Variables.SIDE_SEMI_MID, Variables.SIDE_EASY,
-                                    Variables.SIDE_SEMI_MID, Variables.SIDE_MID][self.bloqPos[0]]
+                    self.posDiff = [Variables.side_Semi_Mid, Variables.side_Easy,
+                                    Variables.side_Semi_Mid, Variables.side_Mid][self.bloqPos[0]]
                 elif(not self.forehand):
-                    self.posDiff = [Variables.SIDE_EASY, Variables.SIDE_SEMI_MID,
-                                    Variables.SIDE_SEMI_MID, Variables.SIDE_HARD][self.bloqPos[0]]
+                    self.posDiff = [Variables.side_Easy, Variables.side_Semi_Mid,
+                                    Variables.side_Semi_Mid, Variables.side_Hard][self.bloqPos[0]]
 
             elif(self.type == 1):  # Right Hand
                 if(self.forehand):
-                    self.posDiff = [Variables.SIDE_MID, Variables.SIDE_SEMI_MID,
-                                    Variables.SIDE_EASY, Variables.SIDE_SEMI_MID][self.bloqPos[0]]
+                    self.posDiff = [Variables.side_Mid, Variables.side_Semi_Mid,
+                                    Variables.side_Easy, Variables.side_Semi_Mid][self.bloqPos[0]]
                 elif(not self.forehand):
-                    self.posDiff = [Variables.SIDE_HARD, Variables.SIDE_MID,
-                                    Variables.SIDE_SEMI_MID, Variables.SIDE_EASY][self.bloqPos[0]]
+                    self.posDiff = [Variables.side_Hard, Variables.side_Mid,
+                                    Variables.side_Semi_Mid, Variables.side_Easy][self.bloqPos[0]]
 
             # Up and Down Diff
-            self.posDiff *= [Variables.VERT_EASY, Variables.VERT_SEMI_MID,
-                            Variables.VERT_MID][abs(2 * (not self.forehand) - self.bloqPos[1])]
+            self.posDiff *= [Variables.vert_Easy, Variables.vert_Semi_Mid,
+                            Variables.vert_Mid][abs(2 * (not self.forehand) - self.bloqPos[1])]
         except:
             self.posDiff = 1
 
@@ -144,50 +136,50 @@ class Bloq:
             if(self.forehand):
                 # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 7, 8]):
-                    self.angleDiff = Variables.ANGLE_EASY
+                    self.angleDiff = Variables.angle_Easy
                 elif(self.cutDirection == 3):
-                    self.angleDiff = Variables.ANGLE_SEMI_MID
+                    self.angleDiff = Variables.angle_Semi_Mid
                 elif(self.cutDirection in [5, 6]):
-                    self.angleDiff = Variables.ANGLE_MID
+                    self.angleDiff = Variables.angle_Mid
                 elif(self.cutDirection in [0, 2]):
-                    self.angleDiff = Variables.ANGLE_HARD
+                    self.angleDiff = Variables.angle_Hard
             elif(not self.forehand):
                 # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 3]):
-                    self.angleDiff = Variables.ANGLE_HARD
+                    self.angleDiff = Variables.angle_Hard
                 elif(self.cutDirection in [5, 6]):
-                    self.angleDiff = Variables.ANGLE_MID
+                    self.angleDiff = Variables.angle_Mid
                 elif(self.cutDirection == 2):
-                    self.angleDiff = Variables.ANGLE_SEMI_MID
+                    self.angleDiff = Variables.angle_Semi_Mid
                 elif(self.cutDirection in [0, 4, 8]):
-                    self.angleDiff = Variables.ANGLE_EASY
+                    self.angleDiff = Variables.angle_Easy
         elif(self.type == 1):  # Right Hand
             if(self.forehand):
                 # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 6, 8]):
-                    self.angleDiff = Variables.ANGLE_EASY
+                    self.angleDiff = Variables.angle_Easy
                 elif(self.cutDirection == 2):
-                    self.angleDiff = Variables.ANGLE_SEMI_MID
+                    self.angleDiff = Variables.angle_Semi_Mid
                 elif(self.cutDirection in [4, 7]):
-                    self.angleDiff = Variables.ANGLE_MID
+                    self.angleDiff = Variables.angle_Mid
                 elif(self.cutDirection in [0, 3]):
-                    self.angleDiff = Variables.ANGLE_HARD
+                    self.angleDiff = Variables.angle_Hard
             elif(not self.forehand):
                 # Checks if angle is easy, medium or difficult
                 if(self.cutDirection in [1, 2]):
-                    self.angleDiff = Variables.ANGLE_HARD
+                    self.angleDiff = Variables.angle_Hard
                 elif(self.cutDirection in [4, 7]):
-                    self.angleDiff = Variables.ANGLE_MID
+                    self.angleDiff = Variables.angle_Mid
                 elif(self.cutDirection == 3):
-                    self.angleDiff = Variables.ANGLE_SEMI_MID
+                    self.angleDiff = Variables.angle_Semi_Mid
                 elif(self.cutDirection in [0, 5, 8]):
-                    self.angleDiff = Variables.ANGLE_EASY
+                    self.angleDiff = Variables.angle_Easy
 
     def calcStackDiff(self):
-        if(self.angleChangeDiff >= Variables.ANGLE_MID):
-            self.stackDiff = self.numNotes**Variables.NUM_NOTE_HARD_POWER
+        if(self.angleChangeDiff >= Variables.angle_Mid):
+            self.stackDiff = self.numNotes**Variables.stack_Hard_Power
         else:
-            self.stackDiff = self.numNotes**Variables.NUM_NOTE_EASY_POWER
+            self.stackDiff = self.numNotes**Variables.stack_Easy_Power
 
 
 def load_song_dat(path):
@@ -226,7 +218,7 @@ def findDiffs(bsPath, songFolder):
         print("Couldn't Sort LOOK AT NUMBERING")
     return difficulties
 
-def selectDiff(song_id):
+def selectDiff(song_id, user = True):
     song_diff = []
     song_id = str(song_id)
     f = open('bs_path.txt', 'r')
@@ -239,14 +231,14 @@ def selectDiff(song_id):
 
     song_info = load_song_dat(folder_path + "Info.dat")
     difficulties = findDiffs(bsPath, songFolder)
-
-    print(song_id+" "+song_info['_songName'], end= " ")
-    print("Select a difficulty: ")
-    print("[a] for all diffs, separate using comma for multiple diffs")
-    for i in range(0, len(difficulties)):
-        print(f"[{i + 1}] {difficulties[i]}")
-    #selectedDiffs = input()
-    selectedDiffs = "a" 
+    if user:
+        print(song_id+" "+song_info['_songName'], end= " ")
+        print("Select a difficulty: ")
+        print("[a] for all diffs, separate using comma for multiple diffs")
+        for i in range(0, len(difficulties)):
+            print(f"[{i + 1}] {difficulties[i]}")
+    #selectedDiffs = input() #To enable choice of difficulty
+    selectedDiffs = "1" #To Lock in Some Difficulty
     if selectedDiffs != "a":
         selectedDiffs = selectedDiffs.replace(" ", "")
         selectedDiffs = selectedDiffs.split(",")
@@ -261,9 +253,8 @@ def selectDiff(song_id):
             selectedDiffs.append(i+1)
     for i, index in enumerate(selectedDiffs):
         song_diff.append(difficulties[int(index) - 1])
-
-    print(song_diff)
-    
+    if user:
+        print(song_diff)
     return folder_path, song_diff
 
 # TODO: sliding window instead of reactive (for future expansion)
@@ -309,7 +300,7 @@ def extractBloqData(songNoteArray, mspb):
                         cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection]))
 
             BloqDataArray[-1].angleChangeDiff = min(
-                1+((max(BloqDataArray[-1].angleChange, 45)-45)/angleDiv)**2, 1.5)
+                1+((max(BloqDataArray[-1].angleChange, 45)-45)/Variables.angle_Div)**2, 1.5)
             BloqDataArray[-1].calcStackDiff()
             # calculates swingTime in ms and Speed and shoves into class for processing later
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -  # Swing time in ms
@@ -321,54 +312,61 @@ def extractBloqData(songNoteArray, mspb):
             BloqDataArray[-1].angleChangeTime = BloqDataArray[-1].angleChange / \
                 (BloqDataArray[-1].swingTime)
 
-            # TODO: move this elsewhere, should be part of processBloqData, not extract
-            temp = 0
-            # Uses a rolling average to asses peak swing speed
-            for j in range(1, min(swingSpeedS_LB,len(BloqDataArray)-1)):
-                if(len(BloqDataArray) >= j):
-                    temp += (BloqDataArray[-1*j].swingSpeed)
-            if(len(BloqDataArray) < swingSpeedS_LB):
-                BloqDataArray[-1].swingSpeedSmoothed = (temp/len(BloqDataArray))
-            else:
-                BloqDataArray[-1].swingSpeedSmoothed = (temp/swingSpeedS_LB)
-            temp = 0
-            # Uses a rolling average to judge pattern difficulty
-            for j in range(0, patternRollingAverage):
-                if(len(BloqDataArray) >= j+1):
-                    temp += (BloqDataArray[-1*(j+1)].angleDiff*BloqDataArray[-1*(j+1)].posDiff *
-                             BloqDataArray[-1*(j+1)].angleChangeDiff*BloqDataArray[-1*(j+1)].stackDiff)
-            # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
-            if(len(BloqDataArray) < patternRollingAverage/4):
-                BloqDataArray[-1].patternDiff = (temp /
-                                                 (patternRollingAverage/4))
-            elif(len(BloqDataArray) < patternRollingAverage):
-                BloqDataArray[-1].patternDiff = (temp/len(BloqDataArray))
-            else:
-                BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
+            
 
+        
     return BloqDataArray
+            
 
+# Uses a rolling average to assess peak swing speed
+def processArray(array: list[Bloq]):
+    SSS = 0             #Sum of Swing Speed
+    qSSS = deque()            #queue
+    SPD = 0             #Sum of Pattern Diff
+    qSPD = deque()            #queue
+    for i in range(0, len(array)):
+        if(i >= Variables.swng_Sped_Smoth_History):
+            SSS -= qSSS.popleft()
+        qSSS.append(array[i].swingSpeed)
+        SSS += qSSS[-1]
+        array[i].swingSpeedSmoothed = (SSS/min(i+1,Variables.swng_Sped_Smoth_History))
+
+        if(i >= Variables.pattern_History):
+            SPD -= qSPD.popleft()
+        qSPD.append(array[i].angleDiff*array[i].posDiff*array[i].angleChangeDiff*array[i].stackDiff)
+        SPD += qSPD[-1]
+    # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
+        if(i < Variables.pattern_History/4):
+            array[i].patternDiff = (SPD/(Variables.pattern_History/4))
+        elif(i < Variables.pattern_History):
+            array[i].patternDiff = (SPD/i)
+        else:
+            array[i].patternDiff = (SPD/Variables.pattern_History)
+        
 def combineAndProcessArray(array1, array2):
+    processArray(array1)
+    processArray(array2)
     combinedArray: list[Bloq] = array1 + array2
     combinedArray.sort(key=lambda x: x.time) #once combined, sort by time
     for i in range(1, len(combinedArray)):
         combinedArray[i].combinedSwingSpeedSmoothed = math.sqrt(
             combinedArray[i].swingSpeedSmoothed**2 + combinedArray[i-1].swingSpeedSmoothed**2)
             # TODO Fix Combine function with new variables
-        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.STAMINA_POWER + combinedArray[i].patternDiff**Variables.PATTERN_POWER) * min(
-            math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.STAMINA_POWER), combinedArray[i].patternDiff**Variables.PATTERN_POWER)
-
-    # TODO: change from n**2 to sliding window
+        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.stamina_Power + combinedArray[i].patternDiff**Variables.pattern_Power) * min(
+            math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.stamina_Power), combinedArray[i].patternDiff**Variables.pattern_Power)
+    
+    SCA = 0 #Sum of Combined Array
+    qCA = deque()
     for i in range(0, len(combinedArray)):
-        temp = 0
-        # Uses a rolling average to smooth difficulties between the hands
-        for j in range(0, min(combinedRollingAverage, i)):
-            temp += combinedArray[i - min(combinedRollingAverage, j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = combinedArrayScale * temp/min(combinedRollingAverage, i+1)
+        if(i >= Variables.combined_History):
+            SCA -= qCA.popleft()        
+        qCA.append(combinedArray[i].combinedDiff)
+        SCA += qCA[-1]
+        combinedArray[i].combinedDiffSmoothed = Variables.array_Scaling*(SCA/min(i+1,Variables.combined_History))
 
     return combinedArray
 
-def Main(folder_path, song_diff, song_id):
+def Main(folder_path, song_diff, song_id, user = True):
     song_id = str(song_id)
     song_dat = load_song_dat(folder_path + song_diff)
     song_info = load_song_dat(folder_path + "Info.dat")
@@ -409,53 +407,49 @@ def Main(folder_path, song_diff, song_id):
     else:
         final_score = "No Score Can Be Made"
     # export results to spreadsheet
-    
-    excelFileName = os.path.join(
-        f"Spreadsheets/{song_id} {song_info['_songName'].replace('/', '')} {song_diff} export.csv")
-    excelFileName = excelFileName.replace("*", "")
-    
-    # new_str = excelFileName.encode("ascii", "ignore")
-    # excelFileName = new_str.decode()
-    try:
-        f = open(excelFileName, 'w', newline="", encoding='utf8')
-    except FileNotFoundError:
-        print('Making Spreadsheets Folder')
-        os.mkdir('Spreadsheets')
-        f = open(excelFileName, 'w', newline="", encoding='utf8')
-
-
-    finally:
-        writer = csv.writer(f)
-        writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed","SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
-                        "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff","","Weighted","Median","Average"])
+    if user:
+        excelFileName = os.path.join(
+            f"Spreadsheets/{song_id} {song_info['_songName'].replace('/', '')} {song_diff} export.csv")
+        excelFileName = excelFileName.replace("*", "")
+        excelFileName = excelFileName.replace("\"", "")
         try:
-            writer.writerow(["","","",statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.numNotes for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.swingSpeed for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.swingSpeedSmoothed for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.angleDiff for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.angleChangeDiff for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.posDiff for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.combinedStamina for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.patternDiff for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.combinedDiff for bloq in combinedArrayRaw]),
-                statistics.mean([bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]),
-                "",
-                final_score,median,average])
-        except statistics.StatisticsError:
-            writer.writerow(["Failed to get averages"])
+            f = open(excelFileName, 'w', newline="", encoding='utf8')
+        except FileNotFoundError:
+            print('Making Spreadsheets Folder')
+            os.mkdir('Spreadsheets')
+            f = open(excelFileName, 'w', newline="", encoding='utf8')
         finally:
-            for bloq in combinedArrayRaw:
-                writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed,bloq.swingSpeedSmoothed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
-                                bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
-        f.close()
-    final_score = str(final_score)
-    median = str(median)
-    average = str(average)
-    #print(song_id+" "+song_info['_songName']+" "+song_diff)
-    print("Weighted Score:" + final_score)
-    print("Median:" + median)
-    print("Average: " + average)
+            writer = csv.writer(f)
+            writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed","SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
+                            "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff","","Weighted","Median","Average"])
+            try:
+                writer.writerow(["","","",statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.numNotes for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.swingSpeed for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.swingSpeedSmoothed for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.angleDiff for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.angleChangeDiff for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.posDiff for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.combinedStamina for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.patternDiff for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.combinedDiff for bloq in combinedArrayRaw]),
+                    statistics.mean([bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]),
+                    "",
+                    final_score,median,average])
+            except statistics.StatisticsError:
+                writer.writerow(["Failed to get averages"])
+            finally:
+                for bloq in combinedArrayRaw:
+                    writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed,bloq.swingSpeedSmoothed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
+                                    bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
+            f.close()
+        final_score = str(final_score)
+        median = str(median)
+        average = str(average)
+        #print(song_id+" "+song_info['_songName']+" "+song_diff)
+        print("Weighted Score:" + final_score)
+        print("Median:" + median)
+        print("Average: " + average)
     
     return song_id+" "+song_info['_songName']+" "+song_diff, final_score, median, average
 
