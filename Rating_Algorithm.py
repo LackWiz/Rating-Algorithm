@@ -10,18 +10,9 @@ import setup
 #from tkinter.filedialog import askdirectory
 # tk.Tk().withdraw()
 
-angleDiv = 45
-
-combinedArrayScale = 4.069
-
 # Minimum precision (how close notes are together) to consider 2 very close notes a slider
 sliderPrecision = 1/6
 dotSliderPrecision = 1/5
-
-swingSpeedS_LB = 32
-patternRollingAverage = 128
-staminaHistory = 256
-combinedRollingAverage = 128
 
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
 
@@ -245,8 +236,8 @@ def selectDiff(song_id):
     print("[a] for all diffs, separate using comma for multiple diffs")
     for i in range(0, len(difficulties)):
         print(f"[{i + 1}] {difficulties[i]}")
-    #selectedDiffs = input()
-    selectedDiffs = "a" 
+    #selectedDiffs = input() #To enable choice of difficulty
+    selectedDiffs = "1" #To Lock in Some Difficulty
     if selectedDiffs != "a":
         selectedDiffs = selectedDiffs.replace(" ", "")
         selectedDiffs = selectedDiffs.split(",")
@@ -309,7 +300,7 @@ def extractBloqData(songNoteArray, mspb):
                         cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection]))
 
             BloqDataArray[-1].angleChangeDiff = min(
-                1+((max(BloqDataArray[-1].angleChange, 45)-45)/angleDiv)**2, 1.5)
+                1+((max(BloqDataArray[-1].angleChange, 45)-45)/Variables.ANGLE_DIV)**2, 1.5)
             BloqDataArray[-1].calcStackDiff()
             # calculates swingTime in ms and Speed and shoves into class for processing later
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -  # Swing time in ms
@@ -324,27 +315,27 @@ def extractBloqData(songNoteArray, mspb):
             # TODO: move this elsewhere, should be part of processBloqData, not extract
             temp = 0
             # Uses a rolling average to asses peak swing speed
-            for j in range(1, min(swingSpeedS_LB,len(BloqDataArray)-1)):
+            for j in range(1, min(Variables.SWNG_SPED_SMOTH_HISTORY,len(BloqDataArray)-1)):
                 if(len(BloqDataArray) >= j):
                     temp += (BloqDataArray[-1*j].swingSpeed)
-            if(len(BloqDataArray) < swingSpeedS_LB):
+            if(len(BloqDataArray) < Variables.SWNG_SPED_SMOTH_HISTORY):
                 BloqDataArray[-1].swingSpeedSmoothed = (temp/len(BloqDataArray))
             else:
-                BloqDataArray[-1].swingSpeedSmoothed = (temp/swingSpeedS_LB)
+                BloqDataArray[-1].swingSpeedSmoothed = (temp/Variables.SWNG_SPED_SMOTH_HISTORY)
             temp = 0
             # Uses a rolling average to judge pattern difficulty
-            for j in range(0, patternRollingAverage):
+            for j in range(0, Variables.PATTERN_HISTORY):
                 if(len(BloqDataArray) >= j+1):
                     temp += (BloqDataArray[-1*(j+1)].angleDiff*BloqDataArray[-1*(j+1)].posDiff *
                              BloqDataArray[-1*(j+1)].angleChangeDiff*BloqDataArray[-1*(j+1)].stackDiff)
             # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
-            if(len(BloqDataArray) < patternRollingAverage/4):
+            if(len(BloqDataArray) < Variables.PATTERN_HISTORY/4):
                 BloqDataArray[-1].patternDiff = (temp /
-                                                 (patternRollingAverage/4))
-            elif(len(BloqDataArray) < patternRollingAverage):
+                                                 (Variables.PATTERN_HISTORY/4))
+            elif(len(BloqDataArray) < Variables.PATTERN_HISTORY):
                 BloqDataArray[-1].patternDiff = (temp/len(BloqDataArray))
             else:
-                BloqDataArray[-1].patternDiff = (temp/patternRollingAverage)
+                BloqDataArray[-1].patternDiff = (temp/Variables.PATTERN_HISTORY)
 
     return BloqDataArray
 
@@ -362,9 +353,9 @@ def combineAndProcessArray(array1, array2):
     for i in range(0, len(combinedArray)):
         temp = 0
         # Uses a rolling average to smooth difficulties between the hands
-        for j in range(0, min(combinedRollingAverage, i)):
-            temp += combinedArray[i - min(combinedRollingAverage, j)].combinedDiff
-        combinedArray[i].combinedDiffSmoothed = combinedArrayScale * temp/min(combinedRollingAverage, i+1)
+        for j in range(0, min(Variables.COMBINED_HISTORY, i)):
+            temp += combinedArray[i - min(Variables.COMBINED_HISTORY, j)].combinedDiff
+        combinedArray[i].combinedDiffSmoothed = Variables.ARRAY_SCALING * temp/min(Variables.COMBINED_HISTORY, i+1)
 
     return combinedArray
 

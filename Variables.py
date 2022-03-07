@@ -1,3 +1,6 @@
+import re
+
+
 ANGLE_EASY = 1
 ANGLE_SEMI_MID = 1.1
 ANGLE_MID = 1.3
@@ -18,6 +21,21 @@ NUM_NOTE_HARD_POWER = 1/5
 
 STAMINA_POWER = 2
 PATTERN_POWER = 2
+
+SWNG_SPED_SMOTH_HISTORY = 32
+PATTERN_HISTORY = 128
+STAMINA_HISTORY = 256
+COMBINED_HISTORY = 128
+
+ANGLE_DIV = 45
+
+
+
+
+ARRAY_SCALING = 4.069
+
+
+
 
 DIFFICULTY_ORDER = [
         "ExpertPlusStandard.dat",
@@ -67,3 +85,6 @@ DIFFICULTY_ORDER = [
         "EasyLightshow.dat",
         "*.dat"
     ]
+
+
+
