@@ -1,34 +1,34 @@
 import re
 
-angle_Easy = 0.866          #incremenet by 0.01 from 
-angle_Semi_Mid = 1.347
-angle_Mid = 1.282
-angle_Hard = 1.516
+angle_Easy = 1          #incremenet by 0.01 from 
+angle_Semi_Mid = 1.1
+angle_Mid = 1.3
+angle_Hard = 1.5
 
-side_Easy = 0.939
-side_Semi_Mid = 1.094
-side_Mid = 1.131
-side_Hard = 1.967
+side_Easy = 1
+side_Semi_Mid = 1.05
+side_Mid = 1.2
+side_Hard = 1.5
 
-vert_Easy = 1.051
-vert_Semi_Mid = 1.157
-vert_Mid = 1.054
+vert_Easy = 1
+vert_Semi_Mid = 1.05
+vert_Mid = 1.2
 
-stack_Easy_Power = 0.139   #incremenet by 0.001
-stack_Hard_Power = 0.198   #incremenet by 0.01
+stack_Easy_Power = 1/8   #incremenet by 0.001
+stack_Hard_Power = 1/5   #incremenet by 0.01
 
 
-stamina_Power = 2.107
-pattern_Power = 1.944
+stamina_Power = 2
+pattern_Power = 2
 
-swng_Sped_Smoth_History = 36
-pattern_History = 159
-stamina_History = 310
-combined_History = 148
+swng_Sped_Smoth_History = 32
+pattern_History = 128
+stamina_History = 256
+combined_History = 128
 
-angle_Div = 57
+angle_Div = 45
 
-array_Scaling = 4.387
+array_Scaling = 4.069
 
 
 

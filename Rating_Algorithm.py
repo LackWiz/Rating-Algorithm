@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import statistics
 import os
 import json
@@ -218,9 +219,10 @@ def findDiffs(bsPath, songFolder):
         print("Couldn't Sort LOOK AT NUMBERING")
     return difficulties
 
-def selectDiff(song_id, user = True):
+def selectDiff(song_id, user = True, lock_diff = NULL):
     song_diff = []
     song_id = str(song_id)
+    lock_diff = str(lock_diff)
     f = open('bs_path.txt', 'r')
     bsPath = f.read()
     f.close
@@ -237,8 +239,10 @@ def selectDiff(song_id, user = True):
         print("[a] for all diffs, separate using comma for multiple diffs")
         for i in range(0, len(difficulties)):
             print(f"[{i + 1}] {difficulties[i]}")
-    #selectedDiffs = input() #To enable choice of difficulty
-    selectedDiffs = "1" #To Lock in Some Difficulty
+    if lock_diff == '0':
+        selectedDiffs = input() #To enable choice of difficulty
+    else:
+        selectedDiffs = lock_diff #To Lock in Some Difficulty
     if selectedDiffs != "a":
         selectedDiffs = selectedDiffs.replace(" ", "")
         selectedDiffs = selectedDiffs.split(",")
