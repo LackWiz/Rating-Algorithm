@@ -204,6 +204,7 @@ def findSongFolder(song_id):
         if(response := input().capitalize() == "Y"):
             if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
                 print(f"Download of {id} failed. Exiting...")
+                input()
                 exit()
         else:
             exit()

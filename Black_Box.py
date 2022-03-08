@@ -76,41 +76,44 @@ class NewValues:
 setup.checkFolderPath()
 
 DataArray: list[Data] = []
-DataArray.append(Data("c32d",14)) #Lacks Data
-DataArray.append(Data("170d0",7.5))
-DataArray.append(Data("1e4b4",5))
-DataArray.append(Data("190b4",17))
-DataArray.append(Data("1df5b",12.75))
-DataArray.append(Data("217a8",11))
-DataArray.append(Data("18a92",9.65))
-DataArray.append(Data("17cc0",10))
-DataArray.append(Data("17ecf",7.5))
+DataArray.append(Data("c32d",14)) #Lacks Data #L
+DataArray.append(Data("170d0",7.5)) #L
+DataArray.append(Data("1e4b4",5)) #L
+DataArray.append(Data("190b4",17)) #L
+DataArray.append(Data("1df5b",12.75)) #L
+DataArray.append(Data("217a8",11)) #L
+DataArray.append(Data("18a92",9.65)) #L
+DataArray.append(Data("17cc0",10)) #L
+DataArray.append(Data("17ecf",7.5)) #L
 
-DataArray.append(Data("1db9d",13.25)) #Syncs Data
-DataArray.append(Data("20540",12.9))
-DataArray.append(Data("1f491",12.5))
-DataArray.append(Data("18a27",12.4))
+DataArray.append(Data("1db9d",13.25)) #Syncs Data #L
+DataArray.append(Data("20540",12.9)) #L
+DataArray.append(Data("1f491",12.5)) #L
+DataArray.append(Data("18a27",12.4)) #L
 
 DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
-DataArray.append(Data("9e5c",11.77))
-DataArray.append(Data("16d07",10.08))
-DataArray.append(Data("1ace8",10.62))
-DataArray.append(Data("1a017",13.22))
-DataArray.append(Data("1a209",13.75))
-DataArray.append(Data("22639",16))
-DataArray.append(Data("20848",14))
+DataArray.append(Data("9e5c",11.77)) #L
+DataArray.append(Data("16d07",10.08)) #L
+DataArray.append(Data("1ace8",10.62)) #L
+DataArray.append(Data("1a017",13.22)) #L
+DataArray.append(Data("1a209",13.75)) #L
+DataArray.append(Data("22639",16)) #L
+DataArray.append(Data("20848",14)) #L
 
-Breadth = 1.1
+Breadth = 1.2
+
 SOIterations: list[NewValues] = []
 AverageIteration: list[NewValues] = []
-iterations = 25            #Number of gererations
-passes = 100               #Number of children per generation
-pass_history = 10           #Top picks to average for next generation
+iterations = 50            #Number of gererations
+passes = 672               #Number of children per generation
+pass_history = 30           #Top picks to average for next generation
 
 for j in range(0, iterations):
+    Breadth = 1.2-(0.2*j/iterations)
     ValueArray: list[NewValues] = []
     SOIterations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL))   #Sum of Iterations
     First = True
+    print("Breadth: " + str(Breadth))
     for i in range(0, passes):
         if First:
             ValueArray.append(NewValues(Variables.angle_Easy,Variables.angle_Semi_Mid,Variables.angle_Mid,Variables.angle_Hard,
@@ -144,7 +147,7 @@ for j in range(0, iterations):
                 random.uniform(Variables.array_Scaling/Breadth,Variables.array_Scaling*Breadth)
             ))
     First = True
-    for Vars in ValueArray:
+    for i, Vars in enumerate(ValueArray):
         
         Variables.angle_Easy = Vars.angle_easy
         Variables.angle_Semi_Mid = Vars.angle_semi_mid
@@ -176,7 +179,7 @@ for j in range(0, iterations):
             DataArray[i].accuracy = (abs(float(DataArray[i].results[1])-DataArray[i].expectedResults)/DataArray[i].expectedResults)**2
             temp += DataArray[i].accuracy
         Vars.Accuracy = temp/len(DataArray)
-        print("Total Accuracy is: " + str(Vars.Accuracy))
+        print(i/passes*100+"% Total Accuracy is: " + str(Vars.Accuracy))
     ValueArray.sort(key=lambda x: x.Accuracy)
     
     temp = 0
