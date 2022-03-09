@@ -1,5 +1,6 @@
 from asyncio.windows_events import NULL
 from copy import copy, deepcopy
+from math import floor
 import random
 from tkinter import FIRST
 import Rating_Algorithm
@@ -99,21 +100,23 @@ DataArray.append(Data("1a017",13.22)) #L
 DataArray.append(Data("1a209",13.75)) #L
 DataArray.append(Data("22639",16)) #L
 DataArray.append(Data("20848",14)) #L
-
-Breadth = 1.2
+Breadth = 1.1
+NewBreadth = 1.25
 
 SOIterations: list[NewValues] = []
 AverageIteration: list[NewValues] = []
 iterations = 50            #Number of gererations
-passes = 672               #Number of children per generation
+passes = 300               #Number of children per generation
 pass_history = 30           #Top picks to average for next generation
+progress_marker = 25        #How often to mark progress
 
 for j in range(0, iterations):
-    Breadth = 1.2-(0.2*j/iterations)
+    NewBreadth = 1.2-(0.2*j/iterations)
+    progress_threshold = progress_marker #as a percentage
     ValueArray: list[NewValues] = []
     SOIterations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL))   #Sum of Iterations
     First = True
-    print("Breadth: " + str(Breadth))
+    print("Breadth: " + str(NewBreadth))
     for i in range(0, passes):
         if First:
             ValueArray.append(NewValues(Variables.angle_Easy,Variables.angle_Semi_Mid,Variables.angle_Mid,Variables.angle_Hard,
@@ -124,26 +127,26 @@ for j in range(0, iterations):
             First = False
         else:
             ValueArray.append(NewValues(
-                random.uniform(Variables.angle_Easy/Breadth,Variables.angle_Easy*Breadth),
-                random.uniform(Variables.angle_Semi_Mid/Breadth,Variables.angle_Semi_Mid*Breadth),
-                random.uniform(Variables.angle_Mid/Breadth,Variables.angle_Mid*Breadth),
-                random.uniform(Variables.angle_Hard/Breadth,Variables.angle_Hard*Breadth),
-                random.uniform(Variables.side_Easy/Breadth,Variables.side_Easy*Breadth),
-                random.uniform(Variables.side_Semi_Mid/Breadth,Variables.side_Semi_Mid*Breadth),
-                random.uniform(Variables.side_Mid/Breadth,Variables.side_Mid*Breadth),
-                random.uniform(Variables.side_Hard/Breadth,Variables.side_Hard*Breadth),
-                random.uniform(Variables.vert_Easy/Breadth,Variables.vert_Easy*Breadth),
-                random.uniform(Variables.vert_Semi_Mid/Breadth,Variables.vert_Semi_Mid*Breadth),
-                random.uniform(Variables.vert_Mid/Breadth,Variables.vert_Mid*Breadth),
-                random.uniform(Variables.stack_Easy_Power/Breadth,Variables.stack_Easy_Power*Breadth),
-                random.uniform(Variables.stack_Hard_Power/Breadth,Variables.stack_Hard_Power*Breadth),
-                random.uniform(Variables.stamina_Power/Breadth,Variables.stamina_Power*Breadth),
-                random.uniform(Variables.pattern_Power/Breadth,Variables.pattern_Power*Breadth),
-                round(random.uniform(Variables.swng_Sped_Smoth_History/Breadth,Variables.swng_Sped_Smoth_History*Breadth)),
-                round(random.uniform(Variables.pattern_History/Breadth,Variables.pattern_History*Breadth)),
-                round(random.uniform(Variables.stamina_History/Breadth,Variables.stamina_History*Breadth)),
-                round(random.uniform(Variables.combined_History/Breadth,Variables.combined_History*Breadth)),
-                random.uniform(Variables.angle_Div/Breadth,Variables.angle_Div*Breadth),
+                random.uniform(Variables.angle_Easy/NewBreadth,Variables.angle_Easy*NewBreadth),
+                random.uniform(Variables.angle_Semi_Mid/NewBreadth,Variables.angle_Semi_Mid*NewBreadth),
+                random.uniform(Variables.angle_Mid/NewBreadth,Variables.angle_Mid*NewBreadth),
+                random.uniform(Variables.angle_Hard/NewBreadth,Variables.angle_Hard*NewBreadth),
+                random.uniform(Variables.side_Easy/NewBreadth,Variables.side_Easy*NewBreadth),
+                random.uniform(Variables.side_Semi_Mid/NewBreadth,Variables.side_Semi_Mid*NewBreadth),
+                random.uniform(Variables.side_Mid/NewBreadth,Variables.side_Mid*NewBreadth),
+                random.uniform(Variables.side_Hard/NewBreadth,Variables.side_Hard*NewBreadth),
+                random.uniform(Variables.vert_Easy/NewBreadth,Variables.vert_Easy*NewBreadth),
+                random.uniform(Variables.vert_Semi_Mid/NewBreadth,Variables.vert_Semi_Mid*NewBreadth),
+                random.uniform(Variables.vert_Mid/NewBreadth,Variables.vert_Mid*NewBreadth),
+                random.uniform(Variables.stack_Easy_Power/NewBreadth,Variables.stack_Easy_Power*NewBreadth),
+                random.uniform(Variables.stack_Hard_Power/NewBreadth,Variables.stack_Hard_Power*NewBreadth),
+                random.uniform(Variables.stamina_Power/NewBreadth,Variables.stamina_Power*NewBreadth),
+                random.uniform(Variables.pattern_Power/NewBreadth,Variables.pattern_Power*NewBreadth),
+                round(random.uniform(Variables.swng_Sped_Smoth_History/NewBreadth,Variables.swng_Sped_Smoth_History*NewBreadth)),
+                round(random.uniform(Variables.pattern_History/NewBreadth,Variables.pattern_History*NewBreadth)),
+                round(random.uniform(Variables.stamina_History/NewBreadth,Variables.stamina_History*NewBreadth)),
+                round(random.uniform(Variables.combined_History/NewBreadth,Variables.combined_History*NewBreadth)),
+                random.uniform(Variables.angle_Div/NewBreadth,Variables.angle_Div*NewBreadth),
                 random.uniform(Variables.array_Scaling/Breadth,Variables.array_Scaling*Breadth)
             ))
     First = True
@@ -175,11 +178,17 @@ for j in range(0, iterations):
             folder_path, song_diff = Rating_Algorithm.selectDiff(Data.songID, False, 1)
             Data.results = (Rating_Algorithm.Main(folder_path, song_diff[0], Data.songID, False))
         temp = 0
-        for i, index in enumerate(DataArray):
-            DataArray[i].accuracy = (abs(float(DataArray[i].results[1])-DataArray[i].expectedResults)/DataArray[i].expectedResults)**2
-            temp += DataArray[i].accuracy
+        for k, index in enumerate(DataArray):
+            # DataArray[k].accuracy = (abs(float(DataArray[k].results[1])-DataArray[k].expectedResults)/DataArray[k].expectedResults)**2
+            DataArray[k].accuracy = (abs((float(DataArray[k].results[1])-DataArray[k].expectedResults)*14/DataArray[k].expectedResults))**4
+            temp += DataArray[k].accuracy
         Vars.Accuracy = temp/len(DataArray)
-        print(i/passes*100+"% Total Accuracy is: " + str(Vars.Accuracy))
+        #print(str(round(k/passes*100, 2))+"% Total Accuracy is: " + str(Vars.Accuracy))
+        
+        if(round(i/passes*100,2) >= progress_threshold):
+            progress_threshold += progress_marker
+            print("\nGeneration "+str(round(i/passes*100, 2))+"% Done")
+        print(*"#", end="", flush=True)
     ValueArray.sort(key=lambda x: x.Accuracy)
     
     temp = 0
@@ -232,7 +241,7 @@ for j in range(0, iterations):
     
     AverageIteration.append(deepcopy(SOIterations[0]))
     
-    print("Iteration: " + str(j) +" Best Accuracy: "+ str(ValueArray[0].Accuracy))
+    print("\nIteration: " + str(j) +" Best Accuracy: "+ str(ValueArray[0].Accuracy))
     print("Iteration: " + str(j) +" Average Accuracy: "+ str(AverageIteration[-1].Accuracy))
     Variables.angle_Easy = AverageIteration[-1].angle_easy
     Variables.angle_Semi_Mid = AverageIteration[-1].angle_semi_mid
