@@ -6,7 +6,7 @@ from math import ceil
 from multiprocessing.dummy import Process
 import random
 from time import sleep, time
-from tkinter import FIRST
+from tkinter import FIRST, Variable
 import Rating_Algorithm
 import setup
 import Variables
@@ -79,7 +79,28 @@ class NewValues:
             self.array_scaling,
             self.Accuracy]
 
-def rate_func(songID, diff):
+def rate_func(songID, diff, Vars: NewValues):
+    Variables.angle_Easy = Vars.angle_easy
+    Variables.angle_Semi_Mid = Vars.angle_semi_mid
+    Variables.angle_Mid = Vars.angle_mid
+    Variables.angle_Hard = Vars.angle_hard
+    Variables.side_Easy = Vars.side_easy
+    Variables.side_Semi_Mid = Vars.side_semi_mid
+    Variables.side_Mid = Vars.side_mid
+    Variables.side_Hard = Vars.side_hard
+    Variables.vert_Easy = Vars.vert_easy
+    Variables.vert_Semi_Mid = Vars.vert_semi_mid
+    Variables.vert_Mid = Vars.vert_mid
+    Variables.stack_Easy_Power = Vars.stack_easy_power
+    Variables.stack_Hard_Power = Vars.stack_hard_power
+    Variables.stamina_Power = Vars.stamina_power
+    Variables.pattern_Power = Vars.pattern_power
+    Variables.swng_Sped_Smoth_History = Vars.SSSH
+    Variables.pattern_History = Vars.pattern_history
+    Variables.stamina_History = Vars.stamina_history
+    Variables.combined_History = Vars.combined_history
+    Variables.angle_Div = Vars.angle_div
+    Variables.array_Scaling = Vars.array_scaling
     folder_path, song_diff = Rating_Algorithm.selectDiff(songID, False, diff)
     return Rating_Algorithm.Main(folder_path, song_diff[0], songID, False)[1]
     
@@ -167,34 +188,34 @@ if __name__ == "__main__":
         First = True
         for i, Vars in enumerate(ValueArray):
             
-            Variables.angle_Easy = Vars.angle_easy
-            Variables.angle_Semi_Mid = Vars.angle_semi_mid
-            Variables.angle_Mid = Vars.angle_mid
-            Variables.angle_Hard = Vars.angle_hard
-            Variables.side_Easy = Vars.side_easy
-            Variables.side_Semi_Mid = Vars.side_semi_mid
-            Variables.side_Mid = Vars.side_mid
-            Variables.side_Hard = Vars.side_hard
-            Variables.vert_Easy = Vars.vert_easy
-            Variables.vert_Semi_Mid = Vars.vert_semi_mid
-            Variables.vert_Mid = Vars.vert_mid
-            Variables.stack_Easy_Power = Vars.stack_easy_power
-            Variables.stack_Hard_Power = Vars.stack_hard_power
-            Variables.stamina_Power = Vars.stamina_power
-            Variables.pattern_Power = Vars.pattern_power
-            Variables.swng_Sped_Smoth_History = Vars.SSSH
-            Variables.pattern_History = Vars.pattern_history
-            Variables.stamina_History = Vars.stamina_history
-            Variables.combined_History = Vars.combined_history
-            Variables.angle_Div = Vars.angle_div
-            Variables.array_Scaling = Vars.array_scaling
+            # Variables.angle_Easy = Vars.angle_easy
+            # Variables.angle_Semi_Mid = Vars.angle_semi_mid
+            # Variables.angle_Mid = Vars.angle_mid
+            # Variables.angle_Hard = Vars.angle_hard
+            # Variables.side_Easy = Vars.side_easy
+            # Variables.side_Semi_Mid = Vars.side_semi_mid
+            # Variables.side_Mid = Vars.side_mid
+            # Variables.side_Hard = Vars.side_hard
+            # Variables.vert_Easy = Vars.vert_easy
+            # Variables.vert_Semi_Mid = Vars.vert_semi_mid
+            # Variables.vert_Mid = Vars.vert_mid
+            # Variables.stack_Easy_Power = Vars.stack_easy_power
+            # Variables.stack_Hard_Power = Vars.stack_hard_power
+            # Variables.stamina_Power = Vars.stamina_power
+            # Variables.pattern_Power = Vars.pattern_power
+            # Variables.swng_Sped_Smoth_History = Vars.SSSH
+            # Variables.pattern_History = Vars.pattern_history
+            # Variables.stamina_History = Vars.stamina_history
+            # Variables.combined_History = Vars.combined_history
+            # Variables.angle_Div = Vars.angle_div
+            # Variables.array_Scaling = Vars.array_scaling
             
             results = []
             processes = []
             
             input_param_list = []
             for a, data in enumerate(DataArray):
-                input_param_list.append((data.songID, 1))
+                input_param_list.append((data.songID, 1, Vars))
                 
             with multiprocessing.Pool(maxProcesses) as p:
                 results = p.starmap(rate_func, input_param_list)
