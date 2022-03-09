@@ -1,14 +1,18 @@
 from asyncio.windows_events import NULL
-from copy import copy, deepcopy
-from math import floor
+from concurrent.futures import process
+from copy import  deepcopy
+from functools import partial
+from math import ceil
+from multiprocessing.dummy import Process
 import random
+from time import sleep, time
 from tkinter import FIRST
 import Rating_Algorithm
 import setup
 import Variables
 import csv
 import os
-
+import multiprocessing
 
 
 
@@ -18,6 +22,7 @@ class Data:
         self.expectedResults = expectedResults
         self.results = 0
         self.accuracy = 0
+        self.index = 0
     def calcAccuracy(self):
         self.accuracy = self.results/self.expectedResults
 
@@ -74,216 +79,236 @@ class NewValues:
             self.array_scaling,
             self.Accuracy]
 
-setup.checkFolderPath()
+def rate_func(songID, diff):
+    folder_path, song_diff = Rating_Algorithm.selectDiff(songID, False, diff)
+    return Rating_Algorithm.Main(folder_path, song_diff[0], songID, False)[1]
+    
+    # print(str(return_Variable[index].results))
+if __name__ == "__main__":
+    setup.checkFolderPath()
 
-DataArray: list[Data] = []
-DataArray.append(Data("c32d",14)) #Lacks Data #L
-DataArray.append(Data("170d0",7.5)) #L
-DataArray.append(Data("1e4b4",5)) #L
-DataArray.append(Data("190b4",17)) #L
-DataArray.append(Data("1df5b",12.75)) #L
-DataArray.append(Data("217a8",11)) #L
-DataArray.append(Data("18a92",9.65)) #L
-DataArray.append(Data("17cc0",10)) #L
-DataArray.append(Data("17ecf",7.5)) #L
+    DataArray: list[Data] = []
+    DataArray.append(Data("c32d",14)) #Lacks Data #L
+    DataArray.append(Data("170d0",7.5)) #L
+    DataArray.append(Data("1e4b4",5)) #L
+    DataArray.append(Data("190b4",17)) #L
+    DataArray.append(Data("1df5b",12.75)) #L
+    DataArray.append(Data("217a8",11)) #L
+    DataArray.append(Data("18a92",9.65)) #L
+    DataArray.append(Data("17cc0",10)) #L
+    DataArray.append(Data("17ecf",7.5)) #L
 
-DataArray.append(Data("1db9d",13.25)) #Syncs Data #L
-DataArray.append(Data("20540",12.9)) #L
-DataArray.append(Data("1f491",12.5)) #L
-DataArray.append(Data("18a27",12.4)) #L
+    DataArray.append(Data("1db9d",13.25)) #Syncs Data #L
+    DataArray.append(Data("20540",12.9)) #L
+    DataArray.append(Data("1f491",12.5)) #L
+    DataArray.append(Data("18a27",12.4)) #L
 
-DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
-DataArray.append(Data("9e5c",11.77)) #L
-DataArray.append(Data("16d07",10.08)) #L
-DataArray.append(Data("1ace8",10.62)) #L
-DataArray.append(Data("1a017",13.22)) #L
-DataArray.append(Data("1a209",13.75)) #L
-DataArray.append(Data("22639",16)) #L
-DataArray.append(Data("20848",14)) #L
-Breadth = 1.1
-NewBreadth = 1.25
+    DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
+    DataArray.append(Data("9e5c",11.77)) #L
+    DataArray.append(Data("16d07",10.08)) #L
+    DataArray.append(Data("1ace8",10.62)) #L
+    DataArray.append(Data("1a017",13.22)) #L
+    DataArray.append(Data("1a209",13.75)) #L
+    DataArray.append(Data("22639",16)) #L
+    DataArray.append(Data("20848",14)) #L
+    for i in range(0,len(DataArray)):
+        DataArray[i].index=i
+    Breadth = 1.1
+    NewBreadth = 1.25
+    SOIterations: list[NewValues] = []
+    AverageIteration: list[NewValues] = []
+    iterations = 50            #Number of gererations
+    passes = 300               #Number of children per generation
+    pass_history = 30           #Top picks to average for next generation
+    progress_marker = 25        #How often to mark progress
 
-SOIterations: list[NewValues] = []
-AverageIteration: list[NewValues] = []
-iterations = 50            #Number of gererations
-passes = 300               #Number of children per generation
-pass_history = 30           #Top picks to average for next generation
-progress_marker = 25        #How often to mark progress
+    maxProcesses = multiprocessing.cpu_count()
+    Batches = ceil(len(DataArray)/maxProcesses)
 
-for j in range(0, iterations):
-    NewBreadth = 1.2-(0.2*j/iterations)
-    progress_threshold = progress_marker #as a percentage
-    ValueArray: list[NewValues] = []
-    SOIterations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL))   #Sum of Iterations
-    First = True
-    print("Breadth: " + str(NewBreadth))
-    for i in range(0, passes):
-        if First:
-            ValueArray.append(NewValues(Variables.angle_Easy,Variables.angle_Semi_Mid,Variables.angle_Mid,Variables.angle_Hard,
-                Variables.side_Easy,Variables.side_Semi_Mid,Variables.side_Mid,Variables.side_Hard,
-                Variables.vert_Easy,Variables.vert_Semi_Mid,Variables.vert_Mid,Variables.stack_Easy_Power,Variables.stack_Hard_Power,
-                Variables.stamina_Power,Variables.pattern_Power,Variables.swng_Sped_Smoth_History,Variables.pattern_History,
-                Variables.stamina_History,Variables.combined_History,Variables.angle_Div, Variables.array_Scaling))
-            First = False
-        else:
-            ValueArray.append(NewValues(
-                random.uniform(Variables.angle_Easy/NewBreadth,Variables.angle_Easy*NewBreadth),
-                random.uniform(Variables.angle_Semi_Mid/NewBreadth,Variables.angle_Semi_Mid*NewBreadth),
-                random.uniform(Variables.angle_Mid/NewBreadth,Variables.angle_Mid*NewBreadth),
-                random.uniform(Variables.angle_Hard/NewBreadth,Variables.angle_Hard*NewBreadth),
-                random.uniform(Variables.side_Easy/NewBreadth,Variables.side_Easy*NewBreadth),
-                random.uniform(Variables.side_Semi_Mid/NewBreadth,Variables.side_Semi_Mid*NewBreadth),
-                random.uniform(Variables.side_Mid/NewBreadth,Variables.side_Mid*NewBreadth),
-                random.uniform(Variables.side_Hard/NewBreadth,Variables.side_Hard*NewBreadth),
-                random.uniform(Variables.vert_Easy/NewBreadth,Variables.vert_Easy*NewBreadth),
-                random.uniform(Variables.vert_Semi_Mid/NewBreadth,Variables.vert_Semi_Mid*NewBreadth),
-                random.uniform(Variables.vert_Mid/NewBreadth,Variables.vert_Mid*NewBreadth),
-                random.uniform(Variables.stack_Easy_Power/NewBreadth,Variables.stack_Easy_Power*NewBreadth),
-                random.uniform(Variables.stack_Hard_Power/NewBreadth,Variables.stack_Hard_Power*NewBreadth),
-                random.uniform(Variables.stamina_Power/NewBreadth,Variables.stamina_Power*NewBreadth),
-                random.uniform(Variables.pattern_Power/NewBreadth,Variables.pattern_Power*NewBreadth),
-                round(random.uniform(Variables.swng_Sped_Smoth_History/NewBreadth,Variables.swng_Sped_Smoth_History*NewBreadth)),
-                round(random.uniform(Variables.pattern_History/NewBreadth,Variables.pattern_History*NewBreadth)),
-                round(random.uniform(Variables.stamina_History/NewBreadth,Variables.stamina_History*NewBreadth)),
-                round(random.uniform(Variables.combined_History/NewBreadth,Variables.combined_History*NewBreadth)),
-                random.uniform(Variables.angle_Div/NewBreadth,Variables.angle_Div*NewBreadth),
-                random.uniform(Variables.array_Scaling/Breadth,Variables.array_Scaling*Breadth)
-            ))
-    First = True
-    for i, Vars in enumerate(ValueArray):
+    for j in range(0, iterations):
+        NewBreadth = 1.2-(0.2*j/iterations)
+        progress_threshold = progress_marker #as a percentage
+        ValueArray: list[NewValues] = []
+        SOIterations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL))   #Sum of Iterations
+        First = True
+        print("Breadth: " + str(NewBreadth))
+        for i in range(0, passes):
+            if First:
+                ValueArray.append(NewValues(Variables.angle_Easy,Variables.angle_Semi_Mid,Variables.angle_Mid,Variables.angle_Hard,
+                    Variables.side_Easy,Variables.side_Semi_Mid,Variables.side_Mid,Variables.side_Hard,
+                    Variables.vert_Easy,Variables.vert_Semi_Mid,Variables.vert_Mid,Variables.stack_Easy_Power,Variables.stack_Hard_Power,
+                    Variables.stamina_Power,Variables.pattern_Power,Variables.swng_Sped_Smoth_History,Variables.pattern_History,
+                    Variables.stamina_History,Variables.combined_History,Variables.angle_Div, Variables.array_Scaling))
+                First = False
+            else:
+                ValueArray.append(NewValues(
+                    random.uniform(Variables.angle_Easy/NewBreadth,Variables.angle_Easy*NewBreadth),
+                    random.uniform(Variables.angle_Semi_Mid/NewBreadth,Variables.angle_Semi_Mid*NewBreadth),
+                    random.uniform(Variables.angle_Mid/NewBreadth,Variables.angle_Mid*NewBreadth),
+                    random.uniform(Variables.angle_Hard/NewBreadth,Variables.angle_Hard*NewBreadth),
+                    random.uniform(Variables.side_Easy/NewBreadth,Variables.side_Easy*NewBreadth),
+                    random.uniform(Variables.side_Semi_Mid/NewBreadth,Variables.side_Semi_Mid*NewBreadth),
+                    random.uniform(Variables.side_Mid/NewBreadth,Variables.side_Mid*NewBreadth),
+                    random.uniform(Variables.side_Hard/NewBreadth,Variables.side_Hard*NewBreadth),
+                    random.uniform(Variables.vert_Easy/NewBreadth,Variables.vert_Easy*NewBreadth),
+                    random.uniform(Variables.vert_Semi_Mid/NewBreadth,Variables.vert_Semi_Mid*NewBreadth),
+                    random.uniform(Variables.vert_Mid/NewBreadth,Variables.vert_Mid*NewBreadth),
+                    random.uniform(Variables.stack_Easy_Power/NewBreadth,Variables.stack_Easy_Power*NewBreadth),
+                    random.uniform(Variables.stack_Hard_Power/NewBreadth,Variables.stack_Hard_Power*NewBreadth),
+                    random.uniform(Variables.stamina_Power/NewBreadth,Variables.stamina_Power*NewBreadth),
+                    random.uniform(Variables.pattern_Power/NewBreadth,Variables.pattern_Power*NewBreadth),
+                    round(random.uniform(Variables.swng_Sped_Smoth_History/NewBreadth,Variables.swng_Sped_Smoth_History*NewBreadth)),
+                    round(random.uniform(Variables.pattern_History/NewBreadth,Variables.pattern_History*NewBreadth)),
+                    round(random.uniform(Variables.stamina_History/NewBreadth,Variables.stamina_History*NewBreadth)),
+                    round(random.uniform(Variables.combined_History/NewBreadth,Variables.combined_History*NewBreadth)),
+                    random.uniform(Variables.angle_Div/NewBreadth,Variables.angle_Div*NewBreadth),
+                    random.uniform(Variables.array_Scaling/Breadth,Variables.array_Scaling*Breadth)
+                ))
+        First = True
+        for i, Vars in enumerate(ValueArray):
+            
+            Variables.angle_Easy = Vars.angle_easy
+            Variables.angle_Semi_Mid = Vars.angle_semi_mid
+            Variables.angle_Mid = Vars.angle_mid
+            Variables.angle_Hard = Vars.angle_hard
+            Variables.side_Easy = Vars.side_easy
+            Variables.side_Semi_Mid = Vars.side_semi_mid
+            Variables.side_Mid = Vars.side_mid
+            Variables.side_Hard = Vars.side_hard
+            Variables.vert_Easy = Vars.vert_easy
+            Variables.vert_Semi_Mid = Vars.vert_semi_mid
+            Variables.vert_Mid = Vars.vert_mid
+            Variables.stack_Easy_Power = Vars.stack_easy_power
+            Variables.stack_Hard_Power = Vars.stack_hard_power
+            Variables.stamina_Power = Vars.stamina_power
+            Variables.pattern_Power = Vars.pattern_power
+            Variables.swng_Sped_Smoth_History = Vars.SSSH
+            Variables.pattern_History = Vars.pattern_history
+            Variables.stamina_History = Vars.stamina_history
+            Variables.combined_History = Vars.combined_history
+            Variables.angle_Div = Vars.angle_div
+            Variables.array_Scaling = Vars.array_scaling
+            
+            results = []
+            processes = []
+            
+            input_param_list = []
+            for a, data in enumerate(DataArray):
+                input_param_list.append((data.songID, 1))
+                
+            with multiprocessing.Pool(maxProcesses) as p:
+                results = p.starmap(rate_func, input_param_list)
+
+            for a, data in enumerate(DataArray):
+                data.results = results[a]
+                # Data.results = rate_func(Data.songID, 1)
+            temp = 0
+            for k, index in enumerate(DataArray):
+                # DataArray[k].accuracy = (abs(float(DataArray[k].results[1])-DataArray[k].expectedResults)/DataArray[k].expectedResults)**2
+                DataArray[k].accuracy = (abs((float(DataArray[k].results)-DataArray[k].expectedResults)*14/DataArray[k].expectedResults))**4
+                temp += DataArray[k].accuracy
+            Vars.Accuracy = temp/len(DataArray)
+            #print(str(round(k/passes*100, 2))+"% Total Accuracy is: " + str(Vars.Accuracy))
+            
+            if(round(i/passes*100,2) >= progress_threshold):
+                progress_threshold += progress_marker
+                print("\nGeneration "+str(round(i/passes*100, 2))+"% Done")
+            print(*"#", end="", flush=True)
+        ValueArray.sort(key=lambda x: x.Accuracy)
         
-        Variables.angle_Easy = Vars.angle_easy
-        Variables.angle_Semi_Mid = Vars.angle_semi_mid
-        Variables.angle_Mid = Vars.angle_mid
-        Variables.angle_Hard = Vars.angle_hard
-        Variables.side_Easy = Vars.side_easy
-        Variables.side_Semi_Mid = Vars.side_semi_mid
-        Variables.side_Mid = Vars.side_mid
-        Variables.side_Hard = Vars.side_hard
-        Variables.vert_Easy = Vars.vert_easy
-        Variables.vert_Semi_Mid = Vars.vert_semi_mid
-        Variables.vert_Mid = Vars.vert_mid
-        Variables.stack_Easy_Power = Vars.stack_easy_power
-        Variables.stack_Hard_Power = Vars.stack_hard_power
-        Variables.stamina_Power = Vars.stamina_power
-        Variables.pattern_Power = Vars.pattern_power
-        Variables.swng_Sped_Smoth_History = Vars.SSSH
-        Variables.pattern_History = Vars.pattern_history
-        Variables.stamina_History = Vars.stamina_history
-        Variables.combined_History = Vars.combined_history
-        Variables.angle_Div = Vars.angle_div
-        Variables.array_Scaling = Vars.array_scaling
-        
-        for Data in DataArray:
-            folder_path, song_diff = Rating_Algorithm.selectDiff(Data.songID, False, 1)
-            Data.results = (Rating_Algorithm.Main(folder_path, song_diff[0], Data.songID, False))
         temp = 0
-        for k, index in enumerate(DataArray):
-            # DataArray[k].accuracy = (abs(float(DataArray[k].results[1])-DataArray[k].expectedResults)/DataArray[k].expectedResults)**2
-            DataArray[k].accuracy = (abs((float(DataArray[k].results[1])-DataArray[k].expectedResults)*14/DataArray[k].expectedResults))**4
-            temp += DataArray[k].accuracy
-        Vars.Accuracy = temp/len(DataArray)
-        #print(str(round(k/passes*100, 2))+"% Total Accuracy is: " + str(Vars.Accuracy))
+        SOIterations[0] = NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)
+        for i in range(0, pass_history):
+            SOIterations[0].angle_easy += ValueArray[i].angle_easy
+            SOIterations[0].angle_semi_mid += ValueArray[i].angle_semi_mid
+            SOIterations[0].angle_mid += ValueArray[i].angle_mid
+            SOIterations[0].angle_hard += ValueArray[i].angle_hard
+            SOIterations[0].side_easy += ValueArray[i].side_easy
+            SOIterations[0].side_semi_mid += ValueArray[i].side_semi_mid
+            SOIterations[0].side_mid += ValueArray[i].side_mid
+            SOIterations[0].side_hard += ValueArray[i].side_hard
+            SOIterations[0].vert_easy += ValueArray[i].vert_easy
+            SOIterations[0].vert_semi_mid += ValueArray[i].vert_semi_mid
+            SOIterations[0].vert_mid += ValueArray[i].vert_mid
+            SOIterations[0].stack_easy_power += ValueArray[i].stack_easy_power
+            SOIterations[0].stack_hard_power += ValueArray[i].stack_hard_power
+            SOIterations[0].stamina_power += ValueArray[i].stamina_power
+            SOIterations[0].pattern_power += ValueArray[i].pattern_power
+            SOIterations[0].SSSH += ValueArray[i].SSSH
+            SOIterations[0].pattern_history += ValueArray[i].pattern_history
+            SOIterations[0].stamina_history += ValueArray[i].stamina_history
+            SOIterations[0].combined_history += ValueArray[i].combined_history
+            SOIterations[0].angle_div += ValueArray[i].angle_div
+            SOIterations[0].array_scaling += ValueArray[i].array_scaling
+            SOIterations[0].Accuracy += ValueArray[i].Accuracy
+        SOIterations[0].angle_easy = SOIterations[0].angle_easy/pass_history
+        SOIterations[0].angle_semi_mid = SOIterations[0].angle_semi_mid/pass_history
+        SOIterations[0].angle_mid = SOIterations[0].angle_mid/pass_history
+        SOIterations[0].angle_hard = SOIterations[0].angle_hard/pass_history
+        SOIterations[0].side_easy = SOIterations[0].side_easy/pass_history
+        SOIterations[0].side_semi_mid = SOIterations[0].side_semi_mid/pass_history
+        SOIterations[0].side_mid = SOIterations[0].side_mid/pass_history
+        SOIterations[0].side_hard = SOIterations[0].side_hard/pass_history
+        SOIterations[0].vert_easy = SOIterations[0].vert_easy/pass_history
+        SOIterations[0].vert_semi_mid = SOIterations[0].vert_semi_mid/pass_history
+        SOIterations[0].vert_mid = SOIterations[0].vert_mid/pass_history
+        SOIterations[0].stack_easy_power = SOIterations[0].stack_easy_power/pass_history
+        SOIterations[0].stack_hard_power = SOIterations[0].stack_hard_power/pass_history
+        SOIterations[0].stamina_power = SOIterations[0].stamina_power/pass_history
+        SOIterations[0].pattern_power = SOIterations[0].pattern_power/pass_history
+        SOIterations[0].SSSH = SOIterations[0].SSSH/pass_history
+        SOIterations[0].pattern_history = SOIterations[0].pattern_history/pass_history
+        SOIterations[0].stamina_history = SOIterations[0].stamina_history/pass_history
+        SOIterations[0].combined_history = SOIterations[0].combined_history/pass_history
+        SOIterations[0].angle_div = SOIterations[0].angle_div/pass_history
+        SOIterations[0].array_scaling = SOIterations[0].array_scaling/pass_history
+        SOIterations[0].Accuracy = SOIterations[0].Accuracy/pass_history
         
-        if(round(i/passes*100,2) >= progress_threshold):
-            progress_threshold += progress_marker
-            print("\nGeneration "+str(round(i/passes*100, 2))+"% Done")
-        print(*"#", end="", flush=True)
-    ValueArray.sort(key=lambda x: x.Accuracy)
-    
-    temp = 0
-    SOIterations[0] = NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)
-    for i in range(0, pass_history):
-        SOIterations[0].angle_easy += ValueArray[i].angle_easy
-        SOIterations[0].angle_semi_mid += ValueArray[i].angle_semi_mid
-        SOIterations[0].angle_mid += ValueArray[i].angle_mid
-        SOIterations[0].angle_hard += ValueArray[i].angle_hard
-        SOIterations[0].side_easy += ValueArray[i].side_easy
-        SOIterations[0].side_semi_mid += ValueArray[i].side_semi_mid
-        SOIterations[0].side_mid += ValueArray[i].side_mid
-        SOIterations[0].side_hard += ValueArray[i].side_hard
-        SOIterations[0].vert_easy += ValueArray[i].vert_easy
-        SOIterations[0].vert_semi_mid += ValueArray[i].vert_semi_mid
-        SOIterations[0].vert_mid += ValueArray[i].vert_mid
-        SOIterations[0].stack_easy_power += ValueArray[i].stack_easy_power
-        SOIterations[0].stack_hard_power += ValueArray[i].stack_hard_power
-        SOIterations[0].stamina_power += ValueArray[i].stamina_power
-        SOIterations[0].pattern_power += ValueArray[i].pattern_power
-        SOIterations[0].SSSH += ValueArray[i].SSSH
-        SOIterations[0].pattern_history += ValueArray[i].pattern_history
-        SOIterations[0].stamina_history += ValueArray[i].stamina_history
-        SOIterations[0].combined_history += ValueArray[i].combined_history
-        SOIterations[0].angle_div += ValueArray[i].angle_div
-        SOIterations[0].array_scaling += ValueArray[i].array_scaling
-        SOIterations[0].Accuracy += ValueArray[i].Accuracy
-    SOIterations[0].angle_easy = SOIterations[0].angle_easy/pass_history
-    SOIterations[0].angle_semi_mid = SOIterations[0].angle_semi_mid/pass_history
-    SOIterations[0].angle_mid = SOIterations[0].angle_mid/pass_history
-    SOIterations[0].angle_hard = SOIterations[0].angle_hard/pass_history
-    SOIterations[0].side_easy = SOIterations[0].side_easy/pass_history
-    SOIterations[0].side_semi_mid = SOIterations[0].side_semi_mid/pass_history
-    SOIterations[0].side_mid = SOIterations[0].side_mid/pass_history
-    SOIterations[0].side_hard = SOIterations[0].side_hard/pass_history
-    SOIterations[0].vert_easy = SOIterations[0].vert_easy/pass_history
-    SOIterations[0].vert_semi_mid = SOIterations[0].vert_semi_mid/pass_history
-    SOIterations[0].vert_mid = SOIterations[0].vert_mid/pass_history
-    SOIterations[0].stack_easy_power = SOIterations[0].stack_easy_power/pass_history
-    SOIterations[0].stack_hard_power = SOIterations[0].stack_hard_power/pass_history
-    SOIterations[0].stamina_power = SOIterations[0].stamina_power/pass_history
-    SOIterations[0].pattern_power = SOIterations[0].pattern_power/pass_history
-    SOIterations[0].SSSH = SOIterations[0].SSSH/pass_history
-    SOIterations[0].pattern_history = SOIterations[0].pattern_history/pass_history
-    SOIterations[0].stamina_history = SOIterations[0].stamina_history/pass_history
-    SOIterations[0].combined_history = SOIterations[0].combined_history/pass_history
-    SOIterations[0].angle_div = SOIterations[0].angle_div/pass_history
-    SOIterations[0].array_scaling = SOIterations[0].array_scaling/pass_history
-    SOIterations[0].Accuracy = SOIterations[0].Accuracy/pass_history
-    
-    AverageIteration.append(deepcopy(SOIterations[0]))
-    
-    print("\nIteration: " + str(j) +" Best Accuracy: "+ str(ValueArray[0].Accuracy))
-    print("Iteration: " + str(j) +" Average Accuracy: "+ str(AverageIteration[-1].Accuracy))
-    Variables.angle_Easy = AverageIteration[-1].angle_easy
-    Variables.angle_Semi_Mid = AverageIteration[-1].angle_semi_mid
-    Variables.angle_Mid = AverageIteration[-1].angle_mid
-    Variables.angle_Hard = AverageIteration[-1].angle_hard
-    Variables.side_Easy = AverageIteration[-1].side_easy
-    Variables.side_Semi_Mid = AverageIteration[-1].side_semi_mid
-    Variables.side_Mid = AverageIteration[-1].side_mid
-    Variables.side_Hard = AverageIteration[-1].side_hard
-    Variables.vert_Easy = AverageIteration[-1].vert_easy
-    Variables.vert_Semi_Mid = AverageIteration[-1].vert_semi_mid
-    Variables.vert_Mid = AverageIteration[-1].vert_mid
-    Variables.stack_Easy_Power = AverageIteration[-1].stack_easy_power
-    Variables.stack_Hard_Power = AverageIteration[-1].stack_hard_power
-    Variables.stamina_Power = AverageIteration[-1].stamina_power
-    Variables.pattern_Power = AverageIteration[-1].pattern_power
-    Variables.swng_Sped_Smoth_History = AverageIteration[-1].SSSH
-    Variables.pattern_History = AverageIteration[-1].pattern_history
-    Variables.stamina_History = AverageIteration[-1].stamina_history
-    Variables.combined_History = AverageIteration[-1].combined_history
-    Variables.angle_Div = AverageIteration[-1].angle_div
-    Variables.array_Scaling = AverageIteration[-1].array_scaling
+        AverageIteration.append(deepcopy(SOIterations[0]))
+        
+        print("\nIteration: " + str(j) +" Best Accuracy: "+ str(ValueArray[0].Accuracy))
+        print("Iteration: " + str(j) +" Average Accuracy: "+ str(AverageIteration[-1].Accuracy))
+        Variables.angle_Easy = AverageIteration[-1].angle_easy
+        Variables.angle_Semi_Mid = AverageIteration[-1].angle_semi_mid
+        Variables.angle_Mid = AverageIteration[-1].angle_mid
+        Variables.angle_Hard = AverageIteration[-1].angle_hard
+        Variables.side_Easy = AverageIteration[-1].side_easy
+        Variables.side_Semi_Mid = AverageIteration[-1].side_semi_mid
+        Variables.side_Mid = AverageIteration[-1].side_mid
+        Variables.side_Hard = AverageIteration[-1].side_hard
+        Variables.vert_Easy = AverageIteration[-1].vert_easy
+        Variables.vert_Semi_Mid = AverageIteration[-1].vert_semi_mid
+        Variables.vert_Mid = AverageIteration[-1].vert_mid
+        Variables.stack_Easy_Power = AverageIteration[-1].stack_easy_power
+        Variables.stack_Hard_Power = AverageIteration[-1].stack_hard_power
+        Variables.stamina_Power = AverageIteration[-1].stamina_power
+        Variables.pattern_Power = AverageIteration[-1].pattern_power
+        Variables.swng_Sped_Smoth_History = AverageIteration[-1].SSSH
+        Variables.pattern_History = AverageIteration[-1].pattern_history
+        Variables.stamina_History = AverageIteration[-1].stamina_history
+        Variables.combined_History = AverageIteration[-1].combined_history
+        Variables.angle_Div = AverageIteration[-1].angle_div
+        Variables.array_Scaling = AverageIteration[-1].array_scaling
 
-folderName = "MachineLearning"
-fileName = "Results"
-headerList = ["angle_Easy","angle_Semi_Mid","angle_Mid","angle_Hard",'side_Easy','side_Semi_Mid','side_Mid','side_Hard',
-    'vert_Easy','vert_Semi_Mid','vert_Mid','stack_Easy_Power','stack_Hard_Power','stamina_Power','pattern_Power',
-    'SSSH','pattern_History','stamina_History','combined_History','angle_Div','array_scaling','Accuracy']
+    folderName = "MachineLearning"
+    fileName = "Results"
+    headerList = ["angle_Easy","angle_Semi_Mid","angle_Mid","angle_Hard",'side_Easy','side_Semi_Mid','side_Mid','side_Hard',
+        'vert_Easy','vert_Semi_Mid','vert_Mid','stack_Easy_Power','stack_Hard_Power','stamina_Power','pattern_Power',
+        'SSSH','pattern_History','stamina_History','combined_History','angle_Div','array_scaling','Accuracy']
 
-excelFileName = os.path.join(f"{folderName}/{fileName} export.csv")
-try:
-    x = open(excelFileName, 'w', newline="", encoding='utf8')
-except FileNotFoundError:
-    print(f'Making {folderName} Folder')
-    os.mkdir(folderName)
-    x = open(excelFileName, 'w', newline="")
-finally:
-    writer = csv.writer(x)
-    writer.writerow(headerList)
-    for i in range(0, len(AverageIteration)):
-        writer.writerow(AverageIteration[i].returnList())
-    x.close()
+    excelFileName = os.path.join(f"{folderName}/{fileName} export.csv")
+    try:
+        x = open(excelFileName, 'w', newline="", encoding='utf8')
+    except FileNotFoundError:
+        print(f'Making {folderName} Folder')
+        os.mkdir(folderName)
+        x = open(excelFileName, 'w', newline="")
+    finally:
+        writer = csv.writer(x)
+        writer.writerow(headerList)
+        for i in range(0, len(AverageIteration)):
+            writer.writerow(AverageIteration[i].returnList())
+        x.close()
 
 
 
@@ -299,5 +324,5 @@ finally:
 
 
 
-print("Press Enter to Exit")
-input()
+    print("Press Enter to Exit")
+    input()
