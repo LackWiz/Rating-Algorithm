@@ -193,7 +193,7 @@ def findSongFolder(song_id):
     song_options = os.listdir(bsPath)
     songFound = False
     for song in song_options:
-        if song.find(song_id) != -1:
+        if song.startswith(song_id+" "):
             songFolder = song
             songFound = True
             break
@@ -408,7 +408,7 @@ def Main(folder_path, song_diff, song_id, user = True):
         average = "No Data"
         Failed = True
     if not Failed:
-        final_score = (top_1_percent*7 + median*3)/10
+        final_score = (top_1_percent*Variables.Top1Weight + median*Variables.MedianWeight)/(Variables.Top1Weight+Variables.MedianWeight)
     else:
         final_score = "No Score Can Be Made"
     # export results to spreadsheet

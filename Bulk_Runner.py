@@ -1,13 +1,12 @@
 from urllib import response
 import Rating_Algorithm
 import setup
-import os
-import csv
+
 import requests
 import json
 
 import tkinter as tk
-from tkinter.filedialog import askdirectory, askopenfile
+from tkinter.filedialog import askopenfile
 tk.Tk().withdraw()
 
 

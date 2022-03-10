@@ -1,12 +1,8 @@
 from asyncio.windows_events import NULL
-from concurrent.futures import process
 from copy import  deepcopy
-from functools import partial
 from math import ceil
-from multiprocessing.dummy import Process
 import random
-from time import sleep, time
-from tkinter import FIRST, Variable
+import time
 import Rating_Algorithm
 import setup
 import Variables
@@ -29,7 +25,8 @@ class Data:
 class NewValues:
     def __init__(self, angle_easy, angle_semi_mid, angle_mid, angle_hard, side_easy, side_semi_mid, side_mid, side_hard,
         vert_easy, vert_semi_mid, vert_mid, stack_easy_power, stack_hard_power, stamina_power, pattern_power,
-        SSSH, pattern_history, stamin_history, combined_history, angle_div, array_scaling):
+        SSSH, pattern_history, stamin_history, combined_history, angle_div,top1Weight, medianWeight, array_scaling):
+        self.generation = 0
         self.angle_easy = angle_easy
         self.angle_semi_mid = angle_semi_mid
         self.angle_mid = angle_mid
@@ -51,12 +48,17 @@ class NewValues:
         self.combined_history = combined_history
         self.angle_div = angle_div
         self.array_scaling = array_scaling
+        self.top1Weight = top1Weight
+        self.medianWeight = medianWeight
         self.Accuracy = 0
+        
     # def __deepcopy__():
 
 
     def returnList(self):
-        return[self.angle_easy,
+        return[
+            self.generation,
+            self.angle_easy,
             self.angle_semi_mid,
             self.angle_mid,
             self.angle_hard,
@@ -77,6 +79,8 @@ class NewValues:
             self.combined_history,
             self.angle_div,
             self.array_scaling,
+            self.top1Weight,
+            self.medianWeight,
             self.Accuracy]
 
 def rate_func(songID, diff, Vars: NewValues):
@@ -100,6 +104,8 @@ def rate_func(songID, diff, Vars: NewValues):
     Variables.stamina_History = Vars.stamina_history
     Variables.combined_History = Vars.combined_history
     Variables.angle_Div = Vars.angle_div
+    Variables.Top1Weight = Vars.top1Weight
+    Variables.MedianWeight = Vars.medianWeight
     Variables.array_Scaling = Vars.array_scaling
     folder_path, song_diff = Rating_Algorithm.selectDiff(songID, False, diff)
     return Rating_Algorithm.Main(folder_path, song_diff[0], songID, False)[1]
@@ -109,49 +115,57 @@ if __name__ == "__main__":
     setup.checkFolderPath()
 
     DataArray: list[Data] = []
-    DataArray.append(Data("c32d",14)) #Lacks Data #L
-    DataArray.append(Data("170d0",7.5)) #L
-    DataArray.append(Data("1e4b4",5)) #L
-    DataArray.append(Data("190b4",17)) #L
-    DataArray.append(Data("1df5b",12.75)) #L
-    DataArray.append(Data("217a8",11)) #L
-    DataArray.append(Data("18a92",9.65)) #L
-    DataArray.append(Data("17cc0",10)) #L
-    DataArray.append(Data("17ecf",7.5)) #L
+    DataArray.append(Data("c32d",14)) #Lacks Data 
+    DataArray.append(Data("170d0",7.5)) 
+    DataArray.append(Data("1e4b4",5)) 
+    # DataArray.append(Data("190b4",17)) 
+    DataArray.append(Data("1df5b",12)) 
+    DataArray.append(Data("217a8",10.25)) 
+    DataArray.append(Data("18a92",9.25)) 
+    DataArray.append(Data("17cc0",10))
+    DataArray.append(Data("17ecf",7)) 
+    DataArray.append(Data('1cb5f', 10.5))
+    DataArray.append(Data('d6a6', 9.25))
 
-    DataArray.append(Data("1db9d",13.25)) #Syncs Data #L
-    DataArray.append(Data("20540",12.9)) #L
-    DataArray.append(Data("1f491",12.5)) #L
-    DataArray.append(Data("18a27",12.4)) #L
+    DataArray.append(Data("1db9d",13.25)) #Syncs Data 
+    DataArray.append(Data("20540",12.9)) 
+    DataArray.append(Data("1f491",12.5)) 
+    DataArray.append(Data("18a27",12.4)) 
 
     DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
-    DataArray.append(Data("9e5c",11.77)) #L
-    DataArray.append(Data("16d07",10.08)) #L
-    DataArray.append(Data("1ace8",10.62)) #L
-    DataArray.append(Data("1a017",13.22)) #L
-    DataArray.append(Data("1a209",13.75)) #L
-    DataArray.append(Data("22639",16)) #L
-    DataArray.append(Data("20848",14)) #L
+    DataArray.append(Data("9e5c",11.77)) 
+    DataArray.append(Data("16d07",10.08)) 
+    DataArray.append(Data("1ace8",10.62)) 
+    DataArray.append(Data("1a017",13.22)) 
+    DataArray.append(Data("1a209",13.75)) 
+    DataArray.append(Data('15836',9.5))
+    DataArray.append(Data('9deb',8))
+    DataArray.append(Data("17914",12.88))
+    DataArray.append(Data('7d6c', 10.75))
+
+    DataArray.append(Data("22639",16)) #Unranked from scoresaber discord
+    # DataArray.append(Data("20848",14)) #
     for i in range(0,len(DataArray)):
         DataArray[i].index=i
-    Breadth = 1.1
-    NewBreadth = 1.25
+    Breadth = 1.2
+    WeighedBreadth = 1.05
     SOIterations: list[NewValues] = []
     AverageIteration: list[NewValues] = []
-    iterations = 50            #Number of gererations
-    passes = 300               #Number of children per generation
-    pass_history = 30           #Top picks to average for next generation
+    iterations = 100           #Number of gererations
+    passes = 720               #Number of children per generation
+    pass_history = 20           #Top picks to average for next generation
     progress_marker = 25        #How often to mark progress
-
+    
     maxProcesses = multiprocessing.cpu_count()
     Batches = ceil(len(DataArray)/maxProcesses)
 
     for j in range(0, iterations):
-        NewBreadth = 1.2-(0.2*j/iterations)
+        NewBreadth = Breadth-((Breadth-1)*j/iterations)
         progress_threshold = progress_marker #as a percentage
         ValueArray: list[NewValues] = []
-        SOIterations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL))   #Sum of Iterations
+        SOIterations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,))   #Sum of Iterations
         First = True
+        start_time = time.time()
         print("Breadth: " + str(NewBreadth))
         for i in range(0, passes):
             if First:
@@ -159,7 +173,7 @@ if __name__ == "__main__":
                     Variables.side_Easy,Variables.side_Semi_Mid,Variables.side_Mid,Variables.side_Hard,
                     Variables.vert_Easy,Variables.vert_Semi_Mid,Variables.vert_Mid,Variables.stack_Easy_Power,Variables.stack_Hard_Power,
                     Variables.stamina_Power,Variables.pattern_Power,Variables.swng_Sped_Smoth_History,Variables.pattern_History,
-                    Variables.stamina_History,Variables.combined_History,Variables.angle_Div, Variables.array_Scaling))
+                    Variables.stamina_History,Variables.combined_History,Variables.angle_Div,Variables.Top1Weight,Variables.MedianWeight,Variables.array_Scaling))
                 First = False
             else:
                 ValueArray.append(NewValues(
@@ -183,36 +197,14 @@ if __name__ == "__main__":
                     round(random.uniform(Variables.stamina_History/NewBreadth,Variables.stamina_History*NewBreadth)),
                     round(random.uniform(Variables.combined_History/NewBreadth,Variables.combined_History*NewBreadth)),
                     random.uniform(Variables.angle_Div/NewBreadth,Variables.angle_Div*NewBreadth),
-                    random.uniform(Variables.array_Scaling/Breadth,Variables.array_Scaling*Breadth)
+                    random.uniform(Variables.Top1Weight/WeighedBreadth,Variables.Top1Weight*WeighedBreadth),
+                    random.uniform(Variables.MedianWeight/WeighedBreadth,Variables.MedianWeight*WeighedBreadth),
+                    random.uniform(Variables.array_Scaling/WeighedBreadth,Variables.array_Scaling*WeighedBreadth) 
                 ))
         First = True
         for i, Vars in enumerate(ValueArray):
-            
-            # Variables.angle_Easy = Vars.angle_easy
-            # Variables.angle_Semi_Mid = Vars.angle_semi_mid
-            # Variables.angle_Mid = Vars.angle_mid
-            # Variables.angle_Hard = Vars.angle_hard
-            # Variables.side_Easy = Vars.side_easy
-            # Variables.side_Semi_Mid = Vars.side_semi_mid
-            # Variables.side_Mid = Vars.side_mid
-            # Variables.side_Hard = Vars.side_hard
-            # Variables.vert_Easy = Vars.vert_easy
-            # Variables.vert_Semi_Mid = Vars.vert_semi_mid
-            # Variables.vert_Mid = Vars.vert_mid
-            # Variables.stack_Easy_Power = Vars.stack_easy_power
-            # Variables.stack_Hard_Power = Vars.stack_hard_power
-            # Variables.stamina_Power = Vars.stamina_power
-            # Variables.pattern_Power = Vars.pattern_power
-            # Variables.swng_Sped_Smoth_History = Vars.SSSH
-            # Variables.pattern_History = Vars.pattern_history
-            # Variables.stamina_History = Vars.stamina_history
-            # Variables.combined_History = Vars.combined_history
-            # Variables.angle_Div = Vars.angle_div
-            # Variables.array_Scaling = Vars.array_scaling
-            
             results = []
             processes = []
-            
             input_param_list = []
             for a, data in enumerate(DataArray):
                 input_param_list.append((data.songID, 1, Vars))
@@ -224,10 +216,16 @@ if __name__ == "__main__":
                 data.results = results[a]
                 # Data.results = rate_func(Data.songID, 1)
             temp = 0
-            for k, index in enumerate(DataArray):
-                # DataArray[k].accuracy = (abs(float(DataArray[k].results[1])-DataArray[k].expectedResults)/DataArray[k].expectedResults)**2
-                DataArray[k].accuracy = (abs((float(DataArray[k].results)-DataArray[k].expectedResults)*14/DataArray[k].expectedResults))**4
-                temp += DataArray[k].accuracy
+            for data in DataArray:
+                if data.songID == 'c32d':
+                    data.accuracy = max(
+                        (abs(float(data.results)-data.expectedResults)*28/data.expectedResults)**0.5,
+                        (abs((float(data.results)-data.expectedResults)*28/data.expectedResults))**8)
+                else:
+                    data.accuracy = max(
+                        (abs(float(data.results)-data.expectedResults)*28/data.expectedResults)**0.75,
+                        (abs((float(data.results)-data.expectedResults)*28/data.expectedResults))**4)
+                temp += data.accuracy
             Vars.Accuracy = temp/len(DataArray)
             #print(str(round(k/passes*100, 2))+"% Total Accuracy is: " + str(Vars.Accuracy))
             
@@ -238,7 +236,7 @@ if __name__ == "__main__":
         ValueArray.sort(key=lambda x: x.Accuracy)
         
         temp = 0
-        SOIterations[0] = NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)
+        SOIterations[0] = NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)
         for i in range(0, pass_history):
             SOIterations[0].angle_easy += ValueArray[i].angle_easy
             SOIterations[0].angle_semi_mid += ValueArray[i].angle_semi_mid
@@ -261,6 +259,8 @@ if __name__ == "__main__":
             SOIterations[0].combined_history += ValueArray[i].combined_history
             SOIterations[0].angle_div += ValueArray[i].angle_div
             SOIterations[0].array_scaling += ValueArray[i].array_scaling
+            SOIterations[0].top1Weight += ValueArray[i].top1Weight
+            SOIterations[0].medianWeight += ValueArray[i].medianWeight
             SOIterations[0].Accuracy += ValueArray[i].Accuracy
         SOIterations[0].angle_easy = SOIterations[0].angle_easy/pass_history
         SOIterations[0].angle_semi_mid = SOIterations[0].angle_semi_mid/pass_history
@@ -283,12 +283,15 @@ if __name__ == "__main__":
         SOIterations[0].combined_history = SOIterations[0].combined_history/pass_history
         SOIterations[0].angle_div = SOIterations[0].angle_div/pass_history
         SOIterations[0].array_scaling = SOIterations[0].array_scaling/pass_history
+        SOIterations[0].top1Weight = SOIterations[0].top1Weight/pass_history
+        SOIterations[0].medianWeight = SOIterations[0].medianWeight/pass_history
         SOIterations[0].Accuracy = SOIterations[0].Accuracy/pass_history
-        
+        SOIterations[0].generation = j+1
         AverageIteration.append(deepcopy(SOIterations[0]))
-        
+        endtime = time.time()
         print("\nIteration: " + str(j) +" Best Accuracy: "+ str(ValueArray[0].Accuracy))
-        print("Iteration: " + str(j) +" Average Accuracy: "+ str(AverageIteration[-1].Accuracy))
+        print(f"Iteration: {str(j)} Average Accuracy: {str(AverageIteration[-1].Accuracy)}")
+        print(f"Average Time per Set of Maps: {(endtime-start_time)/passes}")
         Variables.angle_Easy = AverageIteration[-1].angle_easy
         Variables.angle_Semi_Mid = AverageIteration[-1].angle_semi_mid
         Variables.angle_Mid = AverageIteration[-1].angle_mid
@@ -310,12 +313,22 @@ if __name__ == "__main__":
         Variables.combined_History = AverageIteration[-1].combined_history
         Variables.angle_Div = AverageIteration[-1].angle_div
         Variables.array_Scaling = AverageIteration[-1].array_scaling
+        Variables.Top1Weight = AverageIteration[-1].top1Weight
+        Variables.MedianWeight = AverageIteration[-1].medianWeight
+    finalMapAcc: list = []
+    for data in DataArray:
+        folder_path, song_diff = Rating_Algorithm.selectDiff(data.songID, False, 1)
+        mapReturn = Rating_Algorithm.Main(folder_path, song_diff[0], data.songID, False)[1]
+        finalMapAcc.append([data.songID,data.expectedResults,mapReturn,mapReturn-data.expectedResults])
+
+
 
     folderName = "MachineLearning"
     fileName = "Results"
-    headerList = ["angle_Easy","angle_Semi_Mid","angle_Mid","angle_Hard",'side_Easy','side_Semi_Mid','side_Mid','side_Hard',
+    accHeaderList = ['songID','Expected Acc','Results','Difference']
+    headerList = ['Generation','angle_Easy','angle_Semi_Mid','angle_Mid','angle_Hard','side_Easy','side_Semi_Mid','side_Mid','side_Hard',
         'vert_Easy','vert_Semi_Mid','vert_Mid','stack_Easy_Power','stack_Hard_Power','stamina_Power','pattern_Power',
-        'SSSH','pattern_History','stamina_History','combined_History','angle_Div','array_scaling','Accuracy']
+        'SSSH','pattern_History','stamina_History','combined_History','angle_Div','array_scaling','Top 1% Weight','Median Weight','Accuracy']
 
     excelFileName = os.path.join(f"{folderName}/{fileName} export.csv")
     try:
@@ -326,6 +339,8 @@ if __name__ == "__main__":
         x = open(excelFileName, 'w', newline="")
     finally:
         writer = csv.writer(x)
+        writer.writerow(accHeaderList)
+        writer.writerows(finalMapAcc)
         writer.writerow(headerList)
         for i in range(0, len(AverageIteration)):
             writer.writerow(AverageIteration[i].returnList())
