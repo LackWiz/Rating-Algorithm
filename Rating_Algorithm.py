@@ -192,7 +192,7 @@ def findSongFolder(song_id):
     song_options = os.listdir(bsPath)
     songFound = False
     for song in song_options:
-        if song.startswith(song_id+" ") != False:
+        if song.startswith(song_id+" "):
             songFolder = song
             songFound = True
             break
