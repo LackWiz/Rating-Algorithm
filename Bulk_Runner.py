@@ -1,13 +1,12 @@
 from urllib import response
 import Rating_Algorithm
 import setup
-import os
-import csv
+
 import requests
 import json
 
 import tkinter as tk
-from tkinter.filedialog import askdirectory, askopenfile
+from tkinter.filedialog import askopenfile
 tk.Tk().withdraw()
 
 
@@ -52,7 +51,8 @@ for i, song in enumerate(hash_list):
             print("If you just have an old entry but no song, a new version of the song will be downloaded but you'll need to update the playlist manually")
             print("Press Enter to Continue")
             #input()
-        folder_path, song_diff = Rating_Algorithm.selectDiff(song_id)
+        folder_path, song_diff = Rating_Algorithm.selectDiff(song_id, False, "a")
+        print(folder_path)
         for i, index in enumerate(song_diff):
             queue_list.append([folder_path, index, song_id])
 

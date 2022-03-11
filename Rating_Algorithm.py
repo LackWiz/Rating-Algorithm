@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import statistics
 import os
 import json
@@ -203,6 +204,7 @@ def findSongFolder(song_id):
         if(response := input().capitalize() == "Y"):
             if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
                 print(f"Download of {id} failed. Exiting...")
+                input()
                 exit()
         else:
             exit()
@@ -218,9 +220,12 @@ def findDiffs(bsPath, songFolder):
         print("Couldn't Sort LOOK AT NUMBERING")
     return difficulties
 
-def selectDiff(song_id, user = True):
+
+def selectDiff(song_id, user = True, lock_diff = NULL):
+
     song_diff = []
     song_id = str(song_id)
+    lock_diff = str(lock_diff)
     f = open('bs_path.txt', 'r')
     bsPath = f.read()
     f.close
@@ -237,8 +242,12 @@ def selectDiff(song_id, user = True):
         print("[a] for all diffs, separate using comma for multiple diffs")
         for i in range(0, len(difficulties)):
             print(f"[{i + 1}] {difficulties[i]}")
-    #selectedDiffs = input() #To enable choice of difficulty
-    selectedDiffs = "1" #To Lock in Some Difficulty
+            
+    if lock_diff == '0':
+        selectedDiffs = input() #To enable choice of difficulty
+    else:
+        selectedDiffs = lock_diff #To Lock in Some Difficulty
+
     if selectedDiffs != "a":
         selectedDiffs = selectedDiffs.replace(" ", "")
         selectedDiffs = selectedDiffs.split(",")
@@ -403,7 +412,7 @@ def Main(folder_path, song_diff, song_id, user = True):
         average = "No Data"
         Failed = True
     if not Failed:
-        final_score = (top_1_percent*7 + median*3)/10
+        final_score = (top_1_percent*Variables.Top1Weight + median*Variables.MedianWeight)/(Variables.Top1Weight+Variables.MedianWeight)
     else:
         final_score = "No Score Can Be Made"
     # export results to spreadsheet
