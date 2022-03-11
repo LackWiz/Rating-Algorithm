@@ -1,7 +1,5 @@
 *.pyc
 *.csv
-Black_Box.py
-Base_Variables.py
 songs/
 Spreadsheets/
 bs_path.txt
