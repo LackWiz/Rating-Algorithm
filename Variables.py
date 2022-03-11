@@ -1,4 +1,4 @@
-angle_Easy = 0.553          #incremenet by 0.01 from 
+angle_Easy = 0.553
 angle_Semi_Mid = 4.199
 angle_Mid = 1.180
 angle_Hard = 9.943
@@ -12,8 +12,8 @@ vert_Easy = 0.6420
 vert_Semi_Mid = 3.220
 vert_Mid = 2.343
 
-stack_Easy_Power = 0.3884   #incremenet by 0.001
-stack_Hard_Power = 2.156  #incremenet by 0.01
+stack_Easy_Power = 0.3884 
+stack_Hard_Power = 2.156  
 
 
 stamina_Power = 1.849
@@ -30,6 +30,9 @@ Top1Weight = 8.792
 MedianWeight = 2.800
 
 array_Scaling = 4.703
+
+
+
 
 DIFFICULTY_ORDER = [
         "ExpertPlusStandard.dat",
