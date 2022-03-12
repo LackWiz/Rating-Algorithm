@@ -113,7 +113,7 @@ if __name__ == "__main__":
 #=======================================Training Data Template======================================#
     DataArray: list[Data] = []
     #Add data as "DataArray.append('songID', yourStarValue)""
-    DataArray.append(Data("c32d",14)) #Lacks Data 
+    DataArray.append(Data("c32d",14)) #Lack's Data 
     DataArray.append(Data("170d0",7.5)) 
     DataArray.append(Data("1e4b4",5)) 
     # DataArray.append(Data("190b4",17)) 
@@ -122,13 +122,16 @@ if __name__ == "__main__":
     DataArray.append(Data("18a92",9.25)) 
     DataArray.append(Data("17cc0",10))
     DataArray.append(Data("17ecf",7)) 
-    DataArray.append(Data('1cb5f', 10.5))
-    DataArray.append(Data('d6a6', 9.25))
+    DataArray.append(Data('1cb5f',10.5))
+    DataArray.append(Data('d6a6',9.25))
 
     DataArray.append(Data("1db9d",13.25)) #Syncs Data 
     DataArray.append(Data("20540",12.9)) 
     DataArray.append(Data("1f491",12.5)) 
-    DataArray.append(Data("18a27",12.4)) 
+    DataArray.append(Data("18a27",12.4))
+
+    DataArray.append(Data('19053',9)) #Joshabi's Data
+    #DataArray.append(Data('19924',))
 
     DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
     DataArray.append(Data("9e5c",11.77)) 
@@ -139,28 +142,28 @@ if __name__ == "__main__":
     DataArray.append(Data('15836',9.5))
     DataArray.append(Data('9deb',8))
     DataArray.append(Data("17914",12.88))
-    DataArray.append(Data('7d6c', 10.75))
+    DataArray.append(Data('7d6c',10.75))
 
     DataArray.append(Data("22639",16)) #Unranked from scoresaber discord
     # DataArray.append(Data("20848",14))
     for i in range(0,len(DataArray)):   #Adds an indexing number to each entry in the array
         DataArray[i].index=i
-    BREADTH = 1.2   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
+    BREADTH = 1.5   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
     WEIGHTEDBRANCH = 1.05   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
-    SOIterations: list[NewValues] = []
+    SOGenerations: list[NewValues] = []
     AverageIteration: list[NewValues] = []
-    GENERATIONS = 100           #Number of Gererations
-    CHILDREN = 720               #Number of Children per generation
-    TOP_PICKS = 20           #Top picks to average for next generation
-    PROGRESS_SPLIT = 25        #How often to mark progress in the terminal (just a visual)
+    GENERATIONS = 10           #Number of Gererations
+    CHILDREN = 10               #Number of Children per generation
+    TOP_PICKS = 1           #Top picks to average for next generation
+    PROGRESS_SPLIT = 50        #How often to mark progress in the terminal as a percentage (just a visual)
 
     maxProcesses = multiprocessing.cpu_count()  #Checks how many cores that are avaliable
 
     for j in range(0, GENERATIONS):  #Main loop, loops as many times as there are Generatoins
-        NewBreadth = BREADTH-((BREADTH-1)*j/GENERATIONS)#Slowly Reduces randomizing spread after each generation
+        NewBreadth = BREADTH-((BREADTH-1.25)*j/GENERATIONS)#Slowly Reduces randomizing spread after each generation
         progress_threshold = PROGRESS_SPLIT #as a percentage
         ValueArray: list[NewValues] = [] #Initializes/Empties List
-        SOIterations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)) #Adds an entry to the list so it can change numbers
+        SOGenerations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)) #Adds an entry to the list so it can change numbers
         First = True
         start_time = time.time()    #For measuring time per child
         print("Breadth: " + str(NewBreadth))
@@ -233,62 +236,63 @@ if __name__ == "__main__":
 
         ValueArray.sort(key=lambda x: x.Accuracy)   #Sorts all Children by their accuracy
         temp = 0
-        SOIterations[0] = NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)
+        SOGenerations[0] = NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) #Sum of Generations
         for i in range(0, TOP_PICKS):   #There is a better way to do this but *shrug* Averages Top Picks and Averages them for the next Generation
-            SOIterations[0].angle_easy += ValueArray[i].angle_easy
-            SOIterations[0].angle_semi_mid += ValueArray[i].angle_semi_mid
-            SOIterations[0].angle_mid += ValueArray[i].angle_mid
-            SOIterations[0].angle_hard += ValueArray[i].angle_hard
-            SOIterations[0].side_easy += ValueArray[i].side_easy
-            SOIterations[0].side_semi_mid += ValueArray[i].side_semi_mid
-            SOIterations[0].side_mid += ValueArray[i].side_mid
-            SOIterations[0].side_hard += ValueArray[i].side_hard
-            SOIterations[0].vert_easy += ValueArray[i].vert_easy
-            SOIterations[0].vert_semi_mid += ValueArray[i].vert_semi_mid
-            SOIterations[0].vert_mid += ValueArray[i].vert_mid
-            SOIterations[0].stack_easy_power += ValueArray[i].stack_easy_power
-            SOIterations[0].stack_hard_power += ValueArray[i].stack_hard_power
-            SOIterations[0].stamina_power += ValueArray[i].stamina_power
-            SOIterations[0].pattern_power += ValueArray[i].pattern_power
-            SOIterations[0].SSSH += ValueArray[i].SSSH
-            SOIterations[0].pattern_history += ValueArray[i].pattern_history
-            SOIterations[0].stamina_history += ValueArray[i].stamina_history
-            SOIterations[0].combined_history += ValueArray[i].combined_history
-            SOIterations[0].angle_div += ValueArray[i].angle_div
-            SOIterations[0].array_scaling += ValueArray[i].array_scaling
-            SOIterations[0].top1Weight += ValueArray[i].top1Weight
-            SOIterations[0].medianWeight += ValueArray[i].medianWeight
-            SOIterations[0].Accuracy += ValueArray[i].Accuracy
-        SOIterations[0].angle_easy = SOIterations[0].angle_easy/TOP_PICKS
-        SOIterations[0].angle_semi_mid = SOIterations[0].angle_semi_mid/TOP_PICKS
-        SOIterations[0].angle_mid = SOIterations[0].angle_mid/TOP_PICKS
-        SOIterations[0].angle_hard = SOIterations[0].angle_hard/TOP_PICKS
-        SOIterations[0].side_easy = SOIterations[0].side_easy/TOP_PICKS
-        SOIterations[0].side_semi_mid = SOIterations[0].side_semi_mid/TOP_PICKS
-        SOIterations[0].side_mid = SOIterations[0].side_mid/TOP_PICKS
-        SOIterations[0].side_hard = SOIterations[0].side_hard/TOP_PICKS
-        SOIterations[0].vert_easy = SOIterations[0].vert_easy/TOP_PICKS
-        SOIterations[0].vert_semi_mid = SOIterations[0].vert_semi_mid/TOP_PICKS
-        SOIterations[0].vert_mid = SOIterations[0].vert_mid/TOP_PICKS
-        SOIterations[0].stack_easy_power = SOIterations[0].stack_easy_power/TOP_PICKS
-        SOIterations[0].stack_hard_power = SOIterations[0].stack_hard_power/TOP_PICKS
-        SOIterations[0].stamina_power = SOIterations[0].stamina_power/TOP_PICKS
-        SOIterations[0].pattern_power = SOIterations[0].pattern_power/TOP_PICKS
-        SOIterations[0].SSSH = SOIterations[0].SSSH/TOP_PICKS
-        SOIterations[0].pattern_history = SOIterations[0].pattern_history/TOP_PICKS
-        SOIterations[0].stamina_history = SOIterations[0].stamina_history/TOP_PICKS
-        SOIterations[0].combined_history = SOIterations[0].combined_history/TOP_PICKS
-        SOIterations[0].angle_div = SOIterations[0].angle_div/TOP_PICKS
-        SOIterations[0].array_scaling = SOIterations[0].array_scaling/TOP_PICKS
-        SOIterations[0].top1Weight = SOIterations[0].top1Weight/TOP_PICKS
-        SOIterations[0].medianWeight = SOIterations[0].medianWeight/TOP_PICKS
-        SOIterations[0].Accuracy = SOIterations[0].Accuracy/TOP_PICKS
-        SOIterations[0].generation = j+1
-        AverageIteration.append(deepcopy(SOIterations[0]))
+            SOGenerations[0].angle_easy += ValueArray[i].angle_easy
+            SOGenerations[0].angle_semi_mid += ValueArray[i].angle_semi_mid
+            SOGenerations[0].angle_mid += ValueArray[i].angle_mid
+            SOGenerations[0].angle_hard += ValueArray[i].angle_hard
+            SOGenerations[0].side_easy += ValueArray[i].side_easy
+            SOGenerations[0].side_semi_mid += ValueArray[i].side_semi_mid
+            SOGenerations[0].side_mid += ValueArray[i].side_mid
+            SOGenerations[0].side_hard += ValueArray[i].side_hard
+            SOGenerations[0].vert_easy += ValueArray[i].vert_easy
+            SOGenerations[0].vert_semi_mid += ValueArray[i].vert_semi_mid
+            SOGenerations[0].vert_mid += ValueArray[i].vert_mid
+            SOGenerations[0].stack_easy_power += ValueArray[i].stack_easy_power
+            SOGenerations[0].stack_hard_power += ValueArray[i].stack_hard_power
+            SOGenerations[0].stamina_power += ValueArray[i].stamina_power
+            SOGenerations[0].pattern_power += ValueArray[i].pattern_power
+            SOGenerations[0].SSSH += ValueArray[i].SSSH
+            SOGenerations[0].pattern_history += ValueArray[i].pattern_history
+            SOGenerations[0].stamina_history += ValueArray[i].stamina_history
+            SOGenerations[0].combined_history += ValueArray[i].combined_history
+            SOGenerations[0].angle_div += ValueArray[i].angle_div
+            SOGenerations[0].array_scaling += ValueArray[i].array_scaling
+            SOGenerations[0].top1Weight += ValueArray[i].top1Weight
+            SOGenerations[0].medianWeight += ValueArray[i].medianWeight
+            SOGenerations[0].Accuracy += ValueArray[i].Accuracy
+        SOGenerations[0].angle_easy = SOGenerations[0].angle_easy/TOP_PICKS
+        SOGenerations[0].angle_semi_mid = SOGenerations[0].angle_semi_mid/TOP_PICKS
+        SOGenerations[0].angle_mid = SOGenerations[0].angle_mid/TOP_PICKS
+        SOGenerations[0].angle_hard = SOGenerations[0].angle_hard/TOP_PICKS
+        SOGenerations[0].side_easy = SOGenerations[0].side_easy/TOP_PICKS
+        SOGenerations[0].side_semi_mid = SOGenerations[0].side_semi_mid/TOP_PICKS
+        SOGenerations[0].side_mid = SOGenerations[0].side_mid/TOP_PICKS
+        SOGenerations[0].side_hard = SOGenerations[0].side_hard/TOP_PICKS
+        SOGenerations[0].vert_easy = SOGenerations[0].vert_easy/TOP_PICKS
+        SOGenerations[0].vert_semi_mid = SOGenerations[0].vert_semi_mid/TOP_PICKS
+        SOGenerations[0].vert_mid = SOGenerations[0].vert_mid/TOP_PICKS
+        SOGenerations[0].stack_easy_power = SOGenerations[0].stack_easy_power/TOP_PICKS
+        SOGenerations[0].stack_hard_power = SOGenerations[0].stack_hard_power/TOP_PICKS
+        SOGenerations[0].stamina_power = SOGenerations[0].stamina_power/TOP_PICKS
+        SOGenerations[0].pattern_power = SOGenerations[0].pattern_power/TOP_PICKS
+        SOGenerations[0].SSSH = SOGenerations[0].SSSH/TOP_PICKS
+        SOGenerations[0].pattern_history = SOGenerations[0].pattern_history/TOP_PICKS
+        SOGenerations[0].stamina_history = SOGenerations[0].stamina_history/TOP_PICKS
+        SOGenerations[0].combined_history = SOGenerations[0].combined_history/TOP_PICKS
+        SOGenerations[0].angle_div = SOGenerations[0].angle_div/TOP_PICKS
+        SOGenerations[0].array_scaling = SOGenerations[0].array_scaling/TOP_PICKS
+        SOGenerations[0].top1Weight = SOGenerations[0].top1Weight/TOP_PICKS
+        SOGenerations[0].medianWeight = SOGenerations[0].medianWeight/TOP_PICKS
+        SOGenerations[0].Accuracy = SOGenerations[0].Accuracy/TOP_PICKS
+        SOGenerations[0].generation = j+1
+        AverageIteration.append(deepcopy(SOGenerations[0]))
         endtime = time.time()
-        print("\nIteration: " + str(j) +" Best Accuracy: "+ str(ValueArray[0].Accuracy))    #Prints the results from current generation
-        print(f"Iteration: {str(j)} Average Accuracy: {str(AverageIteration[-1].Accuracy)}")
-        print(f"Average Time per Set of Maps: {(endtime-start_time)/CHILDREN}")
+        print(f"\nGeneration: {j+1} Best Accuracy: {round(ValueArray[0].Accuracy,3)}")    #Prints the results from current generation
+        print(f"Generation: {j+1} Average Accuracy: {round(AverageIteration[-1].Accuracy,3)}")
+        print(f"Average Time per Set of Maps: {round((endtime-start_time)/CHILDREN, 2)}")
+        print(f"Estimated Remaining Time: {round((GENERATIONS-(j+1))*(endtime-start_time),2)}")
         Variables.angle_Easy = AverageIteration[-1].angle_easy  #Assigns New Values for Next Generation
         Variables.angle_Semi_Mid = AverageIteration[-1].angle_semi_mid
         Variables.angle_Mid = AverageIteration[-1].angle_mid

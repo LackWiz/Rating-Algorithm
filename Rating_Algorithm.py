@@ -1,4 +1,5 @@
 from asyncio.windows_events import NULL
+from pickle import TRUE
 import statistics
 import os
 import json
@@ -188,7 +189,7 @@ def load_song_dat(path):
         dat = json.load(json_dat)
     return dat
 
-def findSongFolder(song_id):
+def findSongFolder(song_id, isuser):
     bsPath = setup.checkFolderPath()
     song_options = os.listdir(bsPath)
     songFound = False
@@ -199,15 +200,22 @@ def findSongFolder(song_id):
             break
     if not songFound:
         # TODO: download from scoresaber if map missing
-        print(song_id + " Not Downloaded or wrong song code!")
-        print("Would you like to download this song? (Y/N)")
-        if(response := input().capitalize() == "Y"):
+        if isuser:
+            print(song_id + " Not Downloaded or wrong song code!")
+            print("Would you like to download this song? (Y/N)")
+            if(response := input().capitalize() == "Y"):
+                if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
+                    print(f"Download of {id} failed. Exiting...")
+                    input()
+                    exit()
+            else:
+                exit()
+        else:
+            print(f'Downloading Missing song {id}')
             if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
                 print(f"Download of {id} failed. Exiting...")
                 input()
                 exit()
-        else:
-            exit()
     return songFolder
 
 def findDiffs(bsPath, songFolder):
@@ -228,7 +236,7 @@ def selectDiff(song_id, user = True, lock_diff = NULL):
     bsPath = f.read()
     f.close
     
-    songFolder = findSongFolder(song_id)
+    songFolder = findSongFolder(song_id, isuser = user)
 
     folder_path = bsPath + songFolder + '/'
 
