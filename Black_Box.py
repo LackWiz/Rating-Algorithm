@@ -131,7 +131,7 @@ if __name__ == "__main__":
     DataArray.append(Data("18a27",12.4))
 
     DataArray.append(Data('19053',9)) #Joshabi's Data
-    #DataArray.append(Data('19924',))
+    DataArray.append(Data('19924',8.45))
 
     DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
     DataArray.append(Data("9e5c",11.77)) 
