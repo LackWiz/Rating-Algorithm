@@ -188,7 +188,7 @@ def load_song_dat(path):
         dat = json.load(json_dat)
     return dat
 
-def findSongFolder(song_id):
+def findSongFolder(song_id, isuser):
     bsPath = setup.checkFolderPath()
     song_options = os.listdir(bsPath)
     songFound = False
@@ -199,15 +199,22 @@ def findSongFolder(song_id):
             break
     if not songFound:
         # TODO: download from scoresaber if map missing
-        print(song_id + " Not Downloaded or wrong song code!")
-        print("Would you like to download this song? (Y/N)")
-        if(response := input().capitalize() == "Y"):
+        if isuser:
+            print(song_id + " Not Downloaded or wrong song code!")
+            print("Would you like to download this song? (Y/N)")
+            if(response := input().capitalize() == "Y"):
+                if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
+                    print(f"Download of {id} failed. Exiting...")
+                    input()
+                    exit()
+            else:
+                exit()
+        else:
+            print(f'Downloading Missing song {id}')
             if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
                 print(f"Download of {id} failed. Exiting...")
                 input()
                 exit()
-        else:
-            exit()
     return songFolder
 
 def findDiffs(bsPath, songFolder):
@@ -228,7 +235,7 @@ def selectDiff(song_id, user = True, lock_diff = NULL):
     bsPath = f.read()
     f.close
     
-    songFolder = findSongFolder(song_id)
+    songFolder = findSongFolder(song_id, isuser = user)
 
     folder_path = bsPath + songFolder + '/'
 
@@ -263,13 +270,17 @@ def selectDiff(song_id, user = True, lock_diff = NULL):
     return folder_path, song_diff
 
 # TODO: sliding window instead of reactive (for future expansion)
-def extractBloqData(songNoteArray, mspb):
+def extractBloqData(songNoteArray, bpm_list: list):
 
     BloqDataArray: list[Bloq] = []
-
+    t = 0 #To keep track of what bpm to use
+    mspb = 60*1000/bpm_list[0]
     for i, block in enumerate(songNoteArray):
         block['_cutDirection'] = min(block['_cutDirection'], 8)
-             
+        if t+1 < len(bpm_list):
+            if bpm_list[t+1]['_time'] <= block['_time']:
+                t += 1
+                mspb = 60*1000/bpm_list[t]['_BPM']  # milliseconds per beat
         # Checks if the note behind is super close, and treats it as a single swing
         if i == 0:
             BloqDataArray.append(Bloq(
@@ -375,19 +386,27 @@ def Main(folder_path, song_diff, song_id, user = True):
     song_id = str(song_id)
     song_dat = load_song_dat(folder_path + song_diff)
     song_info = load_song_dat(folder_path + "Info.dat")
-
     bpm = song_info['_beatsPerMinute']
-    mspb = 60*1000/bpm  # milliseconds per beat
-
+    
+    
     # Keep only the notes
     song_notes = list(filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
-
+    try:
+        song_bpm_list = list(song_dat['_customData']['_BPMChanges'])
+        song_bpm_list.insert(0,bpm) #Put Initial BPM at front of List
+        if user:
+            print("Found BPM changes")
+    except:
+        song_bpm_list = [bpm]
+        if user:
+            print("No BPM changes")
+    
     # split into red and blue notes
     songNoteLeft = [block for block in song_notes if block['_type'] == 0]
     songNoteRight = [block for block in song_notes if block['_type'] == 1]
 
-    BloqDataLeft = extractBloqData(songNoteLeft,mspb)
-    BloqDataRight = extractBloqData(songNoteRight,mspb)
+    BloqDataLeft = extractBloqData(songNoteLeft,song_bpm_list)
+    BloqDataRight = extractBloqData(songNoteRight,song_bpm_list)
     combinedArrayRaw = combineAndProcessArray(BloqDataLeft, BloqDataRight)
 
     SmoothDiff = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]

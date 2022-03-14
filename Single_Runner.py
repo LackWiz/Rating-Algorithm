@@ -9,4 +9,3 @@ for i, index in enumerate(song_diff):
     Rating_Algorithm.Main(folder_path, song_diff[i], songID)
 print("Press Enter to Exit")
 input()
-
