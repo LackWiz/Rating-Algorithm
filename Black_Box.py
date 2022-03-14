@@ -1,6 +1,5 @@
 from asyncio.windows_events import NULL
 from copy import  deepcopy
-from math import ceil
 import random
 import time
 import Rating_Algorithm
@@ -9,7 +8,7 @@ import Variables
 import csv
 import os
 import multiprocessing
-
+import datetime
 
 
 class Data: #Class to Hold Training Data and results
@@ -113,29 +112,34 @@ if __name__ == "__main__":
 #=======================================Training Data Template======================================#
     DataArray: list[Data] = []
     #Add data as "DataArray.append('songID', yourStarValue)""
-    DataArray.append(Data("c32d",14)) #Lack's Data 
-    DataArray.append(Data("170d0",7.5)) 
-    DataArray.append(Data("1e4b4",5)) 
+    DataArray.append(Data('c32d',14)) #Lack's Data 
+    DataArray.append(Data('170d0',8)) 
+    DataArray.append(Data('1e4b4',5)) 
     # DataArray.append(Data("190b4",17)) 
-    DataArray.append(Data("1df5b",12)) 
-    DataArray.append(Data("217a8",10.25)) 
-    DataArray.append(Data("18a92",9.25)) 
-    DataArray.append(Data("17cc0",10))
-    DataArray.append(Data("17ecf",7)) 
+    DataArray.append(Data('1df5b',12)) 
+    DataArray.append(Data('217a8',10.25)) 
+    DataArray.append(Data('18a92',9.25)) 
+    DataArray.append(Data('17cc0',9))
+    DataArray.append(Data('17ecf',7)) 
     DataArray.append(Data('1cb5f',10.5))
     DataArray.append(Data('d6a6',9.25))
+    DataArray.append(Data('1a37c',12.75))
+    DataArray.append(Data('1dc95',11.9))
+    DataArray.append(Data('1fa21',9.25))
+    DataArray.append(Data('1d5d4',10))
+    DataArray.append(Data('1dcc5',5))
 
     DataArray.append(Data("1db9d",13.25)) #Syncs Data 
     DataArray.append(Data("20540",12.9)) 
     DataArray.append(Data("1f491",12.5)) 
     DataArray.append(Data("18a27",12.4))
 
-    DataArray.append(Data('19053',9)) #Joshabi's Data
-    DataArray.append(Data('19924',8.45))
+    # DataArray.append(Data('19053',9)) #Joshabi's Data
+    # DataArray.append(Data('19924',8.45))
 
     DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
     DataArray.append(Data("9e5c",11.77)) 
-    DataArray.append(Data("16d07",10.08)) 
+    DataArray.append(Data("16d07",10.5)) 
     DataArray.append(Data("1ace8",10.62)) 
     DataArray.append(Data("1a017",13.22)) 
     DataArray.append(Data("1a209",13.75)) 
@@ -144,29 +148,30 @@ if __name__ == "__main__":
     DataArray.append(Data("17914",12.88))
     DataArray.append(Data('7d6c',10.75))
 
-    DataArray.append(Data("22639",16)) #Unranked from scoresaber discord
+    # DataArray.append(Data("22639",16)) #Unranked from scoresaber discord
     # DataArray.append(Data("20848",14))
     for i in range(0,len(DataArray)):   #Adds an indexing number to each entry in the array
         DataArray[i].index=i
-    BREADTH = 1.5   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
-    WEIGHTEDBRANCH = 1.05   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
+    START_BREADTH = 1.5   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
+    END_BREADTH = 1.1
+    WEIGHTEDBRANCH = 1.1   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
     SOGenerations: list[NewValues] = []
     AverageIteration: list[NewValues] = []
-    GENERATIONS = 10           #Number of Gererations
-    CHILDREN = 10               #Number of Children per generation
-    TOP_PICKS = 1           #Top picks to average for next generation
-    PROGRESS_SPLIT = 50        #How often to mark progress in the terminal as a percentage (just a visual)
+    GENERATIONS = 50           #Number of Gererations
+    CHILDREN = 1400               #Number of Children per generation
+    TOP_PICKS = 72            #Top picks to average for next generation
+    PROGRESS_SPLIT = 25        #How often to mark progress in the terminal as a percentage (just a visual)
 
     maxProcesses = multiprocessing.cpu_count()  #Checks how many cores that are avaliable
 
     for j in range(0, GENERATIONS):  #Main loop, loops as many times as there are Generatoins
-        NewBreadth = BREADTH-((BREADTH-1.25)*j/GENERATIONS)#Slowly Reduces randomizing spread after each generation
+        NewBreadth = START_BREADTH-((START_BREADTH-END_BREADTH)*j/GENERATIONS)#Slowly Reduces randomizing spread after each generation
         progress_threshold = PROGRESS_SPLIT #as a percentage
         ValueArray: list[NewValues] = [] #Initializes/Empties List
         SOGenerations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)) #Adds an entry to the list so it can change numbers
         First = True
         start_time = time.time()    #For measuring time per child
-        print("Breadth: " + str(NewBreadth))
+        print(f"Breadth: {round(NewBreadth,5)}")
         for i in range(0, CHILDREN):    #Child loop, Loops as many times as it needs for children to fill array with values to test
             if First:   #First Entry in Value Array is the same as the Top Average of the previous generation
                 ValueArray.append(NewValues(Variables.angle_Easy,Variables.angle_Semi_Mid,Variables.angle_Mid,Variables.angle_Hard,
@@ -201,6 +206,15 @@ if __name__ == "__main__":
                     random.uniform(Variables.MedianWeight/WEIGHTEDBRANCH,Variables.MedianWeight*WEIGHTEDBRANCH),
                     random.uniform(Variables.array_Scaling/WEIGHTEDBRANCH,Variables.array_Scaling*WEIGHTEDBRANCH) 
                 ))
+            ValueArray[-1].angle_mid = min(ValueArray[-1].angle_mid,ValueArray[-1].angle_hard)
+            ValueArray[-1].angle_semi_mid = min(ValueArray[-1].angle_semi_mid,ValueArray[-1].angle_mid)
+            ValueArray[-1].angle_easy = min(ValueArray[-1].angle_easy,ValueArray[-1].angle_semi_mid)
+            ValueArray[-1].side_mid = min(ValueArray[-1].side_mid,ValueArray[-1].side_hard)
+            ValueArray[-1].side_semi_mid = min(ValueArray[-1].side_semi_mid,ValueArray[-1].side_mid)
+            ValueArray[-1].side_easy = min(ValueArray[-1].side_easy,ValueArray[-1].side_semi_mid)
+            ValueArray[-1].vert_semi_mid = min(ValueArray[-1].vert_semi_mid,ValueArray[-1].vert_mid)
+            ValueArray[-1].vert_easy = min(ValueArray[-1].vert_easy,ValueArray[-1].vert_semi_mid)
+            ValueArray[-1].stack_easy_power = min(ValueArray[-1].stack_easy_power,ValueArray[-1].stack_hard_power)
         First = True
         for i, Vars in enumerate(ValueArray): #Main Child Loop, Goes through every entry in the ValueArray to test every combination of values in the array
             results = []
@@ -292,7 +306,7 @@ if __name__ == "__main__":
         print(f"\nGeneration: {j+1} Best Accuracy: {round(ValueArray[0].Accuracy,3)}")    #Prints the results from current generation
         print(f"Generation: {j+1} Average Accuracy: {round(AverageIteration[-1].Accuracy,3)}")
         print(f"Average Time per Set of Maps: {round((endtime-start_time)/CHILDREN, 2)}")
-        print(f"Estimated Remaining Time: {round((GENERATIONS-(j+1))*(endtime-start_time),2)}")
+        print(f"Estimated Remaining Time: {datetime.timedelta(seconds=round((GENERATIONS-(j+1))*(endtime-start_time),2))}")
         Variables.angle_Easy = AverageIteration[-1].angle_easy  #Assigns New Values for Next Generation
         Variables.angle_Semi_Mid = AverageIteration[-1].angle_semi_mid
         Variables.angle_Mid = AverageIteration[-1].angle_mid
