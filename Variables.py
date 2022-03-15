@@ -1,6 +1,4 @@
-import re
-
-angle_Easy = 1          #incremenet by 0.01 from 
+angle_Easy = 1
 angle_Semi_Mid = 1.1
 angle_Mid = 1.3
 angle_Hard = 1.5
@@ -14,8 +12,8 @@ vert_Easy = 1
 vert_Semi_Mid = 1.05
 vert_Mid = 1.2
 
-stack_Easy_Power = 1/8   #incremenet by 0.001
-stack_Hard_Power = 1/5   #incremenet by 0.01
+stack_Easy_Power = 1/8
+stack_Hard_Power = 1/5
 
 
 stamina_Power = 2
