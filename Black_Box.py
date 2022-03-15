@@ -157,9 +157,9 @@ if __name__ == "__main__":
     WEIGHTEDBRANCH = 1.1   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
     SOGenerations: list[NewValues] = []
     AverageIteration: list[NewValues] = []
-    GENERATIONS = 50           #Number of Gererations
-    CHILDREN = 1400               #Number of Children per generation
-    TOP_PICKS = 72            #Top picks to average for next generation
+    GENERATIONS = 10           #Number of Gererations
+    CHILDREN = 140               #Number of Children per generation
+    TOP_PICKS = 10            #Top picks to average for next generation
     PROGRESS_SPLIT = 25        #How often to mark progress in the terminal as a percentage (just a visual)
 
     maxProcesses = multiprocessing.cpu_count()  #Checks how many cores that are avaliable

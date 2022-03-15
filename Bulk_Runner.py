@@ -31,7 +31,7 @@ playlist_Path = playlist_Path.name
 #--------------Setup--------------------------
 setup.checkFolderPath()
 
-with open(playlist_Path, encoding='utf8') as playlist_json:
+with open(playlist_Path, encoding='ISO-8859-1') as playlist_json:
     playlistRaw = json.load(playlist_json)
     
 BulkRunName = playlistRaw['playlistTitle']
@@ -45,7 +45,7 @@ for i, song in enumerate(hash_list):
         song_id = resultJson["id"]
         
         if(hash_list[i].lower() != resultJson["versions"][0]["hash"].lower()):
-            print(f"Hash {(resultJson['name'])} From Playlist Entry Doesn't match BeatSaver or is unavaliable")
+            print(f"Hash {song_id} {(resultJson['name'])} From Playlist Entry Doesn't match BeatSaver or is unavaliable")
             print("You seem to have an older version of this song?")
             print("The Results may be different due to possible different local map versus hosted map")
             print("If you just have an old entry but no song, a new version of the song will be downloaded but you'll need to update the playlist manually")

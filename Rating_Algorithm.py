@@ -184,8 +184,9 @@ class Bloq:
 
 
 def load_song_dat(path):
-    with open(path, encoding='utf8') as json_dat:
-        dat = json.load(json_dat)
+    with open(path, 'rb') as json_dat:
+        dat = json.loads(json_dat.read())
+        # dat = json.load(json_dat)
     return dat
 
 def findSongFolder(song_id, isuser):
@@ -204,15 +205,15 @@ def findSongFolder(song_id, isuser):
             print("Would you like to download this song? (Y/N)")
             if(response := input().capitalize() == "Y"):
                 if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
-                    print(f"Download of {id} failed. Exiting...")
+                    print(f"Download of {song_id} failed. Exiting...")
                     input()
                     exit()
             else:
                 exit()
         else:
-            print(f'Downloading Missing song {id}')
+            print(f'Downloading Missing song {song_id}')
             if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
-                print(f"Download of {id} failed. Exiting...")
+                print(f"Download of {song_id} failed. Exiting...")
                 input()
                 exit()
     return songFolder
@@ -432,12 +433,14 @@ def Main(folder_path, song_diff, song_id, user = True):
             f"Spreadsheets/{song_id} {song_info['_songName'].replace('/', '')} {song_diff} export.csv")
         excelFileName = excelFileName.replace("*", "")
         excelFileName = excelFileName.replace("\"", "")
+        excelFileName = excelFileName.replace(">", "")
+        excelFileName = excelFileName.replace("<", "")
         try:
-            f = open(excelFileName, 'w', newline="", encoding='utf8')
+            f = open(excelFileName, 'w', newline="", encoding='utf-8')
         except FileNotFoundError:
             print('Making Spreadsheets Folder')
             os.mkdir('Spreadsheets')
-            f = open(excelFileName, 'w', newline="", encoding='utf8')
+            f = open(excelFileName, 'w', newline="", encoding='utf-8')
         finally:
             writer = csv.writer(f)
             writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed","SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
