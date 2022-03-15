@@ -313,7 +313,7 @@ def extractBloqData(songNoteArray, bpm_list: list):
                         cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection]))
 
             BloqDataArray[-1].angleChangeDiff = min(
-                1+((max(BloqDataArray[-1].angleChange, 45)-45)/Variables.angle_Div)**2, 1.5)
+                1+((max(BloqDataArray[-1].angleChange, 45)-45)/Variables.angle_Div)**Variables.angle_Power, 1.5)
             BloqDataArray[-1].calcStackDiff()
             # calculates swingTime in ms and Speed and shoves into class for processing later
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -  # Swing time in ms
@@ -362,8 +362,7 @@ def combineAndProcessArray(array1, array2):
     combinedArray: list[Bloq] = array1 + array2
     combinedArray.sort(key=lambda x: x.time) #once combined, sort by time
     for i in range(1, len(combinedArray)):
-        combinedArray[i].combinedSwingSpeedSmoothed = math.sqrt(
-            combinedArray[i].swingSpeedSmoothed**2 + combinedArray[i-1].swingSpeedSmoothed**2)
+        combinedArray[i].combinedSwingSpeedSmoothed = (combinedArray[i].swingSpeedSmoothed**2 + combinedArray[i-1].swingSpeedSmoothed**2)**(1/Variables.combined_root_power)
             # TODO Fix Combine function with new variables
         combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.stamina_Power + combinedArray[i].patternDiff**Variables.pattern_Power) * min(
             math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.stamina_Power), combinedArray[i].patternDiff**Variables.pattern_Power)

@@ -18,37 +18,49 @@ class Data: #Class to Hold Training Data and results
         self.results = 0
         self.accuracy = 0
         self.index = 0
-    def calcAccuracy(self):
-        self.accuracy = self.results/self.expectedResults
 
 class NewValues:    #Class to Hold Data about Average Values at the end of each generation and values for each child in a generation
-    def __init__(self, angle_easy, angle_semi_mid, angle_mid, angle_hard, side_easy, side_semi_mid, side_mid, side_hard,
-        vert_easy, vert_semi_mid, vert_mid, stack_easy_power, stack_hard_power, stamina_power, pattern_power,
-        SSSH, pattern_history, stamin_history, combined_history, angle_div,top1Weight, medianWeight, array_scaling):
+    def __init__(self, 
+    angle_easy, angle_semi_mid, angle_mid, angle_hard, 
+    side_easy, side_semi_mid, side_mid, side_hard,
+    vert_easy, vert_semi_mid, vert_mid, 
+    angle_Div, 
+    stack_easy_power, stack_hard_power, stamina_power, pattern_power, combined_Root_Power, angle_Power,
+    SSSH, stamina_history, pattern_history,combined_history, 
+    top1Weight, medianWeight, array_scaling):
         self.generation = 0
         self.angle_easy = angle_easy
         self.angle_semi_mid = angle_semi_mid
         self.angle_mid = angle_mid
         self.angle_hard = angle_hard
+
         self.side_easy = side_easy
         self.side_semi_mid = side_semi_mid
         self.side_mid = side_mid
         self.side_hard = side_hard
+
         self.vert_easy = vert_easy
         self.vert_semi_mid = vert_semi_mid
         self.vert_mid = vert_mid
+
+        self.angle_div = angle_Div
+
         self.stack_easy_power = stack_easy_power
         self.stack_hard_power = stack_hard_power
         self.stamina_power = stamina_power
         self.pattern_power = pattern_power
+        self.combined_root_power = combined_Root_Power
+        self.angle_power = angle_Power
+
         self.SSSH = SSSH
+        self.stamina_history = stamina_history
         self.pattern_history = pattern_history
-        self.stamina_history = stamin_history
         self.combined_history = combined_history
-        self.angle_div = angle_div
-        self.array_scaling = array_scaling
+        
         self.top1Weight = top1Weight
         self.medianWeight = medianWeight
+        self.array_scaling = array_scaling
+
         self.Accuracy = 0
 
     def returnList(self):   #Returns all values from the class as a list
@@ -65,18 +77,20 @@ class NewValues:    #Class to Hold Data about Average Values at the end of each 
             self.vert_easy,
             self.vert_semi_mid,
             self.vert_mid,
+            self.angle_div,
             self.stack_easy_power,
             self.stack_hard_power,
             self.stamina_power,
             self.pattern_power,
+            self.combined_root_power,
+            self.angle_power,
             self.SSSH,
-            self.pattern_history,
             self.stamina_history,
+            self.pattern_history,
             self.combined_history,
-            self.angle_div,
-            self.array_scaling,
             self.top1Weight,
             self.medianWeight,
+            self.array_scaling,
             self.Accuracy]
 
 def rate_func(songID, diff, Vars: NewValues): #Function that gets called for multiprocessing
@@ -91,15 +105,17 @@ def rate_func(songID, diff, Vars: NewValues): #Function that gets called for mul
     Variables.vert_Easy = Vars.vert_easy
     Variables.vert_Semi_Mid = Vars.vert_semi_mid
     Variables.vert_Mid = Vars.vert_mid
+    Variables.angle_Div = Vars.angle_div
     Variables.stack_Easy_Power = Vars.stack_easy_power
     Variables.stack_Hard_Power = Vars.stack_hard_power
     Variables.stamina_Power = Vars.stamina_power
     Variables.pattern_Power = Vars.pattern_power
+    Variables.combined_root_power = Vars.combined_root_power
+    Variables.angle_Power = Vars.angle_power
     Variables.swng_Sped_Smoth_History = Vars.SSSH
-    Variables.pattern_History = Vars.pattern_history
     Variables.stamina_History = Vars.stamina_history
+    Variables.pattern_History = Vars.pattern_history
     Variables.combined_History = Vars.combined_history
-    Variables.angle_Div = Vars.angle_div
     Variables.Top1Weight = Vars.top1Weight
     Variables.MedianWeight = Vars.medianWeight
     Variables.array_Scaling = Vars.array_scaling
@@ -168,17 +184,21 @@ if __name__ == "__main__":
         NewBreadth = START_BREADTH-((START_BREADTH-END_BREADTH)*j/GENERATIONS)#Slowly Reduces randomizing spread after each generation
         progress_threshold = PROGRESS_SPLIT #as a percentage
         ValueArray: list[NewValues] = [] #Initializes/Empties List
-        SOGenerations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)) #Adds an entry to the list so it can change numbers
+        SOGenerations.append(NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)) #Adds an entry to the list so it can change numbers
         First = True
         start_time = time.time()    #For measuring time per child
         print(f"Breadth: {round(NewBreadth,5)}")
         for i in range(0, CHILDREN):    #Child loop, Loops as many times as it needs for children to fill array with values to test
             if First:   #First Entry in Value Array is the same as the Top Average of the previous generation
-                ValueArray.append(NewValues(Variables.angle_Easy,Variables.angle_Semi_Mid,Variables.angle_Mid,Variables.angle_Hard,
+                ValueArray.append(NewValues(
+                    Variables.angle_Easy,Variables.angle_Semi_Mid,Variables.angle_Mid,Variables.angle_Hard,
                     Variables.side_Easy,Variables.side_Semi_Mid,Variables.side_Mid,Variables.side_Hard,
-                    Variables.vert_Easy,Variables.vert_Semi_Mid,Variables.vert_Mid,Variables.stack_Easy_Power,Variables.stack_Hard_Power,
-                    Variables.stamina_Power,Variables.pattern_Power,Variables.swng_Sped_Smoth_History,Variables.pattern_History,
-                    Variables.stamina_History,Variables.combined_History,Variables.angle_Div,Variables.Top1Weight,Variables.MedianWeight,Variables.array_Scaling))
+                    Variables.vert_Easy,Variables.vert_Semi_Mid,Variables.vert_Mid,
+                    Variables.angle_Div,
+                    Variables.stack_Easy_Power,Variables.stack_Hard_Power,Variables.stamina_Power,Variables.pattern_Power, Variables.combined_root_power,
+                    Variables.angle_Power,
+                    Variables.swng_Sped_Smoth_History,Variables.stamina_History,Variables.pattern_History,
+                    Variables.combined_History,Variables.Top1Weight,Variables.MedianWeight,Variables.array_Scaling))
                 First = False
             else: # Assigns Random Values withn the Breadth of the Previous Generations Top Average
                 ValueArray.append(NewValues(
@@ -193,15 +213,17 @@ if __name__ == "__main__":
                     random.uniform(Variables.vert_Easy/NewBreadth,Variables.vert_Easy*NewBreadth),
                     random.uniform(Variables.vert_Semi_Mid/NewBreadth,Variables.vert_Semi_Mid*NewBreadth),
                     random.uniform(Variables.vert_Mid/NewBreadth,Variables.vert_Mid*NewBreadth),
+                    random.uniform(Variables.angle_Div/NewBreadth,Variables.angle_Div*NewBreadth),
                     random.uniform(Variables.stack_Easy_Power/NewBreadth,Variables.stack_Easy_Power*NewBreadth),
                     random.uniform(Variables.stack_Hard_Power/NewBreadth,Variables.stack_Hard_Power*NewBreadth),
                     random.uniform(Variables.stamina_Power/NewBreadth,Variables.stamina_Power*NewBreadth),
                     random.uniform(Variables.pattern_Power/NewBreadth,Variables.pattern_Power*NewBreadth),
+                    random.uniform(Variables.combined_root_power/NewBreadth,Variables.combined_root_power*NewBreadth),
+                    random.uniform(Variables.angle_Power/NewBreadth,Variables.angle_Power*NewBreadth),
                     round(random.uniform(Variables.swng_Sped_Smoth_History/NewBreadth,Variables.swng_Sped_Smoth_History*NewBreadth)),
-                    round(random.uniform(Variables.pattern_History/NewBreadth,Variables.pattern_History*NewBreadth)),
                     round(random.uniform(Variables.stamina_History/NewBreadth,Variables.stamina_History*NewBreadth)),
+                    round(random.uniform(Variables.pattern_History/NewBreadth,Variables.pattern_History*NewBreadth)),
                     round(random.uniform(Variables.combined_History/NewBreadth,Variables.combined_History*NewBreadth)),
-                    random.uniform(Variables.angle_Div/NewBreadth,Variables.angle_Div*NewBreadth),
                     random.uniform(Variables.Top1Weight/WEIGHTEDBRANCH,Variables.Top1Weight*WEIGHTEDBRANCH),
                     random.uniform(Variables.MedianWeight/WEIGHTEDBRANCH,Variables.MedianWeight*WEIGHTEDBRANCH),
                     random.uniform(Variables.array_Scaling/WEIGHTEDBRANCH,Variables.array_Scaling*WEIGHTEDBRANCH) 
@@ -250,7 +272,7 @@ if __name__ == "__main__":
 
         ValueArray.sort(key=lambda x: x.Accuracy)   #Sorts all Children by their accuracy
         temp = 0
-        SOGenerations[0] = NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) #Sum of Generations
+        SOGenerations[0] = NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) #Sum of Generations
         for i in range(0, TOP_PICKS):   #There is a better way to do this but *shrug* Averages Top Picks and Averages them for the next Generation
             SOGenerations[0].angle_easy += ValueArray[i].angle_easy
             SOGenerations[0].angle_semi_mid += ValueArray[i].angle_semi_mid
@@ -263,18 +285,20 @@ if __name__ == "__main__":
             SOGenerations[0].vert_easy += ValueArray[i].vert_easy
             SOGenerations[0].vert_semi_mid += ValueArray[i].vert_semi_mid
             SOGenerations[0].vert_mid += ValueArray[i].vert_mid
+            SOGenerations[0].angle_div += ValueArray[i].angle_div
             SOGenerations[0].stack_easy_power += ValueArray[i].stack_easy_power
             SOGenerations[0].stack_hard_power += ValueArray[i].stack_hard_power
             SOGenerations[0].stamina_power += ValueArray[i].stamina_power
             SOGenerations[0].pattern_power += ValueArray[i].pattern_power
+            SOGenerations[0].combined_root_power += ValueArray[i].combined_root_power
+            SOGenerations[0].angle_power += ValueArray[i].angle_power
             SOGenerations[0].SSSH += ValueArray[i].SSSH
-            SOGenerations[0].pattern_history += ValueArray[i].pattern_history
             SOGenerations[0].stamina_history += ValueArray[i].stamina_history
-            SOGenerations[0].combined_history += ValueArray[i].combined_history
-            SOGenerations[0].angle_div += ValueArray[i].angle_div
-            SOGenerations[0].array_scaling += ValueArray[i].array_scaling
+            SOGenerations[0].pattern_history += ValueArray[i].pattern_history
+            SOGenerations[0].combined_history += ValueArray[i].combined_history   
             SOGenerations[0].top1Weight += ValueArray[i].top1Weight
             SOGenerations[0].medianWeight += ValueArray[i].medianWeight
+            SOGenerations[0].array_scaling += ValueArray[i].array_scaling
             SOGenerations[0].Accuracy += ValueArray[i].Accuracy
         SOGenerations[0].angle_easy = SOGenerations[0].angle_easy/TOP_PICKS
         SOGenerations[0].angle_semi_mid = SOGenerations[0].angle_semi_mid/TOP_PICKS
@@ -287,18 +311,20 @@ if __name__ == "__main__":
         SOGenerations[0].vert_easy = SOGenerations[0].vert_easy/TOP_PICKS
         SOGenerations[0].vert_semi_mid = SOGenerations[0].vert_semi_mid/TOP_PICKS
         SOGenerations[0].vert_mid = SOGenerations[0].vert_mid/TOP_PICKS
+        SOGenerations[0].angle_div = SOGenerations[0].angle_div/TOP_PICKS
         SOGenerations[0].stack_easy_power = SOGenerations[0].stack_easy_power/TOP_PICKS
         SOGenerations[0].stack_hard_power = SOGenerations[0].stack_hard_power/TOP_PICKS
         SOGenerations[0].stamina_power = SOGenerations[0].stamina_power/TOP_PICKS
         SOGenerations[0].pattern_power = SOGenerations[0].pattern_power/TOP_PICKS
+        SOGenerations[0].combined_root_power = SOGenerations[0].combined_root_power/TOP_PICKS
+        SOGenerations[0].angle_power = SOGenerations[0].angle_power/TOP_PICKS
         SOGenerations[0].SSSH = SOGenerations[0].SSSH/TOP_PICKS
-        SOGenerations[0].pattern_history = SOGenerations[0].pattern_history/TOP_PICKS
         SOGenerations[0].stamina_history = SOGenerations[0].stamina_history/TOP_PICKS
+        SOGenerations[0].pattern_history = SOGenerations[0].pattern_history/TOP_PICKS
         SOGenerations[0].combined_history = SOGenerations[0].combined_history/TOP_PICKS
-        SOGenerations[0].angle_div = SOGenerations[0].angle_div/TOP_PICKS
-        SOGenerations[0].array_scaling = SOGenerations[0].array_scaling/TOP_PICKS
         SOGenerations[0].top1Weight = SOGenerations[0].top1Weight/TOP_PICKS
         SOGenerations[0].medianWeight = SOGenerations[0].medianWeight/TOP_PICKS
+        SOGenerations[0].array_scaling = SOGenerations[0].array_scaling/TOP_PICKS
         SOGenerations[0].Accuracy = SOGenerations[0].Accuracy/TOP_PICKS
         SOGenerations[0].generation = j+1
         AverageIteration.append(deepcopy(SOGenerations[0]))
@@ -318,18 +344,20 @@ if __name__ == "__main__":
         Variables.vert_Easy = AverageIteration[-1].vert_easy
         Variables.vert_Semi_Mid = AverageIteration[-1].vert_semi_mid
         Variables.vert_Mid = AverageIteration[-1].vert_mid
+        Variables.angle_Div = AverageIteration[-1].angle_div
         Variables.stack_Easy_Power = AverageIteration[-1].stack_easy_power
         Variables.stack_Hard_Power = AverageIteration[-1].stack_hard_power
         Variables.stamina_Power = AverageIteration[-1].stamina_power
         Variables.pattern_Power = AverageIteration[-1].pattern_power
+        Variables.combined_root_power = AverageIteration[-1].combined_root_power
+        Variables.angle_Power = AverageIteration[-1].angle_power
         Variables.swng_Sped_Smoth_History = AverageIteration[-1].SSSH
-        Variables.pattern_History = AverageIteration[-1].pattern_history
         Variables.stamina_History = AverageIteration[-1].stamina_history
+        Variables.pattern_History = AverageIteration[-1].pattern_history
         Variables.combined_History = AverageIteration[-1].combined_history
-        Variables.angle_Div = AverageIteration[-1].angle_div
-        Variables.array_Scaling = AverageIteration[-1].array_scaling
         Variables.Top1Weight = AverageIteration[-1].top1Weight
         Variables.MedianWeight = AverageIteration[-1].medianWeight
+        Variables.array_Scaling = AverageIteration[-1].array_scaling
     finalMapAcc: list = []
     for data in DataArray:  #Gathering Data about the Full run
         folder_path, song_diff = Rating_Algorithm.selectDiff(data.songID, False, 1)
@@ -342,8 +370,9 @@ if __name__ == "__main__":
     fileName = "Results"
     accHeaderList = ['songID','Expected Acc','Results','Difference']
     headerList = ['Generation','angle_Easy','angle_Semi_Mid','angle_Mid','angle_Hard','side_Easy','side_Semi_Mid','side_Mid','side_Hard',
-        'vert_Easy','vert_Semi_Mid','vert_Mid','stack_Easy_Power','stack_Hard_Power','stamina_Power','pattern_Power',
-        'SSSH','pattern_History','stamina_History','combined_History','angle_Div','array_scaling','Top 1% Weight','Median Weight','Accuracy']
+        'vert_Easy','vert_Semi_Mid','vert_Mid','angle_Div',
+        'stack_Easy_Power','stack_Hard_Power','stamina_Power','pattern_Power','Com_Root_Power','Angle Power',
+        'SSSH','stamina_History','pattern_History','combined_History','Top 1% Weight','Median Weight','array_scaling','Accuracy']
 
     excelFileName = os.path.join(f"{folderName}/{fileName} export.csv")
     try:
