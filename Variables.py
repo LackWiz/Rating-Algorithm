@@ -1,36 +1,34 @@
-import re
+angle_Easy = 1
+angle_Semi_Mid = 1.1
+angle_Mid = 1.3
+angle_Hard = 1.5
 
-angle_Easy = 5.43          #incremenet by 0.01 from 
-angle_Semi_Mid = 65.59
-angle_Mid = 69.89
-angle_Hard = 372.01
+side_Easy = 1
+side_Semi_Mid = 1.05
+side_Mid = 1.2
+side_Hard = 1.5
 
-side_Easy = 35.29
-side_Semi_Mid = 48.03
-side_Mid = 157.18
-side_Hard = 245.87
+vert_Easy = 1
+vert_Semi_Mid = 1.05
+vert_Mid = 1.2
 
-vert_Easy = 29.67
-vert_Semi_Mid = 143.63
-vert_Mid = 531.71
-
-stack_Easy_Power = 1.85   #incremenet by 0.001
-stack_Hard_Power = 56.75   #incremenet by 0.01
+stack_Easy_Power = 1/8
+stack_Hard_Power = 1/5
 
 
-stamina_Power = 1.139
-pattern_Power = 0.210
+stamina_Power = 2
+pattern_Power = 2
 
-swng_Sped_Smoth_History = 2679
-pattern_History = 9985
-stamina_History = 50940
-combined_History = 4303
+swng_Sped_Smoth_History = 32
+pattern_History = 128
+stamina_History = 256
+combined_History = 128
 
-angle_Div = 8927
+angle_Div = 45
 
-Top1Weight = 15.99
-MedianWeight = 5.085
-array_Scaling = 2.789
+Top1Weight = 7
+MedianWeight = 3
+array_Scaling = 4.069
 
 
 
