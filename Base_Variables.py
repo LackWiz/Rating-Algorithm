@@ -28,6 +28,8 @@ combined_History = 128
 
 angle_Div = 45
 
+Top1Weight = 7
+MedianWeight = 3
 array_Scaling = 4.069
 
 

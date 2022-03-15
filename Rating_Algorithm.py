@@ -274,13 +274,9 @@ def extractBloqData(songNoteArray, bpm_list: list):
 
     BloqDataArray: list[Bloq] = []
     t = 0 #To keep track of what bpm to use
-    mspb = 60*1000/bpm_list[0]
+    mspb = 60*1000/bpm_list[0]  #Uses ms per beat for all calculations
     for i, block in enumerate(songNoteArray):
         block['_cutDirection'] = min(block['_cutDirection'], 8)
-        if t+1 < len(bpm_list):
-            if bpm_list[t+1]['_time'] <= block['_time']:
-                t += 1
-                mspb = 60*1000/bpm_list[t]['_BPM']  # milliseconds per beat
         # Checks if the note behind is super close, and treats it as a single swing
         if i == 0:
             BloqDataArray.append(Bloq(
