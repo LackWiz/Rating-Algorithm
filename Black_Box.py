@@ -169,13 +169,13 @@ if __name__ == "__main__":
     for i in range(0,len(DataArray)):   #Adds an indexing number to each entry in the array
         DataArray[i].index=i
     START_BREADTH = 1.5   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
-    END_BREADTH = 1.1
-    WEIGHTEDBRANCH = 1.1   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
+    END_BREADTH = 1.4
+    WEIGHTEDBRANCH = 1.25   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
     SOGenerations: list[NewValues] = []
     AverageIteration: list[NewValues] = []
     GENERATIONS = 10           #Number of Gererations
-    CHILDREN = 140               #Number of Children per generation
-    TOP_PICKS = 10            #Top picks to average for next generation
+    CHILDREN = 5000               #Number of Children per generation
+    TOP_PICKS = 100            #Top picks to average for next generation
     PROGRESS_SPLIT = 25        #How often to mark progress in the terminal as a percentage (just a visual)
 
     maxProcesses = multiprocessing.cpu_count()  #Checks how many cores that are avaliable
@@ -364,7 +364,6 @@ if __name__ == "__main__":
         mapReturn = Rating_Algorithm.Main(folder_path, song_diff[0], data.songID, False)[1]
         finalMapAcc.append([data.songID,data.expectedResults,mapReturn,mapReturn-data.expectedResults])
 
-
     #Excel shannagins
     folderName = "MachineLearning"
     fileName = "Results"
@@ -373,6 +372,35 @@ if __name__ == "__main__":
         'vert_Easy','vert_Semi_Mid','vert_Mid','angle_Div',
         'stack_Easy_Power','stack_Hard_Power','stamina_Power','pattern_Power','Com_Root_Power','Angle Power',
         'SSSH','stamina_History','pattern_History','combined_History','Top 1% Weight','Median Weight','array_scaling','Accuracy']
+    pyFileName = os.path.join(f"{folderName}/Variables.py")
+
+    v = open(pyFileName, "w+")
+    v.write(f'angle_Easy = {ValueArray[0].angle_easy}\n')
+    v.write(f'angle_Semi_Mid = {ValueArray[0].angle_semi_mid}\n')
+    v.write(f'angle_Mid = {ValueArray[0].angle_mid}\n')
+    v.write(f'angle_Hard = {ValueArray[0].angle_hard}\n\n')
+    v.write(f'side_Easy = {ValueArray[0].side_easy}\n')
+    v.write(f'side_Semi_Mid = {ValueArray[0].side_semi_mid}\n')
+    v.write(f'side_Mid = {ValueArray[0].side_mid}\n')
+    v.write(f'side_Hard = {ValueArray[0].side_hard}\n\n')
+    v.write(f'vert_Easy = {ValueArray[0].vert_easy}\n')
+    v.write(f'vert_Semi_Mid = {ValueArray[0].vert_semi_mid}\n')
+    v.write(f'vert_Mid = {ValueArray[0].vert_mid}\n\n')
+    v.write(f'angle_Div = {ValueArray[0].angle_div}\n\n')
+    v.write(f'stack_Easy_Power = {ValueArray[0].stack_easy_power}\n')
+    v.write(f'stack_Hard_Power = {ValueArray[0].stack_hard_power}\n')
+    v.write(f'stamina_Power = {ValueArray[0].stamina_power}\n')
+    v.write(f'pattern_Power = {ValueArray[0].pattern_power}\n')
+    v.write(f'combined_root_power = {ValueArray[0].combined_root_power}\n')
+    v.write(f'angle_Power = {ValueArray[0].angle_power}\n\n')
+    v.write(f'swng_Sped_Smoth_History = {ValueArray[0].SSSH}\n')
+    v.write(f'stamina_History = {ValueArray[0].stamina_history}\n')
+    v.write(f'pattern_History = {ValueArray[0].pattern_history}\n')
+    v.write(f'combined_History = {ValueArray[0].combined_history}\n\n')
+    v.write(f'Top1Weight = {ValueArray[0].top1Weight}\n')
+    v.write(f'MedianWeight = {ValueArray[0].medianWeight}\n')
+    v.write(f'array_Scaling = {ValueArray[0].array_scaling}\n')
+    v.close()
 
     excelFileName = os.path.join(f"{folderName}/{fileName} export.csv")
     try:

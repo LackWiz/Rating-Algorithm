@@ -17,6 +17,54 @@ sliderPrecision = 1/6
 dotSliderPrecision = 1/5
 
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
+DIFFICULTY_ORDER = [
+        "ExpertPlusStandard.dat",
+        "ExpertPlus.dat",
+        "ExpertStandard.dat",
+        "Expert.dat",
+        "HardStandard.dat",
+        "Hard.dat",
+        "NormalStandard.dat",
+        "Normal.dat",
+        "EasyStandard.dat",
+        "Easy.dat",
+        "ExpertPlusLawless.dat",
+        "ExpertLawless.dat",
+        "HardLawless.dat",
+        "NormalLawless.dat",
+        "EasyLawless.dat",
+        "ExpertPlusNoArrows.dat",
+        "ExpertNoArrows.dat",
+        "HardNoArrows.dat",
+        "NormalNoArrows.dat",
+        "EasyNoArrows.dat",
+        "ExpertPlus90Degree.dat",
+        "Expert90Degree.dat",
+        "Hard90Degree.dat",
+        "Normal90Degree.dat",
+        "Easy90Degree.dat",
+        "90DegreeExpertPlus.dat",
+        "90DegreeExpert.dat",
+        "90DegreeHard.dat",
+        "90DegreeNormal.dat",
+        "90DegreeEasy.dat",
+        "ExpertPlus360Degree.dat",
+        "Expert360Degree.dat",
+        "Hard360Degree.dat",
+        "Normal360Degree.dat",
+        "Easy360Degree.dat",
+        "360DegreeExpertPlus.dat",
+        "360DegreeExpert.dat",
+        "360DegreeHard.dat",
+        "360DegreeNormal.dat",
+        "360DegreeEasy.dat",
+        "ExpertPlusLightshow.dat",
+        "ExpertLightshow.dat",
+        "HardLightshow.dat",
+        "NormalLightshow.dat",
+        "EasyLightshow.dat",
+        "*.dat"
+    ]
 
 """
 https://bsmg.wiki/mapping/map-format.html#notes-2
@@ -223,7 +271,7 @@ def findDiffs(bsPath, songFolder):
     difficulties = list(filter(lambda x: x.endswith(
         ".dat") and x.lower() != "info.dat", difficulties))
     try: 
-        difficulties = sorted(difficulties,key=Variables.DIFFICULTY_ORDER.index)
+        difficulties = sorted(difficulties,key=DIFFICULTY_ORDER.index)
     except ValueError:
         print("Couldn't Sort LOOK AT NUMBERING")
     return difficulties
