@@ -122,6 +122,9 @@ def rate_func(songID, diff, Vars: NewValues): #Function that gets called for mul
     folder_path, song_diff = Rating_Algorithm.selectDiff(songID, False, diff)
     return Rating_Algorithm.Main(folder_path, song_diff[0], songID, False)[1]   #Runs Rating _Algorithm and returns Weighted Result
     
+def rand_func(Variable, Breadth):
+    return random.uniform(Variable-(Variable*(Breadth-1)),Variable*Breadth)
+
     # print(str(return_Variable[index].results))
 if __name__ == "__main__":
     setup.checkFolderPath() #Makes sure bs_path.txt is filled
@@ -149,6 +152,7 @@ if __name__ == "__main__":
     DataArray.append(Data("20540",12.9)) 
     DataArray.append(Data("1f491",12.5)) 
     DataArray.append(Data("18a27",12.4))
+    DataArray.append(Data('1c1f7',17))
 
     # DataArray.append(Data('19053',9)) #Joshabi's Data
     # DataArray.append(Data('19924',8.45))
@@ -168,9 +172,9 @@ if __name__ == "__main__":
     # DataArray.append(Data("20848",14))
     for i in range(0,len(DataArray)):   #Adds an indexing number to each entry in the array
         DataArray[i].index=i
-    START_BREADTH = 1.5   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
-    END_BREADTH = 1.4
-    WEIGHTEDBRANCH = 1.25   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
+    START_BREADTH = 1.4   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
+    END_BREADTH = 1.25
+    WEIGHTEDBREADTH = 1.25   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
     SOGenerations: list[NewValues] = []
     AverageIteration: list[NewValues] = []
     GENERATIONS = 10           #Number of Gererations
@@ -202,41 +206,41 @@ if __name__ == "__main__":
                 First = False
             else: # Assigns Random Values withn the Breadth of the Previous Generations Top Average
                 ValueArray.append(NewValues(
-                    random.uniform(Variables.angle_Easy/NewBreadth,Variables.angle_Easy*NewBreadth),
-                    random.uniform(Variables.angle_Semi_Mid/NewBreadth,Variables.angle_Semi_Mid*NewBreadth),
-                    random.uniform(Variables.angle_Mid/NewBreadth,Variables.angle_Mid*NewBreadth),
-                    random.uniform(Variables.angle_Hard/NewBreadth,Variables.angle_Hard*NewBreadth),
-                    random.uniform(Variables.side_Easy/NewBreadth,Variables.side_Easy*NewBreadth),
-                    random.uniform(Variables.side_Semi_Mid/NewBreadth,Variables.side_Semi_Mid*NewBreadth),
-                    random.uniform(Variables.side_Mid/NewBreadth,Variables.side_Mid*NewBreadth),
-                    random.uniform(Variables.side_Hard/NewBreadth,Variables.side_Hard*NewBreadth),
-                    random.uniform(Variables.vert_Easy/NewBreadth,Variables.vert_Easy*NewBreadth),
-                    random.uniform(Variables.vert_Semi_Mid/NewBreadth,Variables.vert_Semi_Mid*NewBreadth),
-                    random.uniform(Variables.vert_Mid/NewBreadth,Variables.vert_Mid*NewBreadth),
-                    random.uniform(Variables.angle_Div/NewBreadth,Variables.angle_Div*NewBreadth),
-                    random.uniform(Variables.stack_Easy_Power/NewBreadth,Variables.stack_Easy_Power*NewBreadth),
-                    random.uniform(Variables.stack_Hard_Power/NewBreadth,Variables.stack_Hard_Power*NewBreadth),
-                    random.uniform(Variables.stamina_Power/NewBreadth,Variables.stamina_Power*NewBreadth),
-                    random.uniform(Variables.pattern_Power/NewBreadth,Variables.pattern_Power*NewBreadth),
-                    random.uniform(Variables.combined_root_power/NewBreadth,Variables.combined_root_power*NewBreadth),
-                    random.uniform(Variables.angle_Power/NewBreadth,Variables.angle_Power*NewBreadth),
-                    round(random.uniform(Variables.swng_Sped_Smoth_History/NewBreadth,Variables.swng_Sped_Smoth_History*NewBreadth)),
-                    round(random.uniform(Variables.stamina_History/NewBreadth,Variables.stamina_History*NewBreadth)),
-                    round(random.uniform(Variables.pattern_History/NewBreadth,Variables.pattern_History*NewBreadth)),
-                    round(random.uniform(Variables.combined_History/NewBreadth,Variables.combined_History*NewBreadth)),
-                    random.uniform(Variables.Top1Weight/WEIGHTEDBRANCH,Variables.Top1Weight*WEIGHTEDBRANCH),
-                    random.uniform(Variables.MedianWeight/WEIGHTEDBRANCH,Variables.MedianWeight*WEIGHTEDBRANCH),
-                    random.uniform(Variables.array_Scaling/WEIGHTEDBRANCH,Variables.array_Scaling*WEIGHTEDBRANCH) 
+                    rand_func(Variables.angle_Easy, NewBreadth),
+                    rand_func(Variables.angle_Semi_Mid, NewBreadth),
+                    rand_func(Variables.angle_Mid, NewBreadth),
+                    rand_func(Variables.angle_Hard, NewBreadth),
+                    rand_func(Variables.side_Easy, NewBreadth),
+                    rand_func(Variables.side_Semi_Mid, NewBreadth),
+                    rand_func(Variables.side_Mid, NewBreadth),
+                    rand_func(Variables.side_Hard, NewBreadth),
+                    rand_func(Variables.vert_Easy, NewBreadth),
+                    rand_func(Variables.vert_Semi_Mid, NewBreadth),
+                    rand_func(Variables.vert_Mid, NewBreadth),
+                    round(rand_func(Variables.angle_Div, NewBreadth)),
+                    rand_func(Variables.stack_Easy_Power, NewBreadth),
+                    rand_func(Variables.stack_Hard_Power, NewBreadth),
+                    rand_func(Variables.stamina_Power, NewBreadth),
+                    rand_func(Variables.pattern_Power, NewBreadth),
+                    rand_func(Variables.combined_root_power, NewBreadth),
+                    rand_func(Variables.angle_Power, NewBreadth),
+                    round(rand_func(Variables.swng_Sped_Smoth_History, NewBreadth)),
+                    round(rand_func(Variables.stamina_History, NewBreadth)),
+                    round(rand_func(Variables.pattern_History, NewBreadth),),
+                    round(rand_func(Variables.combined_History, NewBreadth),),
+                    rand_func(Variables.Top1Weight, WEIGHTEDBREADTH),
+                    rand_func(Variables.MedianWeight, WEIGHTEDBREADTH),
+                    rand_func(Variables.array_Scaling, WEIGHTEDBREADTH),
                 ))
-            ValueArray[-1].angle_mid = min(ValueArray[-1].angle_mid,ValueArray[-1].angle_hard)
-            ValueArray[-1].angle_semi_mid = min(ValueArray[-1].angle_semi_mid,ValueArray[-1].angle_mid)
-            ValueArray[-1].angle_easy = min(ValueArray[-1].angle_easy,ValueArray[-1].angle_semi_mid)
-            ValueArray[-1].side_mid = min(ValueArray[-1].side_mid,ValueArray[-1].side_hard)
-            ValueArray[-1].side_semi_mid = min(ValueArray[-1].side_semi_mid,ValueArray[-1].side_mid)
-            ValueArray[-1].side_easy = min(ValueArray[-1].side_easy,ValueArray[-1].side_semi_mid)
-            ValueArray[-1].vert_semi_mid = min(ValueArray[-1].vert_semi_mid,ValueArray[-1].vert_mid)
-            ValueArray[-1].vert_easy = min(ValueArray[-1].vert_easy,ValueArray[-1].vert_semi_mid)
-            ValueArray[-1].stack_easy_power = min(ValueArray[-1].stack_easy_power,ValueArray[-1].stack_hard_power)
+            # ValueArray[-1].angle_mid = min(ValueArray[-1].angle_mid,ValueArray[-1].angle_hard)
+            # ValueArray[-1].angle_semi_mid = min(ValueArray[-1].angle_semi_mid,ValueArray[-1].angle_mid)
+            # ValueArray[-1].angle_easy = min(ValueArray[-1].angle_easy,ValueArray[-1].angle_semi_mid)
+            # ValueArray[-1].side_mid = min(ValueArray[-1].side_mid,ValueArray[-1].side_hard)
+            # ValueArray[-1].side_semi_mid = min(ValueArray[-1].side_semi_mid,ValueArray[-1].side_mid)
+            # ValueArray[-1].side_easy = min(ValueArray[-1].side_easy,ValueArray[-1].side_semi_mid)
+            # ValueArray[-1].vert_semi_mid = min(ValueArray[-1].vert_semi_mid,ValueArray[-1].vert_mid)
+            # ValueArray[-1].vert_easy = min(ValueArray[-1].vert_easy,ValueArray[-1].vert_semi_mid)
+            # ValueArray[-1].stack_easy_power = min(ValueArray[-1].stack_easy_power,ValueArray[-1].stack_hard_power)
         First = True
         for i, Vars in enumerate(ValueArray): #Main Child Loop, Goes through every entry in the ValueArray to test every combination of values in the array
             results = []

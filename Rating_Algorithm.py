@@ -292,8 +292,9 @@ def selectDiff(song_id, user = True, lock_diff = NULL):
     difficulties = findDiffs(bsPath, songFolder)
     if user:
         print(song_id+" "+song_info['_songName'], end= " ")
-        print("Select a difficulty: ")
-        print("[a] for all diffs, separate using comma for multiple diffs")
+        print("Select a difficulty, separate using comma for multiple diffs:")
+        print("e.g. 'a'   or  '2,3,4'     or  '1'")
+        print("[a] for all diffs")
         for i in range(0, len(difficulties)):
             print(f"[{i + 1}] {difficulties[i]}")
     if lock_diff == '0':
@@ -482,6 +483,7 @@ def Main(folder_path, song_diff, song_id, user = True):
         excelFileName = excelFileName.replace("\"", "")
         excelFileName = excelFileName.replace(">", "")
         excelFileName = excelFileName.replace("<", "")
+        excelFileName = excelFileName.replace("|", "")
         try:
             f = open(excelFileName, 'w', newline="", encoding='utf-8')
         except FileNotFoundError:
@@ -491,7 +493,7 @@ def Main(folder_path, song_diff, song_id, user = True):
         finally:
             writer = csv.writer(f)
             writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed","SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
-                            "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff","","Weighted","Median","Average"])
+                            "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff","","Rated Score","Median","Average"])
             try:
                 writer.writerow(["","","",statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
                     statistics.mean([bloq.numNotes for bloq in combinedArrayRaw]),
@@ -517,9 +519,9 @@ def Main(folder_path, song_diff, song_id, user = True):
         median = str(median)
         average = str(average)
         #print(song_id+" "+song_info['_songName']+" "+song_diff)
-        print("Weighted Score:" + final_score)
-        print("Median:" + median)
-        print("Average: " + average)
+        print("Rated Score:" + final_score)
+        #print("Median:" + median)
+        #print("Average: " + average)
     
     return song_id+" "+song_info['_songName']+" "+song_diff, final_score, median, average
 

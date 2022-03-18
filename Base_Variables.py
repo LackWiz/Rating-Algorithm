@@ -1,5 +1,3 @@
-import re
-
 angle_Easy = 1          #incremenet by 0.01 from 
 angle_Semi_Mid = 1.1
 angle_Mid = 1.3

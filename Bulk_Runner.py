@@ -1,4 +1,3 @@
-from urllib import response
 import Rating_Algorithm
 import setup
 
@@ -71,7 +70,7 @@ for i, entry in enumerate(diff_list): #List Off all the songs, diffs, and scores
 
 #----------------------Export to CSV-----------------------------------------------#
 
-setup.writeToExcel("BulkResults",BulkRunName,["Name", "Weighted/Score", "Median", "Average"],diff_list)
+setup.writeToExcel("BulkResults",BulkRunName,["Name", "Rated Score", "Median", "Average"],diff_list)
 
 print("Press Enter to Exit")
 input()
