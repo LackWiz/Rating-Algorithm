@@ -1,38 +1,38 @@
-angle_Easy = 0.6674121594869713
-angle_Semi_Mid = 4.79924917448546
-angle_Mid = 0.296466552267911
-angle_Hard = 7.287199937868395
+angle_Easy = 0.4986181394401711
+angle_Semi_Mid = 1.9343212470810194
+angle_Mid = 0.2707816419401206
+angle_Hard = 15.088544548164139
 
-side_Easy = 2.443989179029632
-side_Semi_Mid = 1.4238188140034171
-side_Mid = 3.4642744190843384
-side_Hard = 1.3837883624485783
+side_Easy = 1.6044993443299822
+side_Semi_Mid = 0.832460165880043
+side_Mid = 3.6190752904932864
+side_Hard = 3.412761387277193
 
-vert_Easy = 0.15763524237556306
-vert_Semi_Mid = 2.183889288968755
-vert_Mid = 0.5759932903638199
+vert_Easy = 0.14277469840892332
+vert_Semi_Mid = 1.409596630307775
+vert_Mid = 1.582970960187366
 
-angle_Div = 95
+angle_Div = 131
 
-stack_Easy_Power = 0.1457074387387588
-stack_Hard_Power = 0.11510546668226118
-stamina_Power = 1.9576871010679504
-pattern_Power = 0.3084272880568958
-combined_stamina_root_power = 3.104414866955027
-combined_root_power = 1.4118390902275963
-combined_min_root_power = 2.203814933610453
-angle_Power = 2.152159567066464
+stack_Easy_Power = 0.10569521964685803
+stack_Hard_Power = 0.0846922938326615
+stamina_Power = 8.641912116651978
+pattern_Power = 0.28278413159789273
+combined_stamina_root_power = 4.14689746648454
+combined_root_power = 5.357594191493872
+combined_min_root_power = 2.427319151551405
+angle_Power = 2.499969139691707
 
-swng_Sped_Smoth_History = 165
-stamina_History = 360
-pattern_History = 422
-combined_History = 637
+swng_Sped_Smoth_History = 198
+stamina_History = 649
+pattern_History = 205
+combined_History = 196
 
-stamina_Weight = 8.648586011586167
+stamina_Weight = 14.148871100013443
 pattern_Weight = 5
 
-Top1Weight = 3.6050517353895675
-Top5Weight = 5.170464644373253
-Top20Weight = 5.67637223279346
+Top1Weight = 5.494305956730229
+Top5Weight = 4.399419826056472
+Top20Weight = 5.360979071657905
 MedianWeight = 5
-array_Scaling = 7.119471738848862
+array_Scaling = 7.656195086708639

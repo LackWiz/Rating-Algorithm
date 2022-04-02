@@ -552,7 +552,7 @@ def Main(folder_path, song_diff, song_id, user=True):
         median = str(median)
         average = str(average)
         #print(song_id+" "+song_info['_songName']+" "+song_diff)
-        print("Rated Score:" + final_score)
+        #print("Rated Score:" + final_score)
         #print("Median:" + median)
         #print("Average: " + average)
 

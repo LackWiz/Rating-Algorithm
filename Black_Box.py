@@ -150,39 +150,32 @@ if __name__ == "__main__":
     DataArray: list[Data] = []
     #Add data as "DataArray.append('songID', yourStarValue)""
     DataArray.append(Data('c32d',14)) #Lack's Data 
-    DataArray.append(Data('170d0',8)) 
+    DataArray.append(Data('170d0',7)) 
     DataArray.append(Data('1e4b4',5)) 
-    # DataArray.append(Data("190b4",17)) 
-    DataArray.append(Data('1df5b',12)) 
-    DataArray.append(Data('217a8',10.25)) 
-    DataArray.append(Data('18a92',9.25)) 
-    DataArray.append(Data('17cc0',9))
+    DataArray.append(Data('169e6',11)) 
+    DataArray.append(Data('1df5b',11.5)) 
+    DataArray.append(Data('217a8',10.5)) 
+    DataArray.append(Data('18a92',9)) 
+    DataArray.append(Data('17cc0',9.75))
     DataArray.append(Data('17ecf',7)) 
-    DataArray.append(Data('1cb5f',10.5))
     DataArray.append(Data('d6a6',9.25))
-    DataArray.append(Data('1a37c',12.75))
+    DataArray.append(Data('1a37c',12.25))
     DataArray.append(Data('1dc95',11.9))
     DataArray.append(Data('1fa21',9.25))
-    DataArray.append(Data('1d5d4',10))
-    DataArray.append(Data('1dcc5',5))
+    DataArray.append(Data('1d5d4',9.75))
+    DataArray.append(Data('1dcc5',4))
+    DataArray.append(Data('20fa4',9.5))
+    DataArray.append(Data('19c66',8.75))
 
-    DataArray.append(Data("1db9d",13.25)) #Syncs Data 
-    DataArray.append(Data("20540",12.9)) 
-    DataArray.append(Data("1f491",12.5)) 
-    DataArray.append(Data("18a27",12.4))
     DataArray.append(Data('1c1f7',17))
-
-    # DataArray.append(Data('19053',9)) #Joshabi's Data
-    # DataArray.append(Data('19924',8.45))
 
     DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
     DataArray.append(Data("9e5c",11.77)) 
-    DataArray.append(Data("16d07",10.5)) 
+    DataArray.append(Data("16d07",10.75)) 
     DataArray.append(Data("1ace8",10.62)) 
     DataArray.append(Data("1a017",13.22)) 
-    DataArray.append(Data("1a209",13.75)) 
+    DataArray.append(Data("1a209",14.25)) 
     DataArray.append(Data('15836',9.5))
-    DataArray.append(Data('9deb',8))
     DataArray.append(Data("17914",12.88))
     DataArray.append(Data('7d6c',10.75))
 
@@ -191,7 +184,7 @@ if __name__ == "__main__":
     for i in range(0,len(DataArray)):   #Adds an indexing number to each entry in the array
         DataArray[i].index=i
     START_BREADTH = 1.4   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
-    END_BREADTH = 1.25
+    END_BREADTH = 1.3
     WEIGHTEDBREADTH = 1.25   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
     SOGenerations: list[NewValues] = []
     AverageIteration: list[NewValues] = []
@@ -283,12 +276,12 @@ if __name__ == "__main__":
             for data in DataArray:  #Accuracy Calculation, Based on a piecewise function to prevent single map outliers
                 if data.songID == 'c32d':   #Extra weight for c32d if it exists, you can replace with map of choice or change 'c32d' to whatever song you'd like
                     data.accuracy = max(
-                        (abs(float(data.results)-data.expectedResults)*102/data.expectedResults)**0.5,
-                        (abs((float(data.results)-data.expectedResults)*102/data.expectedResults))**8)
+                        (abs((float(data.results)-data.expectedResults)*8))**0.5,
+                        (abs((float(data.results)-data.expectedResults)*8))**8)
                 else:
                     data.accuracy = max(
-                        (abs(float(data.results)-data.expectedResults)*102/data.expectedResults)**0.75,
-                        (abs((float(data.results)-data.expectedResults)*102/data.expectedResults))**4)
+                        (abs((float(data.results)-data.expectedResults)*4))**0.5,
+                        (abs((float(data.results)-data.expectedResults)*4))**8)
                 temp += data.accuracy
             Vars.Accuracy = temp/len(DataArray) #Averages all accuracies for this Child
 
@@ -418,8 +411,8 @@ if __name__ == "__main__":
         'vert_Easy','vert_Semi_Mid','vert_Mid','angle_Div',
         'stack_Easy_Power','stack_Hard_Power','stamina_Power','pattern_Power','Com_Stam_Root_Power','Com_Root_Power','Com_min_root_power','Angle Power',
         'SSSH','stamina_History','pattern_History','combined_History','stam_weight','pattern_weight','Top 1% Weight','Top 5% Weight','Top 20% Weight','Median Weight','array_scaling','Accuracy']
-    pyFileName = os.path.join(f"{folderName}/Variables.py")
-
+    
+    pyFileName = os.path.join(f"{folderName}/Best Variables.py")
     v = open(pyFileName, "w+")
     v.write(f'angle_Easy = {ValueArray[0].angle_easy}\n')
     v.write(f'angle_Semi_Mid = {ValueArray[0].angle_semi_mid}\n')
@@ -452,6 +445,41 @@ if __name__ == "__main__":
     v.write(f'Top20Weight = {ValueArray[0].top20Weight}\n')
     v.write(f'MedianWeight = {ValueArray[0].medianWeight}\n')
     v.write(f'array_Scaling = {ValueArray[0].array_scaling}\n')
+    v.close()
+    
+    pyFileName = os.path.join(f"{folderName}/Average Variables.py")
+    v = open(pyFileName, "w+")
+    v.write(f'angle_Easy = {AverageIteration[-1].angle_easy}\n')
+    v.write(f'angle_Semi_Mid = {AverageIteration[-1].angle_semi_mid}\n')
+    v.write(f'angle_Mid = {AverageIteration[-1].angle_mid}\n')
+    v.write(f'angle_Hard = {AverageIteration[-1].angle_hard}\n\n')
+    v.write(f'side_Easy = {AverageIteration[-1].side_easy}\n')
+    v.write(f'side_Semi_Mid = {AverageIteration[-1].side_semi_mid}\n')
+    v.write(f'side_Mid = {AverageIteration[-1].side_mid}\n')
+    v.write(f'side_Hard = {AverageIteration[-1].side_hard}\n\n')
+    v.write(f'vert_Easy = {AverageIteration[-1].vert_easy}\n')
+    v.write(f'vert_Semi_Mid = {AverageIteration[-1].vert_semi_mid}\n')
+    v.write(f'vert_Mid = {AverageIteration[-1].vert_mid}\n\n')
+    v.write(f'angle_Div = {AverageIteration[-1].angle_div}\n\n')
+    v.write(f'stack_Easy_Power = {AverageIteration[-1].stack_easy_power}\n')
+    v.write(f'stack_Hard_Power = {AverageIteration[-1].stack_hard_power}\n')
+    v.write(f'stamina_Power = {AverageIteration[-1].stamina_power}\n')
+    v.write(f'pattern_Power = {AverageIteration[-1].pattern_power}\n')
+    v.write(f'combined_stamina_root_power = {AverageIteration[-1].combined_stamina_root_power}\n')
+    v.write(f'combined_root_power = {AverageIteration[-1].combined_root_power}\n')
+    v.write(f'combined_min_root_power = {AverageIteration[-1].combined_min_rool_power}\n')
+    v.write(f'angle_Power = {AverageIteration[-1].angle_power}\n\n')
+    v.write(f'swng_Sped_Smoth_History = {AverageIteration[-1].SSSH}\n')
+    v.write(f'stamina_History = {AverageIteration[-1].stamina_history}\n')
+    v.write(f'pattern_History = {AverageIteration[-1].pattern_history}\n')
+    v.write(f'combined_History = {AverageIteration[-1].combined_history}\n\n')
+    v.write(f'stamina_Weight = {AverageIteration[-1].stamina_weight}\n')
+    v.write(f'pattern_Weight = {AverageIteration[-1].pattern_weight}\n\n')
+    v.write(f'Top1Weight = {AverageIteration[-1].top1Weight}\n')
+    v.write(f'Top5Weight = {AverageIteration[-1].top5Weight}\n')
+    v.write(f'Top20Weight = {AverageIteration[-1].top20Weight}\n')
+    v.write(f'MedianWeight = {AverageIteration[-1].medianWeight}\n')
+    v.write(f'array_Scaling = {AverageIteration[-1].array_scaling}\n')
     v.close()
 
     excelFileName = os.path.join(f"{folderName}/{fileName} export.csv")
