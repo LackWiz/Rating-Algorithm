@@ -1,6 +1,5 @@
-from urllib import response
-import Rating_Algorithm
-import setup
+import _BackendFiles.Rating_Algorithm as Rating_Algorithm
+import _BackendFiles.setup as setup
 
 import requests
 import json
@@ -31,7 +30,7 @@ playlist_Path = playlist_Path.name
 #--------------Setup--------------------------
 setup.checkFolderPath()
 
-with open(playlist_Path, encoding='utf8') as playlist_json:
+with open(playlist_Path, encoding='ISO-8859-1') as playlist_json:
     playlistRaw = json.load(playlist_json)
     
 BulkRunName = playlistRaw['playlistTitle']
@@ -45,7 +44,7 @@ for i, song in enumerate(hash_list):
         song_id = resultJson["id"]
         
         if(hash_list[i].lower() != resultJson["versions"][0]["hash"].lower()):
-            print(f"Hash {(resultJson['name'])} From Playlist Entry Doesn't match BeatSaver or is unavaliable")
+            print(f"Hash {song_id} {(resultJson['name'])} From Playlist Entry Doesn't match BeatSaver or is unavaliable")
             print("You seem to have an older version of this song?")
             print("The Results may be different due to possible different local map versus hosted map")
             print("If you just have an old entry but no song, a new version of the song will be downloaded but you'll need to update the playlist manually")
@@ -71,7 +70,7 @@ for i, entry in enumerate(diff_list): #List Off all the songs, diffs, and scores
 
 #----------------------Export to CSV-----------------------------------------------#
 
-setup.writeToExcel("BulkResults",BulkRunName,["Name", "Weighted/Score", "Median", "Average"],diff_list)
+setup.writeToExcel("BulkResults",BulkRunName,["Name", "Rated Score", "Median", "Average"],diff_list)
 
 print("Press Enter to Exit")
 input()

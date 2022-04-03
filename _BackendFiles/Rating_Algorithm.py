@@ -4,9 +4,9 @@ import os
 import json
 import math
 import csv
-import MapDownloader
-import Variables
-import setup
+import _BackendFiles.MapDownloader as MapDownloader
+import _BackendFiles.Variables as Variables
+import _BackendFiles.setup as setup
 from collections import deque
 #import tkinter as tk
 #from tkinter.filedialog import askdirectory
@@ -17,6 +17,54 @@ sliderPrecision = 1/6
 dotSliderPrecision = 1/5
 
 cut_direction_index = [90, 270, 0, 180, 45, 135, 315, 225]
+DIFFICULTY_ORDER = [
+    "ExpertPlusStandard.dat",
+    "ExpertPlus.dat",
+    "ExpertStandard.dat",
+    "Expert.dat",
+    "HardStandard.dat",
+    "Hard.dat",
+    "NormalStandard.dat",
+    "Normal.dat",
+    "EasyStandard.dat",
+    "Easy.dat",
+    "ExpertPlusLawless.dat",
+    "ExpertLawless.dat",
+    "HardLawless.dat",
+    "NormalLawless.dat",
+    "EasyLawless.dat",
+    "ExpertPlusNoArrows.dat",
+    "ExpertNoArrows.dat",
+    "HardNoArrows.dat",
+    "NormalNoArrows.dat",
+    "EasyNoArrows.dat",
+    "ExpertPlus90Degree.dat",
+    "Expert90Degree.dat",
+    "Hard90Degree.dat",
+    "Normal90Degree.dat",
+    "Easy90Degree.dat",
+    "90DegreeExpertPlus.dat",
+    "90DegreeExpert.dat",
+    "90DegreeHard.dat",
+    "90DegreeNormal.dat",
+    "90DegreeEasy.dat",
+    "ExpertPlus360Degree.dat",
+    "Expert360Degree.dat",
+    "Hard360Degree.dat",
+    "Normal360Degree.dat",
+    "Easy360Degree.dat",
+    "360DegreeExpertPlus.dat",
+    "360DegreeExpert.dat",
+    "360DegreeHard.dat",
+    "360DegreeNormal.dat",
+    "360DegreeEasy.dat",
+    "ExpertPlusLightshow.dat",
+    "ExpertLightshow.dat",
+    "HardLightshow.dat",
+    "NormalLightshow.dat",
+    "EasyLightshow.dat",
+    "*.dat"
+]
 
 """
 https://bsmg.wiki/mapping/map-format.html#notes-2
@@ -127,7 +175,7 @@ class Bloq:
 
             # Up and Down Diff
             self.posDiff *= [Variables.vert_Easy, Variables.vert_Semi_Mid,
-                            Variables.vert_Mid][abs(2 * (not self.forehand) - self.bloqPos[1])]
+                             Variables.vert_Mid][abs(2 * (not self.forehand) - self.bloqPos[1])]
         except:
             self.posDiff = 1
 
@@ -184,8 +232,9 @@ class Bloq:
 
 
 def load_song_dat(path):
-    with open(path, encoding='utf8') as json_dat:
-        dat = json.load(json_dat)
+    with open(path, 'rb') as json_dat:
+        dat = json.loads(json_dat.read())
+        # dat = json.load(json_dat)
     return dat
 
 def findSongFolder(song_id, isuser):
@@ -204,53 +253,56 @@ def findSongFolder(song_id, isuser):
             print("Would you like to download this song? (Y/N)")
             if(response := input().capitalize() == "Y"):
                 if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
-                    print(f"Download of {id} failed. Exiting...")
+                    print(f"Download of {song_id} failed. Exiting...")
                     input()
                     exit()
             else:
                 exit()
         else:
-            print(f'Downloading Missing song {id}')
+            print(f'Downloading Missing song {song_id}')
             if not (songFolder := MapDownloader.downloadSong(song_id, bsPath)):
-                print(f"Download of {id} failed. Exiting...")
+                print(f"Download of {song_id} failed. Exiting...")
                 input()
                 exit()
     return songFolder
+
 
 def findDiffs(bsPath, songFolder):
     difficulties = os.listdir(bsPath + "/" + songFolder)
     difficulties = list(filter(lambda x: x.endswith(
         ".dat") and x.lower() != "info.dat", difficulties))
-    try: 
-        difficulties = sorted(difficulties,key=Variables.DIFFICULTY_ORDER.index)
+    try:
+        difficulties = sorted(difficulties, key=DIFFICULTY_ORDER.index)
     except ValueError:
         print("Couldn't Sort LOOK AT NUMBERING")
     return difficulties
 
-def selectDiff(song_id, user = True, lock_diff = NULL):
+
+def selectDiff(song_id, user=True, lock_diff=NULL):
     song_diff = []
     song_id = str(song_id)
     lock_diff = str(lock_diff)
-    f = open('bs_path.txt', 'r')
+    f = open('_BackendFiles/bs_path.txt', 'r')
     bsPath = f.read()
     f.close
-    
-    songFolder = findSongFolder(song_id, isuser = user)
+
+    songFolder = findSongFolder(song_id, isuser=user)
 
     folder_path = bsPath + songFolder + '/'
 
     song_info = load_song_dat(folder_path + "Info.dat")
     difficulties = findDiffs(bsPath, songFolder)
     if user:
-        print(song_id+" "+song_info['_songName'], end= " ")
-        print("Select a difficulty: ")
-        print("[a] for all diffs, separate using comma for multiple diffs")
+        print(song_id+" "+song_info['_songName'], end=" ")
+        print("Select a difficulty, separate using comma for multiple diffs:")
+        print("e.g. 'a'   or  '2,3,4'     or  '1'")
+        print("[a] for all diffs")
         for i in range(0, len(difficulties)):
             print(f"[{i + 1}] {difficulties[i]}")
     if lock_diff == '0':
-        selectedDiffs = input() #To enable choice of difficulty
+        selectedDiffs = input()  # To enable choice of difficulty
     else:
-        selectedDiffs = lock_diff #To Lock in Some Difficulty
+        selectedDiffs = lock_diff  # To Lock in Some Difficulty
     if selectedDiffs != "a":
         selectedDiffs = selectedDiffs.replace(" ", "")
         selectedDiffs = selectedDiffs.split(",")
@@ -270,17 +322,15 @@ def selectDiff(song_id, user = True, lock_diff = NULL):
     return folder_path, song_diff
 
 # TODO: sliding window instead of reactive (for future expansion)
+
+
 def extractBloqData(songNoteArray, bpm_list: list):
 
     BloqDataArray: list[Bloq] = []
-    t = 0 #To keep track of what bpm to use
-    mspb = 60*1000/bpm_list[0]
+    t = 0  # To keep track of what bpm to use
+    mspb = 60*1000/bpm_list[0]  # Uses ms per beat for all calculations
     for i, block in enumerate(songNoteArray):
         block['_cutDirection'] = min(block['_cutDirection'], 8)
-        if t+1 < len(bpm_list):
-            if bpm_list[t+1]['_time'] <= block['_time']:
-                t += 1
-                mspb = 60*1000/bpm_list[t]['_BPM']  # milliseconds per beat
         # Checks if the note behind is super close, and treats it as a single swing
         if i == 0:
             BloqDataArray.append(Bloq(
@@ -289,8 +339,8 @@ def extractBloqData(songNoteArray, bpm_list: list):
             BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
 
         elif (block["_time"] - songNoteArray[i-1]['_time'] <= (dotSliderPrecision if block["_cutDirection"] == 8 else sliderPrecision)
-              and (block['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'], 8])) or ((block["_time"] - songNoteArray[i-1]['_time'] <= 1/32) 
-              or (True if max(block["_cutDirection"],songNoteArray[i-1]['_cutDirection']) == 8 else abs(cut_direction_index[block['_cutDirection']]-cut_direction_index[songNoteArray[i-1]['_cutDirection']]) <= 45) and (block["_time"] - songNoteArray[i-1]['_time'] <= 1/4)):
+              and (block['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'], 8])) or ((block["_time"] - songNoteArray[i-1]['_time'] <= 1/32)
+                                                                                            or (True if max(block["_cutDirection"], songNoteArray[i-1]['_cutDirection']) == 8 else abs(cut_direction_index[block['_cutDirection']]-cut_direction_index[songNoteArray[i-1]['_cutDirection']]) <= 45) and (block["_time"] - songNoteArray[i-1]['_time'] <= 1/4)):
 
             # Adds 1 to keep track of how many notes in a single swing
             BloqDataArray[-1].addNote()
@@ -316,7 +366,7 @@ def extractBloqData(songNoteArray, bpm_list: list):
                         cut_direction_index[BloqDataArray[-1].cutDirection]-cut_direction_index[BloqDataArray[-2].cutDirection]))
 
             BloqDataArray[-1].angleChangeDiff = min(
-                1+((max(BloqDataArray[-1].angleChange, 45)-45)/Variables.angle_Div)**2, 1.5)
+                1+((max(BloqDataArray[-1].angleChange, 45)-45)/Variables.angle_Div)**Variables.angle_Power, 1.5)
             BloqDataArray[-1].calcStackDiff()
             # calculates swingTime in ms and Speed and shoves into class for processing later
             BloqDataArray[-1].swingTime = (BloqDataArray[-1].time -  # Swing time in ms
@@ -328,28 +378,27 @@ def extractBloqData(songNoteArray, bpm_list: list):
             BloqDataArray[-1].angleChangeTime = BloqDataArray[-1].angleChange / \
                 (BloqDataArray[-1].swingTime)
 
-            
-
-        
     return BloqDataArray
-            
+
 
 # Uses a rolling average to assess peak swing speed
 def processArray(array: list[Bloq]):
-    SSS = 0             #Sum of Swing Speed
-    qSSS = deque()            #queue
-    SPD = 0             #Sum of Pattern Diff
-    qSPD = deque()            #queue
+    SSS = 0  # Sum of Swing Speed
+    qSSS = deque()  # queue
+    SPD = 0  # Sum of Pattern Diff
+    qSPD = deque()  # queue
     for i in range(0, len(array)):
         if(i >= Variables.swng_Sped_Smoth_History):
             SSS -= qSSS.popleft()
         qSSS.append(array[i].swingSpeed)
         SSS += qSSS[-1]
-        array[i].swingSpeedSmoothed = (SSS/min(i+1,Variables.swng_Sped_Smoth_History))
+        array[i].swingSpeedSmoothed = (
+            SSS/min(i+1, Variables.swng_Sped_Smoth_History))
 
         if(i >= Variables.pattern_History):
             SPD -= qSPD.popleft()
-        qSPD.append(array[i].angleDiff*array[i].posDiff*array[i].angleChangeDiff*array[i].stackDiff)
+        qSPD.append(array[i].angleDiff*array[i].posDiff *
+                    array[i].angleChangeDiff*array[i].stackDiff)
         SPD += qSPD[-1]
     # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
         if(i < Variables.pattern_History/4):
@@ -358,55 +407,57 @@ def processArray(array: list[Bloq]):
             array[i].patternDiff = (SPD/i)
         else:
             array[i].patternDiff = (SPD/Variables.pattern_History)
-        
+
+
 def combineAndProcessArray(array1, array2):
     processArray(array1)
     processArray(array2)
     combinedArray: list[Bloq] = array1 + array2
-    combinedArray.sort(key=lambda x: x.time) #once combined, sort by time
+    combinedArray.sort(key=lambda x: x.time)  # once combined, sort by time
     for i in range(1, len(combinedArray)):
-        combinedArray[i].combinedSwingSpeedSmoothed = math.sqrt(
-            combinedArray[i].swingSpeedSmoothed**2 + combinedArray[i-1].swingSpeedSmoothed**2)
-            # TODO Fix Combine function with new variables
-        combinedArray[i].combinedDiff = math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.stamina_Power + combinedArray[i].patternDiff**Variables.pattern_Power) * min(
-            math.sqrt(combinedArray[i].combinedSwingSpeedSmoothed**Variables.stamina_Power), combinedArray[i].patternDiff**Variables.pattern_Power)
-    
-    SCA = 0 #Sum of Combined Array
+        combinedArray[i].combinedSwingSpeedSmoothed = (
+            combinedArray[i].swingSpeedSmoothed**2 + combinedArray[i-1].swingSpeedSmoothed**2)**(1/Variables.combined_stamina_root_power)
+        # TODO Fix Combine function with new variables
+        combinedArray[i].combinedDiff = (((Variables.stamina_Weight*combinedArray[i].combinedSwingSpeedSmoothed**Variables.stamina_Power + Variables.pattern_Weight*combinedArray[i].patternDiff**Variables.pattern_Power)/(Variables.stamina_Weight+Variables.pattern_Weight))**(1/Variables.combined_root_power)) * (min(
+            combinedArray[i].combinedSwingSpeedSmoothed**Variables.stamina_Power, combinedArray[i].patternDiff**Variables.pattern_Power)**(1/Variables.combined_min_root_power))
+
+    SCA = 0  # Sum of Combined Array
     qCA = deque()
     for i in range(0, len(combinedArray)):
         if(i >= Variables.combined_History):
-            SCA -= qCA.popleft()        
+            SCA -= qCA.popleft()
         qCA.append(combinedArray[i].combinedDiff)
         SCA += qCA[-1]
-        combinedArray[i].combinedDiffSmoothed = Variables.array_Scaling*(SCA/min(i+1,Variables.combined_History))
+        combinedArray[i].combinedDiffSmoothed = Variables.array_Scaling * \
+            (SCA/min(i+1, Variables.combined_History))
 
     return combinedArray
 
-def Main(folder_path, song_diff, song_id, user = True):
+
+def Main(folder_path, song_diff, song_id, user=True):
     song_id = str(song_id)
     song_dat = load_song_dat(folder_path + song_diff)
     song_info = load_song_dat(folder_path + "Info.dat")
     bpm = song_info['_beatsPerMinute']
-    
-    
+
     # Keep only the notes
-    song_notes = list(filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
+    song_notes = list(
+        filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
     try:
         song_bpm_list = list(song_dat['_customData']['_BPMChanges'])
-        song_bpm_list.insert(0,bpm) #Put Initial BPM at front of List
+        song_bpm_list.insert(0, bpm)  # Put Initial BPM at front of List
         if user:
             print("Found BPM changes")
     except:
         song_bpm_list = [bpm]
         if user:
             print("No BPM changes")
-    
     # split into red and blue notes
     songNoteLeft = [block for block in song_notes if block['_type'] == 0]
     songNoteRight = [block for block in song_notes if block['_type'] == 1]
 
-    BloqDataLeft = extractBloqData(songNoteLeft,song_bpm_list)
-    BloqDataRight = extractBloqData(songNoteRight,song_bpm_list)
+    BloqDataLeft = extractBloqData(songNoteLeft, song_bpm_list)
+    BloqDataRight = extractBloqData(songNoteRight, song_bpm_list)
     combinedArrayRaw = combineAndProcessArray(BloqDataLeft, BloqDataRight)
 
     SmoothDiff = [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]
@@ -420,6 +471,18 @@ def Main(folder_path, song_diff, song_id, user = True):
         top_1_percent = "Cannot Divide by Zero"
         Failed = True
     try:
+        top_5_percent = sum(
+            SmoothDiff[:int(len(SmoothDiff)/100)])/(len(SmoothDiff)/100)
+    except ZeroDivisionError:
+        top_5_percent = "Cannot Divide by Zero"
+        Failed = True
+    try:
+        top_20_percent = sum(
+            SmoothDiff[:int(len(SmoothDiff)/100)])/(len(SmoothDiff)/100)
+    except ZeroDivisionError:
+        top_20_percent = "Cannot Divide by Zero"
+        Failed = True
+    try:
         median = statistics.median(SmoothDiff)
         average = statistics.mean(SmoothDiff)
     except statistics.StatisticsError:
@@ -427,7 +490,8 @@ def Main(folder_path, song_diff, song_id, user = True):
         average = "No Data"
         Failed = True
     if not Failed:
-        final_score = (top_1_percent*Variables.Top1Weight + median*Variables.MedianWeight)/(Variables.Top1Weight+Variables.MedianWeight)
+        final_score = (top_1_percent*Variables.Top1Weight + top_5_percent*Variables.Top5Weight + top_20_percent*Variables.Top20Weight + median *
+                       Variables.MedianWeight)/(Variables.Top1Weight+Variables.Top5Weight+Variables.Top20Weight+Variables.MedianWeight)
     else:
         final_score = "No Score Can Be Made"
     # export results to spreadsheet
@@ -436,56 +500,64 @@ def Main(folder_path, song_diff, song_id, user = True):
             f"Spreadsheets/{song_id} {song_info['_songName'].replace('/', '')} {song_diff} export.csv")
         excelFileName = excelFileName.replace("*", "")
         excelFileName = excelFileName.replace("\"", "")
+        excelFileName = excelFileName.replace(">", "")
+        excelFileName = excelFileName.replace("<", "")
+        excelFileName = excelFileName.replace("|", "")
+        excelFileName = excelFileName.replace(":", "")
+        excelFileName = excelFileName.replace("?", "")
         try:
-            f = open(excelFileName, 'w', newline="", encoding='utf8')
+            f = open(excelFileName, 'w', newline="", encoding='utf-8')
         except FileNotFoundError:
             print('Making Spreadsheets Folder')
             os.mkdir('Spreadsheets')
-            f = open(excelFileName, 'w', newline="", encoding='utf8')
+            f = open(excelFileName, 'w', newline="", encoding='utf-8')
         finally:
             writer = csv.writer(f)
-            writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed","SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
-                            "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff","","Weighted","Median","Average"])
+            writer.writerow(["TimeMS", "Beat", "Type", "Forehand", "numNotes", "SwingSpeed", "SmoothSpeed", "Angle Diff", "AngleChangeDiff", "Pos Diff",
+                            "Stamina", "Pattern Diff", "CombinedDiff", "SmoothedDiff", "", "Rated Score", "Median", "Average"])
             try:
-                writer.writerow(["","","",statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.numNotes for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.swingSpeed for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.swingSpeedSmoothed for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.angleDiff for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.angleChangeDiff for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.posDiff for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.combinedStamina for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.patternDiff for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.combinedDiff for bloq in combinedArrayRaw]),
-                    statistics.mean([bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]),
-                    "",
-                    final_score,median,average])
+                writer.writerow(["", "", "", statistics.mean([bloq.forehand for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.numNotes for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.swingSpeed for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.swingSpeedSmoothed for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.angleDiff for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.angleChangeDiff for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.posDiff for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.combinedStamina for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.patternDiff for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.combinedDiff for bloq in combinedArrayRaw]),
+                                 statistics.mean(
+                                     [bloq.combinedDiffSmoothed for bloq in combinedArrayRaw]),
+                                 "",
+                                 final_score, median, average])
             except statistics.StatisticsError:
                 writer.writerow(["Failed to get averages"])
             finally:
                 for bloq in combinedArrayRaw:
-                    writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed,bloq.swingSpeedSmoothed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
+                    writer.writerow([bloq.timeMS, bloq.time,  bloq.type, bloq.forehand, bloq.numNotes, bloq.swingSpeed, bloq.swingSpeedSmoothed, bloq.angleDiff, bloq.angleChangeDiff, bloq.posDiff,
                                     bloq.combinedStamina, bloq.patternDiff, bloq.combinedDiff, bloq.combinedDiffSmoothed])
             f.close()
         final_score = str(final_score)
         median = str(median)
         average = str(average)
         #print(song_id+" "+song_info['_songName']+" "+song_diff)
-        print("Weighted Score:" + final_score)
-        print("Median:" + median)
-        print("Average: " + average)
-    
+        #print("Rated Score:" + final_score)
+        #print("Median:" + median)
+        #print("Average: " + average)
+
     return song_id+" "+song_info['_songName']+" "+song_diff, final_score, median, average
-
-
 
 
 # Setup ------------------------------------------------------ #
 
 
 # possible overlapping hashes bug
-
-
-
-
-

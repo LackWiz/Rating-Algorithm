@@ -3,7 +3,7 @@ import os
 import csv
 def checkFolderPath():
     try:
-        f = open('bs_path.txt', 'r')
+        f = open('_BackendFiles/bs_path.txt', 'r')
         bsPath = f.read()
     except FileNotFoundError:
         print('Enter Beat Saber custom songs folder:')
@@ -12,7 +12,7 @@ def checkFolderPath():
         bsPath = input()
         if bsPath[-1] not in ['\\', '/']:  # Checks if song path is empty
             bsPath += '/'
-        f = open('bs_path.txt', 'w')
+        f = open('_BackendFiles/bs_path.txt', 'w')
         f.write(bsPath)
     finally:
         f.close()

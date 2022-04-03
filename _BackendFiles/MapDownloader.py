@@ -19,12 +19,13 @@ def downloadSong(songID, songsPath):
 
     if(r.status_code != 200):
         return False
+    f = getFilename(r.headers.get('content-disposition'))
+    f = f.replace("?", "_")
+    open(f, "wb").write(r.content)
 
-    open(f := getFilename(r.headers.get('content-disposition')), "wb").write(r.content)
-
-    os.makedirs(songsPath + f)
+    os.makedirs(songsPath + f[:-4])
     with zipfile.ZipFile(f, 'r') as z:
-        z.extractall(songsPath + f)
+        z.extractall(songsPath + f[:-4])
 
     os.remove(f)
-    return f
+    return f[:-4]
