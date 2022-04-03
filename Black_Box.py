@@ -179,6 +179,7 @@ if __name__ == "__main__":
     DataArray.append(Data('15836',9.5))
     DataArray.append(Data("17914",12.88))
     DataArray.append(Data('7d6c',10.75))
+    DataArray.append(Data('1bfaa',11))
 
     # DataArray.append(Data("22639",16)) #Unranked from scoresaber discord
     # DataArray.append(Data("20848",14))
@@ -194,7 +195,7 @@ if __name__ == "__main__":
     TOP_PICKS = 100            #Top picks to average for next generation
     PROGRESS_SPLIT = 25        #How often to mark progress in the terminal as a percentage (just a visual)
 
-    maxProcesses = multiprocessing.cpu_count()  #Checks how many cores that are avaliable
+    maxProcesses = round(multiprocessing.cpu_count()/2)  #Checks how many cores that are avaliable
 
     for j in range(0, GENERATIONS):  #Main loop, loops as many times as there are Generatoins
         NewBreadth = START_BREADTH-((START_BREADTH-END_BREADTH)*j/GENERATIONS)#Slowly Reduces randomizing spread after each generation
@@ -273,16 +274,20 @@ if __name__ == "__main__":
             for a, data in enumerate(DataArray):    #Copies results from multiprocessing into the DataArray
                 data.results = results[a]
                 # Data.results = rate_func(Data.songID, 1)
+            
             temp = 0
             for data in DataArray:  #Accuracy Calculation, Based on a piecewise function to prevent single map outliers
-                if data.songID == 'c32d':   #Extra weight for c32d if it exists, you can replace with map of choice or change 'c32d' to whatever song you'd like
-                    data.accuracy = max(
-                        (abs((float(data.results)-data.expectedResults)*8))**0.5,
-                        (abs((float(data.results)-data.expectedResults)*8))**8)
-                else:
-                    data.accuracy = max(
-                        (abs((float(data.results)-data.expectedResults)*4))**0.5,
-                        (abs((float(data.results)-data.expectedResults)*4))**8)
+                # if data.songID == 'c32d':   #Extra weight for c32d if it exists, you can replace with map of choice or change 'c32d' to whatever song you'd like
+                #     data.accuracy = max(
+                #         (abs((float(data.results)-data.expectedResults)*8))**0.5,
+                #         (abs((float(data.results)-data.expectedResults)*8))**8)
+                # else:
+                #     data.accuracy = max(
+                #         (abs((float(data.results)-data.expectedResults)*4))**0.5,
+                #         (abs((float(data.results)-data.expectedResults)*4))**8)
+                data.accuracy = max(
+                    (abs((float(data.results)-data.expectedResults)*4))**0.5,
+                    (abs((float(data.results)-data.expectedResults)*4))**8)
                 temp += data.accuracy
             Vars.Accuracy = temp/len(DataArray) #Averages all accuracies for this Child
 
