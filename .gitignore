@@ -6,4 +6,10 @@ bs_path.txt
 BulkResults/
 Pics/
 MachineLearning/
+<<<<<<< HEAD
 .Standby/
+=======
+Variables_*
+Black_Box.py
+Base_Variables.py
+>>>>>>> 50056c0236674f54cc31b91e60d5296bf82a055b
