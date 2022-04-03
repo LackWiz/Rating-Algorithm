@@ -6,9 +6,9 @@ umm
 2. Download and unzip entire repository into a folder of choice
 3. Shift+Right click in the working folder containing all the python files and click "Open Powershell Window Here"
 4. Run: "*py -m pip install -r requirements.txt*" in powershell. This will download and install any missing modules/libraries
-6. run script either Single_runner.py (single songIDs) or Bulk_runner.py (playlists)
+6. run script either Single_Rank.py (single songIDs) or Playlist_Rank.py (playlists)
 
-The bs_path.txt file should contain one line: *your install directory*/Beat Saber/Beat Saber_Data/CustomLevels/
+The bs_path.txt file in _BackendFiles should contain one line: *your install directory*/Beat Saber/Beat Saber_Data/CustomLevels/
 
 It'll spit out an CSV file with all the numbers you can graph in excel in a SpreadSheets and/or BlukResults folder
 
