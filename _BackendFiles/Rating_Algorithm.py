@@ -237,7 +237,6 @@ def load_song_dat(path):
         # dat = json.load(json_dat)
     return dat
 
-
 def findSongFolder(song_id, isuser):
     bsPath = setup.checkFolderPath()
     song_options = os.listdir(bsPath)
@@ -453,7 +452,6 @@ def Main(folder_path, song_diff, song_id, user=True):
         song_bpm_list = [bpm]
         if user:
             print("No BPM changes")
-
     # split into red and blue notes
     songNoteLeft = [block for block in song_notes if block['_type'] == 0]
     songNoteRight = [block for block in song_notes if block['_type'] == 1]
