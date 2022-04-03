@@ -4,9 +4,9 @@ import os
 import json
 import math
 import csv
-import MapDownloader
-import Variables
-import setup
+import _BackendFiles.MapDownloader as MapDownloader
+import _BackendFiles.Variables as Variables
+import _BackendFiles.setup as setup
 from collections import deque
 #import tkinter as tk
 #from tkinter.filedialog import askdirectory
@@ -283,7 +283,7 @@ def selectDiff(song_id, user=True, lock_diff=NULL):
     song_diff = []
     song_id = str(song_id)
     lock_diff = str(lock_diff)
-    f = open('bs_path.txt', 'r')
+    f = open('_BackendFiles/bs_path.txt', 'r')
     bsPath = f.read()
     f.close
 

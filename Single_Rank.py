@@ -1,12 +1,12 @@
-import Rating_Algorithm
-import setup
+import _BackendFiles.Rating_Algorithm as Rating_Algorithm
+import _BackendFiles.setup as setup
 print('Enter song ID, separate using comma for multiple songs:')
 print("e.g. '25f'   or  'beef, 17cc0'")
 songIDs = input()
 setup.checkFolderPath()
 songIDs = songIDs.replace(" ", "")
 songIDs = songIDs.split(",")
-print("Would you like to scale the rating by some amount away from scoresaber?")
+print("Would you like to scale the rating by some amount away from Scoresaber PPV2? (Leave Empty for Default PPV2 Scaling)")
 scaler = input()
 try:
     scaler = float(scaler)

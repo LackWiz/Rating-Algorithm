@@ -1,5 +1,5 @@
-import Rating_Algorithm
-import setup
+import _BackendFiles.Rating_Algorithm as Rating_Algorithm
+import _BackendFiles.setup as setup
 
 import requests
 import json

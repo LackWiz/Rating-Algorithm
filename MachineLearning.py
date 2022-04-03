@@ -2,9 +2,9 @@ from asyncio.windows_events import NULL
 from copy import  deepcopy
 import random
 import time
-import Rating_Algorithm
-import setup
-import Variables
+import _BackendFiles.Rating_Algorithm as Rating_Algorithm
+import _BackendFiles.setup as setup
+import _BackendFiles.Variables as Variables
 import csv
 import os
 import multiprocessing
