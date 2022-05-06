@@ -441,8 +441,13 @@ def Main(folder_path, song_diff, song_id, user=True):
     bpm = song_info['_beatsPerMinute']
 
     # Keep only the notes
-    song_notes = list(
-        filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
+    try:
+        song_notes = list(
+            filter(lambda x: x['_type'] in [0, 1], song_dat['_notes']))
+    except:
+        song_notes = []
+        if user:
+            print("No _note data found: Cannot Deal with 3.0.0 maps")
     try:
         song_bpm_list = list(song_dat['_customData']['_BPMChanges'])
         song_bpm_list.insert(0, bpm)  # Put Initial BPM at front of List
