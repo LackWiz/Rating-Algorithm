@@ -1,0 +1,1186 @@
+{
+    "songs": [
+        {
+            "hash": "F402008042EFACA4291A6633EBB6B562E4ADCD87",
+            "difficulty": "ExpertPlus",
+            "value": 14,
+            "key": "c32d"
+        },
+        {
+            "hash": "4F003B1A4144A7AF68FA1F846D480239B2BC5CA2",
+            "difficulty": "ExpertPlus",
+            "value": 13,
+            "key": "d96f"
+        },
+        {
+            "hash": "23015A4E5087A298C723754C64DFD36A668386AE",
+            "difficulty": "ExpertPlus",
+            "value": 12.7,
+            "key": "10a93"
+        },
+        {
+            "hash": "B9BED84A127130BF80AFF18DB677EDD215CE0AB5",
+            "difficulty": "ExpertPlus",
+            "value": 12.6,
+            "key": "9ab1"
+        },
+        {
+            "hash": "23328A868C4C13C72E191A77EB42622D551EF5AC",
+            "difficulty": "Expert",
+            "value": 12.2,
+            "key": "da19"
+        },
+        {
+            "hash": "28547D0245F0FEF153A5F4C96BB3B4F91A9D0AB8",
+            "difficulty": "ExpertPlus",
+            "value": 12,
+            "key": "16a2f"
+        },
+        {
+            "hash": "697B9800DE84149EF6E938EA198F0AF14C391EC0",
+            "difficulty": "ExpertPlus",
+            "value": 11.8,
+            "key": "c1b2"
+        },
+        {
+            "hash": "97F3EC9CF48316CB1060CABA1029A0EEC0B402D4",
+            "difficulty": "ExpertPlus",
+            "value": 11.75,
+            "key": "78a8"
+        },
+        {
+            "hash": "9B6C79E80137F947F8A65F8070624436BCC8D5F9",
+            "difficulty": "ExpertPlus",
+            "value": 11.7,
+            "key": "d7f7"
+        },
+        {
+            "hash": "30BA065016AAC5DF31D1E2D27A63F7719FF1370E",
+            "difficulty": "ExpertPlus",
+            "value": 11.7,
+            "key": "76eb"
+        },
+        {
+            "hash": "A8424C1DBB2C03D63B50091A50537DA40132D780",
+            "difficulty": "ExpertPlus",
+            "value": 11.7,
+            "key": "130bc"
+        },
+        {
+            "hash": "518FD81AC6FDBFD050AB8FAC7C6AE7D73E16257A",
+            "difficulty": "ExpertPlus",
+            "value": 11.7,
+            "key": "ba40"
+        },
+        {
+            "hash": "AABB370D94A909AECACC7DE4AF92E9A05861820D",
+            "difficulty": "ExpertPlus",
+            "value": 11.65,
+            "key": "132dc"
+        },
+        {
+            "hash": "3F97C2436882538C7B482E87A5E97B9F14EDCB69",
+            "difficulty": "ExpertPlus",
+            "value": 11.65,
+            "key": "a066"
+        },
+        {
+            "hash": "2E887F6CD0FA896A890D2FB8D023A17DB47F0EA9",
+            "difficulty": "ExpertPlus",
+            "value": 11.65,
+            "key": "13b2b"
+        },
+        {
+            "hash": "51284444BF53C79584BCE5A2B6A2F450DCBAA12B",
+            "difficulty": "ExpertPlus",
+            "value": 11.65,
+            "key": "ba24"
+        },
+        {
+            "hash": "E1D69325D605DE36DED9EEE3C980EB216716CD63",
+            "difficulty": "ExpertPlus",
+            "value": 11.6,
+            "key": "12ccf"
+        },
+        {
+            "hash": "1C09E823E2B9720E573EA46C53C62EDAAAD51665",
+            "difficulty": "ExpertPlus",
+            "value": 11.6,
+            "key": "995e"
+        },
+        {
+            "hash": "2B8A75D4346AA7300D001E69CAF85D0FAC9D8291",
+            "difficulty": "Expert",
+            "value": 11.6,
+            "key": "10d08"
+        },
+        {
+            "hash": "805220F74ECB8FFFD9930ABCF4AB601E90E5751E",
+            "difficulty": "ExpertPlus",
+            "value": 11.55,
+            "key": "a49b"
+        },
+        {
+            "hash": "158005783F1B04090F97CD22325232EC7CBF6FD5",
+            "difficulty": "ExpertPlus",
+            "value": 11.55,
+            "key": "e5cd"
+        },
+        {
+            "hash": "CAB8CC7FDCCE43489DC65E275B8FCAE7444715B1",
+            "difficulty": "ExpertPlus",
+            "value": 11.5,
+            "key": "fcfd"
+        },
+        {
+            "hash": "81A6B24EA98FF589B1B91C891382E602B36579A1",
+            "difficulty": "ExpertPlus",
+            "value": 11.5,
+            "key": "110b8"
+        },
+        {
+            "hash": "28BDD9211BD4CD76E2D2FB8A32245DBB7F38F7AB",
+            "difficulty": "ExpertPlus",
+            "value": 11.5,
+            "key": "9c22"
+        },
+        {
+            "hash": "EE05B004F5B94CF9A4C788B3B5F0871EDD74EC34",
+            "difficulty": "ExpertPlus",
+            "value": 11.5,
+            "key": "12ae1"
+        },
+        {
+            "hash": "0115B6CFD65270EB2A3A2C1909FCD0FE311D7A07",
+            "difficulty": "ExpertPlus",
+            "value": 11.5,
+            "key": "16afb"
+        },
+        {
+            "hash": "1F9D15D393191ABFE089A9B0CAA055F29D4DB3F5",
+            "difficulty": "ExpertPlus",
+            "value": 11.4,
+            "key": "bb7e"
+        },
+        {
+            "hash": "F102C77F848203C7A5F472B96B177A13CD09B886",
+            "difficulty": "ExpertPlus",
+            "value": 11.4,
+            "key": "9b0e"
+        },
+        {
+            "hash": "BC1EC36D7A78658C0870FB9529F848C034A3D43E",
+            "difficulty": "ExpertPlus",
+            "value": 11.3,
+            "key": "12fae"
+        },
+        {
+            "hash": "2E887F6CD0FA896A890D2FB8D023A17DB47F0EA9",
+            "difficulty": "Expert",
+            "value": 11.3,
+            "key": "13b2b"
+        },
+        {
+            "hash": "9C7201C25290E8DE798770EAB374F0249B1BCEE5",
+            "difficulty": "ExpertPlus",
+            "value": 11.3,
+            "key": "f1e3"
+        },
+        {
+            "hash": "312E16C63C727303286A0278A713A3BCFEA8186D",
+            "difficulty": "ExpertPlus",
+            "value": 11.25,
+            "key": "def0"
+        },
+        {
+            "hash": "5A8377CEC04DAAC76A525CF810156AC6456D1F1F",
+            "difficulty": "ExpertPlus",
+            "value": 11.2,
+            "key": "ce42"
+        },
+        {
+            "hash": "83FCF7F36599F78D231C8C4A302542853E491AF0",
+            "difficulty": "ExpertPlus",
+            "value": 11.2,
+            "key": "7d6c"
+        },
+        {
+            "hash": "4000546C46A9E28036E788704D235E7CFF56225C",
+            "difficulty": "ExpertPlus",
+            "value": 11.2,
+            "key": "cfeb"
+        },
+        {
+            "hash": "4BBDAA1004A00EEB9C8D9432640E1C7D490B46D9",
+            "difficulty": "ExpertPlus",
+            "value": 11.2,
+            "key": "1703f"
+        },
+        {
+            "hash": "23328A868C4C13C72E191A77EB42622D551EF5AC",
+            "difficulty": "ExpertPlus",
+            "value": 11.2,
+            "key": "da19"
+        },
+        {
+            "hash": "D7D1C76F5F74510D4E70B51A105D2BEBE194BEFD",
+            "difficulty": "ExpertPlus",
+            "value": 11.2,
+            "key": "9e5c"
+        },
+        {
+            "hash": "42C10857AF7E114C71A1B9F598E8462BA07C3DC1",
+            "difficulty": "ExpertPlus",
+            "value": 11.2,
+            "key": "11c74"
+        },
+        {
+            "hash": "5510F0C466CFDB48195EE8763D29945F9AB11628",
+            "difficulty": "ExpertPlus",
+            "value": 11.15,
+            "key": "b9fe"
+        },
+        {
+            "hash": "EF2A01516FE6E6092165FCBB789214973A0DFE23",
+            "difficulty": "ExpertPlus",
+            "value": 11.15,
+            "key": "d8f5"
+        },
+        {
+            "hash": "790735D0DA9B1FD59A0C6FEE32A394539556E5F3",
+            "difficulty": "ExpertPlus",
+            "value": 11.15,
+            "key": "9924"
+        },
+        {
+            "hash": "FF2126D0A76F6E57B5B881D200194FC1FF30B3C2",
+            "difficulty": "ExpertPlus",
+            "value": 11.15,
+            "key": "fa95"
+        },
+        {
+            "hash": "24B997D33544DA0E6B21945F7F6BBED681BF5D8E",
+            "difficulty": "ExpertPlus",
+            "value": 11.15,
+            "key": "115af"
+        },
+        {
+            "hash": "8F4F34521B4FCA8C862DEE92E38AEEEFA66203DE",
+            "difficulty": "ExpertPlus",
+            "value": 11.15,
+            "key": "bc7f"
+        },
+        {
+            "hash": "CAAD877634E4F483CAAF701D1D103BA8D692BD74",
+            "difficulty": "ExpertPlus",
+            "value": 11.1,
+            "key": "169b1"
+        },
+        {
+            "hash": "4BA8B460A7F5A1C32CFB2EE728B8FA0773E40559",
+            "difficulty": "ExpertPlus",
+            "value": 11.1,
+            "key": "16b33"
+        },
+        {
+            "hash": "4FDA03A18F72C76A94F14FB08CA2088E4990BCD3",
+            "difficulty": "Expert",
+            "value": 11.1,
+            "key": "8f88"
+        },
+        {
+            "hash": "3D3FA076FB3D04D4633380F80C6022202116B69C",
+            "difficulty": "ExpertPlus",
+            "value": 11.1,
+            "key": "1496b"
+        },
+        {
+            "hash": "9A8581460386E3D3CCA3BA62EE4BD621C131980C",
+            "difficulty": "ExpertPlus",
+            "value": 11,
+            "key": "16850"
+        },
+        {
+            "hash": "B713AE90A9CE8834B6B8BBCE65F27DDF7BBC51AB",
+            "difficulty": "ExpertPlus",
+            "value": 11,
+            "key": "ffb5"
+        },
+        {
+            "hash": "FA4AAC084483DAA4BBD458A4B0C956B3C3D79EB5",
+            "difficulty": "ExpertPlus",
+            "value": 11,
+            "key": "f2f2"
+        },
+        {
+            "hash": "AB3A401124C720BF01F1F8470A798B7BCFAD3A93",
+            "difficulty": "ExpertPlus",
+            "value": 10.95,
+            "key": "cca9"
+        },
+        {
+            "hash": "75EAC6D275552670911B0428FF11BB38A9FFBF3C",
+            "difficulty": "ExpertPlus",
+            "value": 10.95,
+            "key": "e915"
+        },
+        {
+            "hash": "3D8EBD36AF5E6957154B1FB1553F6155157FF05F",
+            "difficulty": "ExpertPlus",
+            "value": 10.95,
+            "key": "e718"
+        },
+        {
+            "hash": "625642CF98CD718DC2835882C227ED983FC65C6B",
+            "difficulty": "Expert",
+            "value": 10.95,
+            "key": "1013a"
+        },
+        {
+            "hash": "AD19FC9B673C3E1E7B8D2C73BCAF46EB90236D9D",
+            "difficulty": "ExpertPlus",
+            "value": 10.95,
+            "key": "7dac"
+        },
+        {
+            "hash": "18B195F582B284389AE935EE4CFCC34FF342C137",
+            "difficulty": "ExpertPlus",
+            "value": 10.9,
+            "key": "12a6b"
+        },
+        {
+            "hash": "4919283D28DEDC793D4E090F309B4662358E5984",
+            "difficulty": "Expert",
+            "value": 10.9,
+            "key": "13735"
+        },
+        {
+            "hash": "74609523DBF9D849862260CFCEC3DC45034913E0",
+            "difficulty": "ExpertPlus",
+            "value": 10.9,
+            "key": "bbe2"
+        },
+        {
+            "hash": "71561EFCC445EE7B40C5FB6A6B50C52ACC873565",
+            "difficulty": "ExpertPlus",
+            "value": 10.9,
+            "key": "16d22"
+        },
+        {
+            "hash": "AB9D8072C8E65F600844BA8EDC0033AE6125946F",
+            "difficulty": "ExpertPlus",
+            "value": 10.9,
+            "key": "a3c7"
+        },
+        {
+            "hash": "D1F62A2CC48925B51C0EAFC9B7C813573E7CFADA",
+            "difficulty": "ExpertPlus",
+            "value": 10.85,
+            "key": "167ef"
+        },
+        {
+            "hash": "47BCC7380AF03BFBEA6A3A46C71F8317CC332EE5",
+            "difficulty": "ExpertPlus",
+            "value": 10.85,
+            "key": "16b05"
+        },
+        {
+            "hash": "5909C4CC3F242632BF4C826305732489F8C54F9B",
+            "difficulty": "ExpertPlus",
+            "value": 10.85,
+            "key": "14c51"
+        },
+        {
+            "hash": "62128DFDD39DB6A2CC380C254031A9D4367B87A1",
+            "difficulty": "ExpertPlus",
+            "value": 10.85,
+            "key": "127ec"
+        },
+        {
+            "hash": "4A6EE299D15FE5A2E1FEA295991DAC1A89F4FD0F",
+            "difficulty": "ExpertPlus",
+            "value": 10.85,
+            "key": "132cb"
+        },
+        {
+            "hash": "AAF0F0DC98C80F62F745F47FA82FFD37E4BD1044",
+            "difficulty": "ExpertPlus",
+            "value": 10.85,
+            "key": "7bb1"
+        },
+        {
+            "hash": "9BF202F68C333421C69CA6AA15C648D65D4A1E0F",
+            "difficulty": "ExpertPlus",
+            "value": 10.85,
+            "key": "7457"
+        },
+        {
+            "hash": "9102A2152ED870745006858EA037818F6A1EAE81",
+            "difficulty": "ExpertPlus",
+            "value": 10.85,
+            "key": "ffef"
+        },
+        {
+            "hash": "D01CEF83CC9C8B8EEA82DDD98EE2CE6B24BFDB03",
+            "difficulty": "ExpertPlus",
+            "value": 10.8,
+            "key": "132d6"
+        },
+        {
+            "hash": "49635E84BD0518B5192B653AF59922A5D2C97A3F",
+            "difficulty": "ExpertPlus",
+            "value": 10.8,
+            "key": "e170"
+        },
+        {
+            "hash": "2689EE1E1AC4AFFAF303F87DE853FCA887BF5D7E",
+            "difficulty": "ExpertPlus",
+            "value": 10.8,
+            "key": "13292"
+        },
+        {
+            "hash": "C1AD38B91D03388532FEBC509397BA9F2BB324D1",
+            "difficulty": "ExpertPlus",
+            "value": 10.8,
+            "key": "12cac"
+        },
+        {
+            "hash": "533F9F1D34617ABAA0D78681DE81900936963AA4",
+            "difficulty": "ExpertPlus",
+            "value": 10.75,
+            "key": "15d3c"
+        },
+        {
+            "hash": "D04138A245357F230A3BFC568DE9AF89D4FAC687",
+            "difficulty": "ExpertPlus",
+            "value": 10.75,
+            "key": "16c53"
+        },
+        {
+            "hash": "E5D18576630941A62F199C1CBAB3CA4F869A7416",
+            "difficulty": "ExpertPlus",
+            "value": 10.7,
+            "key": "13bd3"
+        },
+        {
+            "hash": "2B8A75D4346AA7300D001E69CAF85D0FAC9D8291",
+            "difficulty": "ExpertPlus",
+            "value": 10.7,
+            "key": "10d08"
+        },
+        {
+            "hash": "1EBB6C788C2C6C5B55F0D7C62092575DC3C4946F",
+            "difficulty": "ExpertPlus",
+            "value": 10.7,
+            "key": "108c6"
+        },
+        {
+            "hash": "479037E38D3D631EA51139462A5333D76E4B810F",
+            "difficulty": "ExpertPlus",
+            "value": 10.7,
+            "key": "ec00"
+        },
+        {
+            "hash": "EB19A1155094C0A34FAF1D729F5C74E25FE7FE5B",
+            "difficulty": "ExpertPlus",
+            "value": 10.7,
+            "key": "9b91"
+        },
+        {
+            "hash": "00CFA473477180E792145ECDE5C2DB814536E8A2",
+            "difficulty": "ExpertPlus",
+            "value": 10.7,
+            "key": "7d14"
+        },
+        {
+            "hash": "625642CF98CD718DC2835882C227ED983FC65C6B",
+            "difficulty": "ExpertPlus",
+            "value": 10.65,
+            "key": "1013a"
+        },
+        {
+            "hash": "A3E5691076181E88776A41E9FF112D3C33576782",
+            "difficulty": "ExpertPlus",
+            "value": 10.65,
+            "key": "16c56"
+        },
+        {
+            "hash": "8F4F34521B4FCA8C862DEE92E38AEEEFA66203DE",
+            "difficulty": "Expert",
+            "value": 10.6,
+            "key": "bc7f"
+        },
+        {
+            "hash": "8348C1F03EF8E88376EAF1CBB8580B738B8536F8",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "b86a"
+        },
+        {
+            "hash": "2D461CBF110B43FF6CD446F7E4FA1E94F216B111",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "d615"
+        },
+        {
+            "hash": "2F09BB6C2ECB9EC5B66B4805656B1CBE9C6AC7CD",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "1492f"
+        },
+        {
+            "hash": "EBB91D7AFD6EEDEC01D245A305693CB8AA60121D",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "13195"
+        },
+        {
+            "hash": "174866667BACBA128E54AD5CB58077A46456303B",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "12ab3"
+        },
+        {
+            "hash": "C6E1038A84CB5BB25A4FF849E81770DB6106C3D5",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "12b53"
+        },
+        {
+            "hash": "754DAC6FF0ED6C0F7EAAAC90C7373CE35F43EF58",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "12d96"
+        },
+        {
+            "hash": "F7FC9D344C177AAA0D082D66FFA50B383057F56B",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "13366"
+        },
+        {
+            "hash": "CAAD877634E4F483CAAF701D1D103BA8D692BD74",
+            "difficulty": "Expert",
+            "value": 10.6,
+            "key": "169b1"
+        },
+        {
+            "hash": "9CE21BB37CBEA55B54F3C19542CF78D02169273B",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "11dcb"
+        },
+        {
+            "hash": "2DC3F6DD835321190979FB6BF9D577D72E1902B3",
+            "difficulty": "ExpertPlus",
+            "value": 10.6,
+            "key": "15512"
+        },
+        {
+            "hash": "9D187121301203D70CC70AABCEAF232E2E37BAB1",
+            "difficulty": "Expert",
+            "value": 10.6,
+            "key": "b68c"
+        },
+        {
+            "hash": "9604D435468C291039E8C39DBF9E8317E06605EE",
+            "difficulty": "ExpertPlus",
+            "value": 10.55,
+            "key": "dead"
+        },
+        {
+            "hash": "B7CC9DC9760CA85294C0B5FD5CA54C34522F4953",
+            "difficulty": "ExpertPlus",
+            "value": 10.55,
+            "key": "721e"
+        },
+        {
+            "hash": "ECCA5C3271E506F20748B30D54482056F7B9187F",
+            "difficulty": "ExpertPlus",
+            "value": 10.55,
+            "key": "123da"
+        },
+        {
+            "hash": "66193DABE3828397B148BD3CC3750E237490A74A",
+            "difficulty": "ExpertPlus",
+            "value": 10.55,
+            "key": "15300"
+        },
+        {
+            "hash": "7BDD78A1787E0FD59A24466D700E1683B1CF5DE4",
+            "difficulty": "Expert",
+            "value": 10.55,
+            "key": "13fe1"
+        },
+        {
+            "hash": "5A79F235519F17323538CB9F9730C9040C89E5DE",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "15aba"
+        },
+        {
+            "hash": "93219A28885AFC6665B7289631420FDE9A2ECBFF",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "b4f0"
+        },
+        {
+            "hash": "541BB4BE6D9D95C08426E3995BAE782A5ECE5FD3",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "12bdb"
+        },
+        {
+            "hash": "A6984FBA66CB80E0D75EFDFC89E48BEE5DA79E93",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "1027a"
+        },
+        {
+            "hash": "F9EE34B06E37C29FFED6BD91DA00F57D3B246CAD",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "12d56"
+        },
+        {
+            "hash": "0F78A1408C91134E3B309E0BBA16B5AE914596F1",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "13e2f"
+        },
+        {
+            "hash": "547C91EEC37C6FB000F9A037EE10AFC6F4712D6C",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "16a01"
+        },
+        {
+            "hash": "770F96C0D16CA15FA7ABF3852FE9633A6F300991",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "16e0a"
+        },
+        {
+            "hash": "EFEA6AE55423520B4E5D8FF79544AF4D9D481962",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "e881"
+        },
+        {
+            "hash": "738B9B0543B37C5589D56F0C2A8FB821F7F88BCF",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "15fd7"
+        },
+        {
+            "hash": "3ADB7906D8C63B89A62D279FB02FE0AF5E8FB9A2",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "16a6c"
+        },
+        {
+            "hash": "67935D25CAF0996A282E87AC7A21738812B629DD",
+            "difficulty": "ExpertPlus",
+            "value": 10.5,
+            "key": "f621"
+        },
+        {
+            "hash": "5EEA46E777960913951ED9D0257404CC3A1BE305",
+            "difficulty": "ExpertPlus",
+            "value": 10.45,
+            "key": "e72b"
+        },
+        {
+            "hash": "62E8C75CC4E0F9CDF9F9D600D44280591B7A4C9E",
+            "difficulty": "ExpertPlus",
+            "value": 10.45,
+            "key": "d8f2"
+        },
+        {
+            "hash": "4919283D28DEDC793D4E090F309B4662358E5984",
+            "difficulty": "ExpertPlus",
+            "value": 10.45,
+            "key": "13735"
+        },
+        {
+            "hash": "65412724A62400BA9D97EE50AA306C7A9C04446E",
+            "difficulty": "ExpertPlus",
+            "value": 10.45,
+            "key": "16dbc"
+        },
+        {
+            "hash": "4050A8A9DF4B7B895A63A23F1CAF61232D9601EF",
+            "difficulty": "ExpertPlus",
+            "value": 10.45,
+            "key": "13865"
+        },
+        {
+            "hash": "09F435B861416442FE61B5B2D512AFCA5C29BCF2",
+            "difficulty": "Hard",
+            "value": 10.45,
+            "key": "138ba"
+        },
+        {
+            "hash": "91F15BAE439205A851E8F288DE5C0CE6C5A5F09D",
+            "difficulty": "ExpertPlus",
+            "value": 10.45,
+            "key": "12fa2"
+        },
+        {
+            "hash": "3DE687620B5722A9AA411AC6592D80E79537755B",
+            "difficulty": "ExpertPlus",
+            "value": 10.4,
+            "key": "12bd2"
+        },
+        {
+            "hash": "625642CF98CD718DC2835882C227ED983FC65C6B",
+            "difficulty": "Hard",
+            "value": 10.4,
+            "key": "1013a"
+        },
+        {
+            "hash": "9A103C5389E8915F896198C2D8415654C30A6444",
+            "difficulty": "ExpertPlus",
+            "value": 10.4,
+            "key": "1402d"
+        },
+        {
+            "hash": "71FEED23BFF9E8B967C3FFE2646B1C878AEB86DF",
+            "difficulty": "ExpertPlus",
+            "value": 10.4,
+            "key": "b2f3"
+        },
+        {
+            "hash": "EA55E256AE89AE72A60763CEB5379560B962773B",
+            "difficulty": "ExpertPlus",
+            "value": 10.4,
+            "key": "117ac"
+        },
+        {
+            "hash": "F4DA02BFEC50EFDE4F2A1E4B89251E654B9C7353",
+            "difficulty": "ExpertPlus",
+            "value": 10.4,
+            "key": "12f33"
+        },
+        {
+            "hash": "9AEA56CDD3E22BA10EF18A6CBB8FB9DBFE1DB66E",
+            "difficulty": "ExpertPlus",
+            "value": 10.35,
+            "key": "d39a"
+        },
+        {
+            "hash": "85F2204FE701F2E88AAF29331009446687A9BCB6",
+            "difficulty": "ExpertPlus",
+            "value": 10.35,
+            "key": "13377"
+        },
+        {
+            "hash": "B14314329BE9676417448404A59619E3CE9EBE48",
+            "difficulty": "ExpertPlus",
+            "value": 10.35,
+            "key": "1499b"
+        },
+        {
+            "hash": "A4DC5CE503BE7D3E42DD9F51995A341BCFF36B30",
+            "difficulty": "Expert",
+            "value": 10.3,
+            "key": "16010"
+        },
+        {
+            "hash": "B382B98737514C6D5D02DEBF02B67E0D1D566160",
+            "difficulty": "ExpertPlus",
+            "value": 10.3,
+            "key": "130c0"
+        },
+        {
+            "hash": "1F288D9C805E51799B723BE65694F3AC763C2CED",
+            "difficulty": "ExpertPlus",
+            "value": 10.3,
+            "key": "b51b"
+        },
+        {
+            "hash": "D17181E450E77531D972FC198C90F19F1BBD03D1",
+            "difficulty": "ExpertPlus",
+            "value": 10.3,
+            "key": "13810"
+        },
+        {
+            "hash": "BD92C5760B6D03664A7083FA93CC6708310E6E2A",
+            "difficulty": "ExpertPlus",
+            "value": 10.25,
+            "key": "124ea"
+        },
+        {
+            "hash": "BD92C5760B6D03664A7083FA93CC6708310E6E2A",
+            "difficulty": "Expert",
+            "value": 10.2,
+            "key": "124ea"
+        },
+        {
+            "hash": "062180FA016CF9FD1FA320C3D8FF03B413628C44",
+            "difficulty": "ExpertPlus",
+            "value": 10.2,
+            "key": "10908"
+        },
+        {
+            "hash": "144663E058ABAD780CBAF38F49CBD03C1EA47454",
+            "difficulty": "Expert",
+            "value": 10.2,
+            "key": "16d03"
+        },
+        {
+            "hash": "1AB633C075210C9AEABDBECA34843D88AE4714E0",
+            "difficulty": "ExpertPlus",
+            "value": 10.15,
+            "key": "16bb1"
+        },
+        {
+            "hash": "E8496DC530318BE6311BA5F080794F6AF452E7C0",
+            "difficulty": "ExpertPlus",
+            "value": 10.15,
+            "key": "13b17"
+        },
+        {
+            "hash": "D5C239EC62143ADD0053857B78165FD6E4B387F3",
+            "difficulty": "ExpertPlus",
+            "value": 10.15,
+            "key": "12151"
+        },
+        {
+            "hash": "E5F0E84D21BA49048B66E62A3A18DF307C1DCA65",
+            "difficulty": "ExpertPlus",
+            "value": 10.15,
+            "key": "128ea"
+        },
+        {
+            "hash": "A78B40D0C240A9DD9B39555B786F0A08B1FD0D1C",
+            "difficulty": "ExpertPlus",
+            "value": 10.15,
+            "key": "107ab"
+        },
+        {
+            "hash": "157E0DB010B9EAFDD0A4673F89D89C33EEEE794B",
+            "difficulty": "ExpertPlus",
+            "value": 10.15,
+            "key": "12b11"
+        },
+        {
+            "hash": "97E1B67ED8641899E89DE59603D97D89DAE770D7",
+            "difficulty": "ExpertPlus",
+            "value": 10.1,
+            "key": "158ce"
+        },
+        {
+            "hash": "A4DC5CE503BE7D3E42DD9F51995A341BCFF36B30",
+            "difficulty": "ExpertPlus",
+            "value": 10.1,
+            "key": "16010"
+        },
+        {
+            "hash": "9AC0355075FBBCCA270225FF9FEBD7B2E27BFA43",
+            "difficulty": "ExpertPlus",
+            "value": 10.1,
+            "key": "14513"
+        },
+        {
+            "hash": "C66C795AAE6E59C8A05B898015B5FA75A1BB6344",
+            "difficulty": "ExpertPlus",
+            "value": 10.1,
+            "key": "8705"
+        },
+        {
+            "hash": "D971E0573D55F0758DBDF983CC88A9DD335D0861",
+            "difficulty": "ExpertPlus",
+            "value": 10.1,
+            "key": "17192"
+        },
+        {
+            "hash": "7BDD78A1787E0FD59A24466D700E1683B1CF5DE4",
+            "difficulty": "ExpertPlus",
+            "value": 10.05,
+            "key": "13fe1"
+        },
+        {
+            "hash": "AD547BAA544700AC8936015B54A00A1E1024E793",
+            "difficulty": "ExpertPlus",
+            "value": 10.05,
+            "key": "e3a0"
+        },
+        {
+            "hash": "F53B115D35C581FDA4EC13360F7957D6808703D8",
+            "difficulty": "ExpertPlus",
+            "value": 10.05,
+            "key": "10f87"
+        },
+        {
+            "hash": "2C908DF9BB7AA93884AB9BFA8DDC598C3DE479E9",
+            "difficulty": "ExpertPlus",
+            "value": 10.05,
+            "key": "5309"
+        },
+        {
+            "hash": "64B81F99B76742B3C70EAC3BDA4230ED55E0D2AD",
+            "difficulty": "ExpertPlus",
+            "value": 10,
+            "key": "13051"
+        },
+        {
+            "hash": "FEDBBA8A72EC41440A24232EB645887C2FCE5EB5",
+            "difficulty": "ExpertPlus",
+            "value": 10,
+            "key": "13e0d"
+        },
+        {
+            "hash": "09F435B861416442FE61B5B2D512AFCA5C29BCF2",
+            "difficulty": "ExpertPlus",
+            "value": 10,
+            "key": "138ba"
+        },
+        {
+            "hash": "183F3021E08B75A3D6D9A0B07BE0505654C52C44",
+            "difficulty": "ExpertPlus",
+            "value": 10,
+            "key": "b775"
+        },
+        {
+            "hash": "183F3021E08B75A3D6D9A0B07BE0505654C52C44",
+            "difficulty": "ExpertPlus",
+            "value": 10,
+            "key": "b775"
+        },
+        {
+            "hash": "DDE59D50E03BE07D360140F98B3EE76680C6A8F8",
+            "difficulty": "ExpertPlus",
+            "value": 10,
+            "key": "16d07"
+        },
+        {
+            "hash": "FA6576F2CD906BA1A38C3AE887428C549299CDD6",
+            "difficulty": "ExpertPlus",
+            "value": 10,
+            "key": "16f24"
+        },
+        {
+            "hash": "64A3204BF9804D4E3D8CE5C2F9DAB8B551D074FE",
+            "difficulty": "ExpertPlus",
+            "value": 9.95,
+            "key": "98bd"
+        },
+        {
+            "hash": "FC5E6D1C214B4D7FEE2D5E6BCF72542DDEE1C073",
+            "difficulty": "ExpertPlus",
+            "value": 9.95,
+            "key": "cd61"
+        },
+        {
+            "hash": "AE3253705F17262E0A4E2574A34AB64B6BD9450D",
+            "difficulty": "ExpertPlus",
+            "value": 9.95,
+            "key": "9afd"
+        },
+        {
+            "hash": "25F76A04677F383F2C5753FCDF6BB8581572311E",
+            "difficulty": "ExpertPlus",
+            "value": 9.95,
+            "key": "16e97"
+        },
+        {
+            "hash": "E5D18576630941A62F199C1CBAB3CA4F869A7416",
+            "difficulty": "Expert",
+            "value": 9.95,
+            "key": "13bd3"
+        },
+        {
+            "hash": "0921DF4BEE8DDDF36EEBFA9D59B567B96D96697A",
+            "difficulty": "ExpertPlus",
+            "value": 9.9,
+            "key": "120a8"
+        },
+        {
+            "hash": "18B80150202B2F2C07E6FEEB36F4239BF014CF03",
+            "difficulty": "ExpertPlus",
+            "value": 9.9,
+            "key": "de6a"
+        },
+        {
+            "hash": "EB19A1155094C0A34FAF1D729F5C74E25FE7FE5B",
+            "difficulty": "Expert",
+            "value": 9.9,
+            "key": "9b91"
+        },
+        {
+            "hash": "5A6ECFEC1A678ED2DF7E366744E16E77C061B82A",
+            "difficulty": "ExpertPlus",
+            "value": 9.9,
+            "key": "f3e2"
+        },
+        {
+            "hash": "68B26B53BC3E1B5999770DB7B6C4358251717521",
+            "difficulty": "ExpertPlus",
+            "value": 9.85,
+            "key": "765d"
+        },
+        {
+            "hash": "0B71BA47DEEF78A55C5709058ABDB9B0849486F7",
+            "difficulty": "ExpertPlus",
+            "value": 9.85,
+            "key": "1695b"
+        },
+        {
+            "hash": "B76F546A682122155BE11739438FCAE6CFE2C2CF",
+            "difficulty": "ExpertPlus",
+            "value": 9.8,
+            "key": "126bd"
+        },
+        {
+            "hash": "AA31DCD3F9DA483793922D24F210944178B6CBC2",
+            "difficulty": "ExpertPlus",
+            "value": 9.8,
+            "key": "1232e"
+        },
+        {
+            "hash": "E7F3AB4CEA241D3762BA28713B7F6CA5F4E5A1B5",
+            "difficulty": "ExpertPlus",
+            "value": 9.8,
+            "key": "add0"
+        },
+        {
+            "hash": "EB650896E07F1F38617B77B980CAFDAFDC7872E7",
+            "difficulty": "ExpertPlus",
+            "value": 9.7,
+            "key": "142f4"
+        },
+        {
+            "hash": "BBC011F70D104624EB40ACD3944C2FBFBB30E5B0",
+            "difficulty": "ExpertPlus",
+            "value": 9.65,
+            "key": "13fe8"
+        },
+        {
+            "hash": "C60BD4CA608AAB8AA5E16804E30BDFAF3298CBAA",
+            "difficulty": "ExpertPlus",
+            "value": 9.65,
+            "key": "12d22"
+        },
+        {
+            "hash": "158005783F1B04090F97CD22325232EC7CBF6FD5",
+            "difficulty": "Expert",
+            "value": 9.6,
+            "key": "e5cd"
+        },
+        {
+            "hash": "88FACAFBED5F0886471DD92AFF0B30EECCCFD4FE",
+            "difficulty": "ExpertPlus",
+            "value": 9.55,
+            "key": "9c01"
+        },
+        {
+            "hash": "23015A4E5087A298C723754C64DFD36A668386AE",
+            "difficulty": "Expert",
+            "value": 9.5,
+            "key": "10a93"
+        },
+        {
+            "hash": "9D187121301203D70CC70AABCEAF232E2E37BAB1",
+            "difficulty": "ExpertPlus",
+            "value": 9.45,
+            "key": "b68c"
+        },
+        {
+            "hash": "0CAC133F16A319DE4788AD5F27002994E120D818",
+            "difficulty": "ExpertPlus",
+            "value": 9.4,
+            "key": "15b6e"
+        },
+        {
+            "hash": "071893022FBB7FF14814263FF59E3D545B903BCB",
+            "difficulty": "ExpertPlus",
+            "value": 9.35,
+            "key": "16c14"
+        },
+        {
+            "hash": "75DAE20C02C460B960358846EAB97DAB5A8FECA1",
+            "difficulty": "Expert",
+            "value": 9.3,
+            "key": "15aab"
+        },
+        {
+            "hash": "A78B40D0C240A9DD9B39555B786F0A08B1FD0D1C",
+            "difficulty": "Expert",
+            "value": 9.3,
+            "key": "107ab"
+        },
+        {
+            "hash": "81A6B24EA98FF589B1B91C891382E602B36579A1",
+            "difficulty": "Expert",
+            "value": 9.25,
+            "key": "110b8"
+        },
+        {
+            "hash": "651F82B3849E4E37F7CFDDCD9209A4E506B2982E",
+            "difficulty": "ExpertPlus",
+            "value": 9.15,
+            "key": "16711"
+        },
+        {
+            "hash": "C813C8DDCC4E831F4A175FDE9F0D8B73952FC2BC",
+            "difficulty": "ExpertPlus",
+            "value": 9.1,
+            "key": "15836"
+        },
+        {
+            "hash": "BB6C14D91C6DAA1B31A44D54487231587E573D6F",
+            "difficulty": "ExpertPlus",
+            "value": 9,
+            "key": "17434"
+        },
+        {
+            "hash": "062180FA016CF9FD1FA320C3D8FF03B413628C44",
+            "difficulty": "Expert",
+            "value": 8.95,
+            "key": "10908"
+        },
+        {
+            "hash": "BDE6A1F8FC7008247443CF3F810BBD8E910DD839",
+            "difficulty": "ExpertPlus",
+            "value": 8.9,
+            "key": "16973"
+        },
+        {
+            "hash": "FD58B27E3EE2D176211C7F53D4A4122CC378AA6C",
+            "difficulty": "ExpertPlus",
+            "value": 8.9,
+            "key": "124d2"
+        },
+        {
+            "hash": "F51C6F95749DFB718A21128A4DD918AA65A38E57",
+            "difficulty": "ExpertPlus",
+            "value": 8.8,
+            "key": "169ad"
+        },
+        {
+            "hash": "50D3F8302337C1E9812EB1C0A0AADF87E1B0FF82",
+            "difficulty": "ExpertPlus",
+            "value": 8.5,
+            "key": "14b34"
+        },
+        {
+            "hash": "50D3F8302337C1E9812EB1C0A0AADF87E1B0FF82",
+            "difficulty": "Expert",
+            "value": 8.45,
+            "key": "14b34"
+        },
+        {
+            "hash": "64B81F99B76742B3C70EAC3BDA4230ED55E0D2AD",
+            "difficulty": "Expert",
+            "value": 8.3,
+            "key": "13051"
+        },
+        {
+            "hash": "2F09BB6C2ECB9EC5B66B4805656B1CBE9C6AC7CD",
+            "difficulty": "Expert",
+            "value": 8.15,
+            "key": "1492f"
+        }
+    ]
+}

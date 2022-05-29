@@ -33,7 +33,10 @@ setup.checkFolderPath()
 with open(playlist_Path, encoding='ISO-8859-1') as playlist_json:
     playlistRaw = json.load(playlist_json)
     
-BulkRunName = playlistRaw['playlistTitle']
+try: 
+    BulkRunName = playlistRaw['playlistTitle']
+except:
+    BulkRunName = "No Name"
 for i, index in enumerate(playlistRaw['songs']):
     hash_list.append(playlistRaw['songs'][i]['hash'])
 

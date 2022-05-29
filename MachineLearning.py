@@ -9,11 +9,16 @@ import csv
 import os
 import multiprocessing
 import datetime
-
+import tkinter as tk
+from tkinter.filedialog import askopenfile
+tk.Tk().withdraw()
+import json
+import requests
 
 class Data: #Class to Hold Training Data and results
-    def __init__(self, songID, expectedResults):
+    def __init__(self, songID, diff, expectedResults):
         self.songID = songID
+        self.diff = diff
         self.expectedResults = expectedResults
         self.results = 0
         self.accuracy = 0
@@ -143,43 +148,73 @@ def rate_func(songID, diff, Vars: NewValues): #Function that gets called for mul
 def rand_func(Variable, Breadth):
     return random.uniform(Variable-(Variable*(Breadth-1)),Variable*Breadth)
 
+def diffToNum(diff):
+    if(diff == 'ExpertPlus'):
+        return 1
+    elif(diff == 'Expert'):
+        return 2
+    elif(diff == 'Hard'):
+        return 3
+    elif(diff == 'Normal'):
+        return 4
+    elif(diff == 'Easy'):
+        return 5
+
     # print(str(return_Variable[index].results))
 if __name__ == "__main__":
     setup.checkFolderPath() #Makes sure bs_path.txt is filled
 #=======================================Training Data Template======================================#
     DataArray: list[Data] = []
-    #Add data as "DataArray.append('songID', yourStarValue)""
-    DataArray.append(Data('c32d',14)) #Lack's Data 
-    DataArray.append(Data('170d0',7)) 
-    DataArray.append(Data('1e4b4',5)) 
-    DataArray.append(Data('169e6',11.5)) 
-    DataArray.append(Data('1df5b',11.5)) 
-    DataArray.append(Data('217a8',10.5)) 
-    DataArray.append(Data('18a92',9)) 
-    DataArray.append(Data('17cc0',9.75))
-    DataArray.append(Data('17ecf',7)) 
-    DataArray.append(Data('d6a6',9.25))
-    DataArray.append(Data('1a37c',12.25))
-    DataArray.append(Data('1dc95',11.9))
-    DataArray.append(Data('1fa21',9.25))
-    DataArray.append(Data('1d5d4',9.75))
-    DataArray.append(Data('1dcc5',4))
-    DataArray.append(Data('20fa4',9.5))
-    DataArray.append(Data('19c66',8.75))
-    DataArray.append(Data('1f784',11))
+    hash_list = []
+    #Add data as "DataArray.append('songID', yourStarValue)"
 
-    DataArray.append(Data('1c1f7',17))
 
-    DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
-    DataArray.append(Data("9e5c",11.77)) 
-    DataArray.append(Data("16d07",10.75)) 
-    DataArray.append(Data("1ace8",10.62)) 
-    DataArray.append(Data("1a017",13.22)) 
-    DataArray.append(Data("1a209",14.25)) 
-    DataArray.append(Data('15836',9.5))
-    DataArray.append(Data("17914",12.88))
-    DataArray.append(Data('7d6c',10.75))
-    DataArray.append(Data('1bfaa',11))
+
+
+
+
+    training_Path = askopenfile(mode ='r', filetypes =[('Training JSON File', '*.json')]).name
+    with open(training_Path, encoding='ISO-8859-1') as training_json:
+        trainingRaw = json.load(training_json)
+    
+    for i, index in enumerate(trainingRaw['songs']):
+        DataArray.append(Data(trainingRaw['songs'][i]['key'], diffToNum(trainingRaw['songs'][i]['difficulty']), trainingRaw['songs'][i]['value']))
+
+
+
+
+
+    # DataArray.append(Data('c32d',14)) #Lack's Data 
+    # DataArray.append(Data('170d0',7)) 
+    # DataArray.append(Data('1e4b4',5)) 
+    # DataArray.append(Data('169e6',11.5)) 
+    # DataArray.append(Data('1df5b',11.5)) 
+    # DataArray.append(Data('217a8',10.5)) 
+    # DataArray.append(Data('18a92',9)) 
+    # DataArray.append(Data('17cc0',9.75))
+    # DataArray.append(Data('17ecf',7)) 
+    # DataArray.append(Data('d6a6',9.25))
+    # DataArray.append(Data('1a37c',12.25))
+    # DataArray.append(Data('1dc95',11.9))
+    # DataArray.append(Data('1fa21',9.25))
+    # DataArray.append(Data('1d5d4',9.75))
+    # DataArray.append(Data('1dcc5',4))
+    # DataArray.append(Data('20fa4',9.5))
+    # DataArray.append(Data('19c66',8.75))
+    # DataArray.append(Data('1f784',11))
+
+    # DataArray.append(Data('1c1f7',17))
+
+    # DataArray.append(Data("1a2cd",11.95)) #Score Saber Data
+    # DataArray.append(Data("9e5c",11.77)) 
+    # DataArray.append(Data("16d07",10.75)) 
+    # DataArray.append(Data("1ace8",10.62)) 
+    # DataArray.append(Data("1a017",13.22)) 
+    # DataArray.append(Data("1a209",14.25)) 
+    # DataArray.append(Data('15836',9.5))
+    # DataArray.append(Data("17914",12.88))
+    # DataArray.append(Data('7d6c',10.75))
+    # DataArray.append(Data('1bfaa',11))
 
     # DataArray.append(Data("22639",16)) #Unranked from scoresaber discord
     # DataArray.append(Data("20848",14))
@@ -266,25 +301,16 @@ if __name__ == "__main__":
             processes = []
             input_param_list = []
             for a, data in enumerate(DataArray):    #Makes a parameter list to pass for multiprocessing
-                input_param_list.append((data.songID, 1, Vars))
+                input_param_list.append((data.songID, data.diff, Vars))
                 
             with multiprocessing.Pool(maxProcesses) as p:   #Spawns child processes to utilize multi-core cpus
                 results = p.starmap(rate_func, input_param_list)    #Returns result into results list
 
             for a, data in enumerate(DataArray):    #Copies results from multiprocessing into the DataArray
                 data.results = results[a]
-                # Data.results = rate_func(Data.songID, 1)
             
             temp = 0
             for data in DataArray:  #Accuracy Calculation, Based on a piecewise function to prevent single map outliers
-                # if data.songID == 'c32d':   #Extra weight for c32d if it exists, you can replace with map of choice or change 'c32d' to whatever song you'd like
-                #     data.accuracy = max(
-                #         (abs((float(data.results)-data.expectedResults)*8))**0.5,
-                #         (abs((float(data.results)-data.expectedResults)*8))**8)
-                # else:
-                #     data.accuracy = max(
-                #         (abs((float(data.results)-data.expectedResults)*4))**0.5,
-                #         (abs((float(data.results)-data.expectedResults)*4))**8)
                 data.accuracy = max(
                     (abs((float(data.results)-data.expectedResults)*4))**0.5,
                     (abs((float(data.results)-data.expectedResults)*4))**8)

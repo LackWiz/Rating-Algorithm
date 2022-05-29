@@ -63,6 +63,7 @@ DIFFICULTY_ORDER = [
     "HardLightshow.dat",
     "NormalLightshow.dat",
     "EasyLightshow.dat",
+    "Lightshow.dat",
     "*.dat"
 ]
 
