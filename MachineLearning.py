@@ -225,12 +225,13 @@ if __name__ == "__main__":
     WEIGHTEDBREADTH = 1.25   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
     SOGenerations: list[NewValues] = []
     AverageIteration: list[NewValues] = []
-    GENERATIONS = 20           #Number of Gererations
-    CHILDREN = 10000               #Number of Children per generation
-    TOP_PICKS = 100            #Top picks to average for next generation
+    GENERATIONS = 5           #Number of Gererations
+    CHILDREN = 100               #Number of Children per generation
+    TOP_PICKS = 5            #Top picks to average for next generation
     PROGRESS_SPLIT = 25        #How often to mark progress in the terminal as a percentage (just a visual)
 
-    maxProcesses = round(multiprocessing.cpu_count()/2)  #Checks how many cores that are avaliable
+    # maxProcesses = round(multiprocessing.cpu_count()/2)  #Checks how many cores that are avaliable
+    maxProcesses = 8
 
     for j in range(0, GENERATIONS):  #Main loop, loops as many times as there are Generatoins
         NewBreadth = START_BREADTH-((START_BREADTH-END_BREADTH)*j/GENERATIONS)#Slowly Reduces randomizing spread after each generation
