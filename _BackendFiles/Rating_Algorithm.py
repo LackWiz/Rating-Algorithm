@@ -505,7 +505,7 @@ def Main(folder_path, song_diff, song_id, user=True):
         excelFileName = os.path.join(
             f"Spreadsheets/{song_id} {song_info['_songName'].replace('/', '')} {song_diff} export.csv")
         excelFileName = excelFileName.replace("*", "")
-        excelFileName = excelFileName.replace("\"", "")
+        excelFileName = excelFileName.replace("\\", "")
         excelFileName = excelFileName.replace(">", "")
         excelFileName = excelFileName.replace("<", "")
         excelFileName = excelFileName.replace("|", "")
