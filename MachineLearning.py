@@ -451,7 +451,7 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print(f'Making {folderName} Folder')
         os.mkdir(folderName)
-        x = open(pyFileName, 'w', newline="")
+        v = open(pyFileName, "w+")
     finally:
         v.write(f'angle_Easy = {ValueArray[0].angle_easy}\n')
         v.write(f'angle_Semi_Mid = {ValueArray[0].angle_semi_mid}\n')
@@ -492,7 +492,7 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print(f'Making {folderName} Folder')
         os.mkdir(folderName)
-        x = open(pyFileName, 'w', newline="")
+        v = open(pyFileName, "w+")
     finally:
         v.write(f'angle_Easy = {AverageIteration[-1].angle_easy}\n')
         v.write(f'angle_Semi_Mid = {AverageIteration[-1].angle_semi_mid}\n')
