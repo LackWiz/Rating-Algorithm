@@ -1,38 +1,38 @@
-angle_Easy = 1.1745837835528103
-angle_Semi_Mid = 1.9650382361639394
-angle_Mid = 5.115021811106426
-angle_Hard = 4.023092246354823
+angle_Easy = 1.2050150563922293
+angle_Semi_Mid = 1.9933320423296936
+angle_Mid = 4.292070727816659
+angle_Hard = 4.0331441734467255
 
-side_Easy = 0.8193479589524375
-side_Semi_Mid = 2.255823185948384
-side_Mid = 3.0478177181188046
-side_Hard = 5.260838192403653
+side_Easy = 0.9504470480508155
+side_Semi_Mid = 2.2702756732974976
+side_Mid = 3.051550039643246
+side_Hard = 4.692171664505919
 
-vert_Easy = 1.5117224466864514
-vert_Semi_Mid = 1.3855946616115977
-vert_Mid = 2.606715929623392
+vert_Easy = 1.9026093004066866
+vert_Semi_Mid = 1.3678582840539792
+vert_Mid = 2.651786169457365
 
-angle_Div = 95
+angle_Div = 88.54608875233458
 
-stack_Easy_Power = 0.7554842902163388
-stack_Hard_Power = 1.898983883592458
-stamina_Power = 1.7065856853038441
-pattern_Power = 1.6849661347810239
-combined_stamina_root_power = 2.3377732425850244
-combined_root_power = 3.228518180090954
-combined_min_root_power = 4.260347138167118
-angle_Power = 1.7203802259742527
+stack_Easy_Power = 0.6675433471720186
+stack_Hard_Power = 1.9817426490382744
+stamina_Power = 1.7595490192500558
+pattern_Power = 1.3900330968218966
+combined_stamina_root_power = 3.1386976700911244
+combined_root_power = 3.5059897424205655
+combined_min_root_power = 3.410206733344545
+angle_Power = 1.8562116016237256
 
-swng_Sped_Smoth_History = 200
-stamina_History = 516
-pattern_History = 267
-combined_History = 225
+swng_Sped_Smoth_History = 199.84032171462147
+stamina_History = 725.8447758790661
+pattern_History = 252.9963578778048
+combined_History = 194.94756653397292
 
-stamina_Weight = 10.580114645216298
+stamina_Weight = 8.908165745483892
 pattern_Weight = 5
 
-Top1Weight = 5.52887598924347
-Top5Weight = 5.616060960222491
-Top20Weight = 4.04870174561924
+Top1Weight = 5.089762252616434
+Top5Weight = 4.708304792264503
+Top20Weight = 4.999590863734086
 MedianWeight = 5
-array_Scaling = 5.329374736675643
+array_Scaling = 5.799052593894011

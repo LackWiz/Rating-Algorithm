@@ -184,24 +184,24 @@ if __name__ == "__main__":
 
 
 
-    DataArray.append(Data('c32d',"ExpertPlus",14)) #Lack's Data 
-    DataArray.append(Data('170d0',"ExpertPlus",7)) 
-    DataArray.append(Data('1e4b4',"ExpertPlus",5)) 
-    DataArray.append(Data('169e6',"ExpertPlus",11.5)) 
-    DataArray.append(Data('1df5b',"ExpertPlus",11.5)) 
-    DataArray.append(Data('217a8',"ExpertPlus",10.5)) 
-    DataArray.append(Data('18a92',"ExpertPlus",9)) 
-    DataArray.append(Data('17cc0',"ExpertPlus",9.75))
-    DataArray.append(Data('17ecf',"ExpertPlus",7)) 
-    DataArray.append(Data('d6a6',"ExpertPlus",9.25))
-    DataArray.append(Data('1a37c',"ExpertPlus",12.25))
-    DataArray.append(Data('1dc95',"ExpertPlus",11.9))
-    DataArray.append(Data('1fa21',"ExpertPlus",9.25))
-    DataArray.append(Data('1d5d4',"ExpertPlus",9.75))
-    DataArray.append(Data('1dcc5',"ExpertPlus",4))
-    DataArray.append(Data('20fa4',"ExpertPlus",9.5))
-    DataArray.append(Data('19c66',"ExpertPlus",8.75))
-    DataArray.append(Data('1f784',"ExpertPlus",11))
+    DataArray.append(Data('c32d',1,14)) #Lack's Data 
+    DataArray.append(Data('170d0',1,7)) 
+    DataArray.append(Data('1e4b4',1,5)) 
+    DataArray.append(Data('169e6',1,11.5)) 
+    DataArray.append(Data('1df5b',1,11.5)) 
+    DataArray.append(Data('217a8',1,10.5)) 
+    DataArray.append(Data('18a92',1,9)) 
+    DataArray.append(Data('17cc0',1,9.75))
+    DataArray.append(Data('17ecf',1,7)) 
+    DataArray.append(Data('d6a6',1,9.25))
+    DataArray.append(Data('1a37c',1,12.25))
+    DataArray.append(Data('1dc95',1,11.9))
+    DataArray.append(Data('1fa21',1,9.25))
+    DataArray.append(Data('1d5d4',1,9.75))
+    DataArray.append(Data('1dcc5',1,4))
+    DataArray.append(Data('20fa4',1,9.5))
+    DataArray.append(Data('19c66',1,8.75))
+    DataArray.append(Data('1f784',1,11))
 
     # DataArray.append(Data('1c1f7',17))
 
@@ -220,18 +220,18 @@ if __name__ == "__main__":
     # DataArray.append(Data("20848",14))
     for i in range(0,len(DataArray)):   #Adds an indexing number to each entry in the array
         DataArray[i].index=i
-    START_BREADTH = 1.4   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
-    END_BREADTH = 1.3
+    START_BREADTH = 1.3   #How much, up and down to randomize initial values from Variables.py, not for Scaling Values
+    END_BREADTH = 1.1
     WEIGHTEDBREADTH = 1.25   #How much, up and down to randomize initial values from Variables.py, only for Scaling values
     SOGenerations: list[NewValues] = []
     AverageIteration: list[NewValues] = []
-    GENERATIONS = 5           #Number of Gererations
-    CHILDREN = 100               #Number of Children per generation
-    TOP_PICKS = 5            #Top picks to average for next generation
+    GENERATIONS = 40           #Number of Gererations
+    CHILDREN = 2500               #Number of Children per generation
+    TOP_PICKS = 50            #Top picks to average for next generation
     PROGRESS_SPLIT = 25        #How often to mark progress in the terminal as a percentage (just a visual)
 
     # maxProcesses = round(multiprocessing.cpu_count()/2)  #Checks how many cores that are avaliable
-    maxProcesses = 8
+    maxProcesses = 10
 
     for j in range(0, GENERATIONS):  #Main loop, loops as many times as there are Generatoins
         NewBreadth = START_BREADTH-((START_BREADTH-END_BREADTH)*j/GENERATIONS)#Slowly Reduces randomizing spread after each generation
