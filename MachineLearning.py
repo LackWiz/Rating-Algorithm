@@ -21,7 +21,7 @@ class Data: #Class to Hold Training Data and results
         self.diff = diff
         self.expectedResults = expectedResults
         self.results = 0
-        self.accuracy = 0
+        self.error = 0
         self.index = 0
 
 class NewValues:    #Class to Hold Data about Average Values at the end of each generation and values for each child in a generation
@@ -73,7 +73,7 @@ class NewValues:    #Class to Hold Data about Average Values at the end of each 
         self.medianWeight = medianWeight
         self.array_scaling = array_scaling
 
-        self.Accuracy = 0
+        self.Error = 0
 
     def returnList(self):   #Returns all values from the class as a list
         return[
@@ -109,7 +109,7 @@ class NewValues:    #Class to Hold Data about Average Values at the end of each 
             self.top20Weight,
             self.medianWeight,
             self.array_scaling,
-            self.Accuracy]
+            self.Error]
 
 def rate_func(songID, diff, Vars: NewValues): #Function that gets called for multiprocessing
     Variables.angle_Easy = Vars.angle_easy  #Copies all variables into the Global memory for Rating_Alrogithm
@@ -311,12 +311,12 @@ if __name__ == "__main__":
                 data.results = results[a]
             
             temp = 0
-            for data in DataArray:  #Accuracy Calculation, Based on a piecewise function to prevent single map outliers
-                data.accuracy = max(
-                    (abs((float(data.results)-data.expectedResults)*4))**0.5,
-                    (abs((float(data.results)-data.expectedResults)*4))**8)
-                temp += data.accuracy
-            Vars.Accuracy = temp/len(DataArray) #Averages all accuracies for this Child
+            for data in DataArray:  #Error Calculation, Based on a piecewise function to prevent single map outliers
+                data.error = max(
+                    (abs((float(data.results)-data.expectedResults)*4)),
+                    (abs((float(data.results)-data.expectedResults)*1.3))**32)
+                temp += data.error
+            Vars.Error = temp/len(DataArray) #Averages all accuracies for this Child
 
             #print(str(round(k/passes*100, 2))+"% Total Accuracy is: " + str(Vars.Accuracy))
             if(round(i/CHILDREN*100,2) >= progress_threshold):  #For Printing Current Generation Progress
@@ -324,7 +324,7 @@ if __name__ == "__main__":
                 print("\nGeneration "+str(round(i/CHILDREN*100, 2))+"% Done")
             print(*"#", end="", flush=True)
 
-        ValueArray.sort(key=lambda x: x.Accuracy)   #Sorts all Children by their accuracy
+        ValueArray.sort(key=lambda x: x.Error)   #Sorts all Children by their accuracy
         temp = 0
         SOGenerations[0] = NewValues(NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) #Sum of Generations
         for i in range(0, TOP_PICKS):   #There is a better way to do this but *shrug* Averages Top Picks and Averages them for the next Generation
@@ -359,7 +359,7 @@ if __name__ == "__main__":
             SOGenerations[0].top20Weight += ValueArray[i].top20Weight
             #medianWeight doesn't change
             SOGenerations[0].array_scaling += ValueArray[i].array_scaling
-            SOGenerations[0].Accuracy += ValueArray[i].Accuracy
+            SOGenerations[0].Error += ValueArray[i].Error
         SOGenerations[0].angle_easy = SOGenerations[0].angle_easy/TOP_PICKS
         SOGenerations[0].angle_semi_mid = SOGenerations[0].angle_semi_mid/TOP_PICKS
         SOGenerations[0].angle_mid = SOGenerations[0].angle_mid/TOP_PICKS
@@ -391,12 +391,12 @@ if __name__ == "__main__":
         SOGenerations[0].top20Weight = SOGenerations[0].top20Weight/TOP_PICKS
         SOGenerations[0].medianWeight = Variables.MedianWeight
         SOGenerations[0].array_scaling = SOGenerations[0].array_scaling/TOP_PICKS
-        SOGenerations[0].Accuracy = SOGenerations[0].Accuracy/TOP_PICKS
+        SOGenerations[0].Error = SOGenerations[0].Error/TOP_PICKS
         SOGenerations[0].generation = j+1
         AverageIteration.append(deepcopy(SOGenerations[0]))
         endtime = time.time()
-        print(f"\nGeneration: {j+1} Best Accuracy: {round(ValueArray[0].Accuracy,3)}")    #Prints the results from current generation
-        print(f"Generation: {j+1} Average Accuracy: {round(AverageIteration[-1].Accuracy,3)}")
+        print(f"\nGeneration: {j+1} Lowest Error: {round(ValueArray[0].Error,3)}")    #Prints the results from current generation
+        print(f"Generation: {j+1} Average Error: {round(AverageIteration[-1].Error,3)}")
         print(f"Average Time per Set of Maps: {round((endtime-start_time)/CHILDREN, 2)}")
         print(f"Estimated Remaining Time: {datetime.timedelta(seconds=round((GENERATIONS-(j+1))*(endtime-start_time),2))}")
         Variables.angle_Easy = AverageIteration[-1].angle_easy  #Assigns New Values for Next Generation
@@ -432,18 +432,18 @@ if __name__ == "__main__":
         Variables.array_Scaling = AverageIteration[-1].array_scaling
     finalMapAcc: list = []
     for data in DataArray:  #Gathering Data about the Full run
-        folder_path, song_diff = Rating_Algorithm.selectDiff(data.songID, False, 1)
+        folder_path, song_diff = Rating_Algorithm.selectDiff(data.songID, False, data.diff)
         mapReturn = Rating_Algorithm.Main(folder_path, song_diff[0], data.songID, False)[1]
-        finalMapAcc.append([data.songID,data.expectedResults,mapReturn,mapReturn-data.expectedResults])
+        finalMapAcc.append([data.songID,data.diff,data.expectedResults,mapReturn,mapReturn-data.expectedResults])
 
     #Excel shannagins
     folderName = "MachineLearning"
     fileName = "Results"
-    accHeaderList = ['songID','Expected Acc','Results','Difference']
+    accHeaderList = ['songID','Diff','Expected Acc','Results','Difference']
     headerList = ['Generation','angle_Easy','angle_Semi_Mid','angle_Mid','angle_Hard','side_Easy','side_Semi_Mid','side_Mid','side_Hard',
         'vert_Easy','vert_Semi_Mid','vert_Mid','angle_Div',
         'stack_Easy_Power','stack_Hard_Power','stamina_Power','pattern_Power','Com_Stam_Root_Power','Com_Root_Power','Com_min_root_power','Angle Power',
-        'SSSH','stamina_History','pattern_History','combined_History','stam_weight','pattern_weight','Top 1% Weight','Top 5% Weight','Top 20% Weight','Median Weight','array_scaling','Accuracy']
+        'SSSH','stamina_History','pattern_History','combined_History','stam_weight','pattern_weight','Top 1% Weight','Top 5% Weight','Top 20% Weight','Median Weight','array_scaling','Error']
     
     pyFileName = os.path.join(f"{folderName}/Best Variables.py")
     try:
