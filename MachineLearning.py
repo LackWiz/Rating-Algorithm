@@ -184,24 +184,24 @@ if __name__ == "__main__":
 
 
 
-    # DataArray.append(Data('c32d',14)) #Lack's Data 
-    # DataArray.append(Data('170d0',7)) 
-    # DataArray.append(Data('1e4b4',5)) 
-    # DataArray.append(Data('169e6',11.5)) 
-    # DataArray.append(Data('1df5b',11.5)) 
-    # DataArray.append(Data('217a8',10.5)) 
-    # DataArray.append(Data('18a92',9)) 
-    # DataArray.append(Data('17cc0',9.75))
-    # DataArray.append(Data('17ecf',7)) 
-    # DataArray.append(Data('d6a6',9.25))
-    # DataArray.append(Data('1a37c',12.25))
-    # DataArray.append(Data('1dc95',11.9))
-    # DataArray.append(Data('1fa21',9.25))
-    # DataArray.append(Data('1d5d4',9.75))
-    # DataArray.append(Data('1dcc5',4))
-    # DataArray.append(Data('20fa4',9.5))
-    # DataArray.append(Data('19c66',8.75))
-    # DataArray.append(Data('1f784',11))
+    DataArray.append(Data('c32d',"ExpertPlus",14)) #Lack's Data 
+    DataArray.append(Data('170d0',"ExpertPlus",7)) 
+    DataArray.append(Data('1e4b4',"ExpertPlus",5)) 
+    DataArray.append(Data('169e6',"ExpertPlus",11.5)) 
+    DataArray.append(Data('1df5b',"ExpertPlus",11.5)) 
+    DataArray.append(Data('217a8',"ExpertPlus",10.5)) 
+    DataArray.append(Data('18a92',"ExpertPlus",9)) 
+    DataArray.append(Data('17cc0',"ExpertPlus",9.75))
+    DataArray.append(Data('17ecf',"ExpertPlus",7)) 
+    DataArray.append(Data('d6a6',"ExpertPlus",9.25))
+    DataArray.append(Data('1a37c',"ExpertPlus",12.25))
+    DataArray.append(Data('1dc95',"ExpertPlus",11.9))
+    DataArray.append(Data('1fa21',"ExpertPlus",9.25))
+    DataArray.append(Data('1d5d4',"ExpertPlus",9.75))
+    DataArray.append(Data('1dcc5',"ExpertPlus",4))
+    DataArray.append(Data('20fa4',"ExpertPlus",9.5))
+    DataArray.append(Data('19c66',"ExpertPlus",8.75))
+    DataArray.append(Data('1f784',"ExpertPlus",11))
 
     # DataArray.append(Data('1c1f7',17))
 

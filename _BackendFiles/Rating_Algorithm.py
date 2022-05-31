@@ -511,6 +511,7 @@ def Main(folder_path, song_diff, song_id, user=True):
         excelFileName = excelFileName.replace("|", "")
         excelFileName = excelFileName.replace(":", "")
         excelFileName = excelFileName.replace("?", "")
+        excelFileName = excelFileName.replace('"', "")
         try:
             f = open(excelFileName, 'w', newline="", encoding='utf-8')
         except FileNotFoundError:
