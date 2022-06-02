@@ -150,12 +150,12 @@ class Bloq:
         self.swingAngle += 36.87
         self.calcStackDiff()
 
-    def setForehand(self, hand):
+    def setForehand(self, hand, distance):
         self.forehand = hand
         self.calcAngleDiff()
-        self.calcPosDiff()
+        self.calcPosDiff(distance)
 
-    def calcPosDiff(self):  # Checks if position is easy, medium or difficult
+    def calcPosDiff(self, distance = 0):  # Checks if position is easy, medium or difficult based on inhearent position and distance from last note
         try:
             if(self.type == 0):  # Left Hand Side to Side Diff
                 # LH centered around 2
@@ -175,8 +175,8 @@ class Bloq:
                                     Variables.side_Semi_Mid, Variables.side_Easy][self.bloqPos[0]]
 
             # Up and Down Diff
-            self.posDiff *= [Variables.vert_Easy, Variables.vert_Semi_Mid,
-                             Variables.vert_Mid][abs(2 * (not self.forehand) - self.bloqPos[1])]
+            self.posDiff == min(self.posDiff * [Variables.vert_Easy, Variables.vert_Semi_Mid,
+                             Variables.vert_Mid][abs(2 * (not self.forehand) - self.bloqPos[1])] * (distance+1)/3, 10)
         except:
             self.posDiff = 1
 
@@ -337,7 +337,7 @@ def extractBloqData(songNoteArray, bpm_list: list):
             BloqDataArray.append(Bloq(
                 block["_type"], block["_cutDirection"], [block["_lineIndex"], block["_lineLayer"]], block["_time"], block["_time"] * mspb, mspb))
             # Forehand if note is not in top section
-            BloqDataArray[-1].setForehand(block['_lineLayer'] != 2)
+            BloqDataArray[-1].setForehand(block['_lineLayer'] != 2, 0)
 
         elif (block["_time"] - songNoteArray[i-1]['_time'] <= (dotSliderPrecision if block["_cutDirection"] == 8 else sliderPrecision)
               and (block['_cutDirection'] in [songNoteArray[i-1]['_cutDirection'], 8])) or ((block["_time"] - songNoteArray[i-1]['_time'] <= 1/32)
@@ -352,7 +352,7 @@ def extractBloqData(songNoteArray, bpm_list: list):
 
             # If Left/Right/Dot, just toggle between forehand/backhand
             if BloqDataArray[-1].cutDirection in [2, 3, 8] or BloqDataArray[-1].forehand is None:
-                BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand)
+                BloqDataArray[-1].setForehand(not BloqDataArray[-2].forehand, math.sqrt((block["_lineIndex"] - songNoteArray[i-1]["_lineIndex"])**2 + (block["_lineLayer"]-songNoteArray[i-1]["_lineLayer"])**2))
 
             # If Hands reset, e.g. bomb resets, bad mapping
             if(BloqDataArray[-1].forehand == BloqDataArray[-2].forehand):
