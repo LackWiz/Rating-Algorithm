@@ -1,38 +1,38 @@
-angle_Easy = 1.2050150563922293
-angle_Semi_Mid = 1.9933320423296936
-angle_Mid = 4.292070727816659
-angle_Hard = 4.0331441734467255
+angle_Easy = 1.202236832674207
+angle_Semi_Mid = 2.1971172686763802
+angle_Mid = 3.563252457831883
+angle_Hard = 4.949669975727517
 
-side_Easy = 0.9504470480508155
-side_Semi_Mid = 2.2702756732974976
-side_Mid = 3.051550039643246
-side_Hard = 4.692171664505919
+side_Easy = 0.7750651824567866
+side_Semi_Mid = 2.5405067687994163
+side_Mid = 3.194000539123276
+side_Hard = 3.853477173070092
 
-vert_Easy = 1.9026093004066866
-vert_Semi_Mid = 1.3678582840539792
-vert_Mid = 2.651786169457365
+vert_Easy = 1.3272005117262415
+vert_Semi_Mid = 1.7038659732415282
+vert_Mid = 3.442768786623375
 
-angle_Div = 88.54608875233458
+angle_Div = 83
 
-stack_Easy_Power = 0.6675433471720186
-stack_Hard_Power = 1.9817426490382744
-stamina_Power = 1.7595490192500558
-pattern_Power = 1.3900330968218966
-combined_stamina_root_power = 3.1386976700911244
-combined_root_power = 3.5059897424205655
-combined_min_root_power = 3.410206733344545
-angle_Power = 1.8562116016237256
+stack_Easy_Power = 0.6964549911015392
+stack_Hard_Power = 2.47115433343576
+stamina_Power = 2.0277842797466477
+pattern_Power = 1.6123474562914464
+combined_stamina_root_power = 3.3079009875193073
+combined_root_power = 2.922057782793648
+combined_min_root_power = 2.3146632936968072
+angle_Power = 1.9123437992734449
 
-swng_Sped_Smoth_History = 199.84032171462147
-stamina_History = 725.8447758790661
-pattern_History = 252.9963578778048
-combined_History = 194.94756653397292
+swng_Sped_Smoth_History = 260
+stamina_History = 871
+pattern_History = 325
+combined_History = 175
 
-stamina_Weight = 8.908165745483892
+stamina_Weight = 11.248622954509452
 pattern_Weight = 5
 
-Top1Weight = 5.089762252616434
-Top5Weight = 4.708304792264503
-Top20Weight = 4.999590863734086
+Top1Weight = 3.201380076069738
+Top5Weight = 4.426246929492951
+Top20Weight = 5.114667287653195
 MedianWeight = 5
-array_Scaling = 5.799052593894011
+array_Scaling = 4.515876553400897
