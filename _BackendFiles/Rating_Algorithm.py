@@ -401,7 +401,7 @@ def processArray(array: list[Bloq]):
         qSPD.append(array[i].angleDiff*array[i].posDiff *
                     array[i].angleChangeDiff*array[i].stackDiff)
         SPD += qSPD[-1]
-    # Helps Speed Up the Average Ramp, then does a proper average past staminaRollingAverage/4 and switches to the conventional rolling average after
+    # Helps Speed Up the Average Ramp, then does a proper average past patternRollingAverage/4 and switches to the conventional rolling average after
         if(i < Variables.pattern_History/4):
             array[i].patternDiff = (SPD/(Variables.pattern_History/4))
         elif(i < Variables.pattern_History):
