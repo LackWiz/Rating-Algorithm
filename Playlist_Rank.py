@@ -11,8 +11,8 @@ tk.Tk().withdraw()
 
 
 hash_list = []
+key_list = []
 diff_list = []
-queue_list = []
 song_diff = []
 #-------------------------------Test Variables--------------------------------
 
@@ -37,33 +37,44 @@ try:
     BulkRunName = playlistRaw['playlistTitle']
 except:
     BulkRunName = "No Name"
-for i, index in enumerate(playlistRaw['songs']):
-    hash_list.append(playlistRaw['songs'][i]['hash'])
 
-for i, song in enumerate(hash_list):
-    result = requests.get(f"https://api.beatsaver.com/maps/hash/{hash_list[i]}")
-    resultJson = json.loads(result.text)
-    try:
-        song_id = resultJson["id"]
-        
-        if(hash_list[i].lower() != resultJson["versions"][0]["hash"].lower()):
-            print(f"Hash {song_id} {(resultJson['name'])} From Playlist Entry Doesn't match BeatSaver or is unavaliable")
-            print("You seem to have an older version of this song?")
-            print("The Results may be different due to possible different local map versus hosted map")
-            print("If you just have an old entry but no song, a new version of the song will be downloaded but you'll need to update the playlist manually")
-            print("Press Enter to Continue")
-            #input()
-        folder_path, song_diff = Rating_Algorithm.selectDiff(song_id, False, "a")
+
+try:
+    queue_list = []
+    for i, index in enumerate(playlistRaw['songs']):
+        key_list.append(playlistRaw['songs'][i]['key'])
+        folder_path, song_diff = Rating_Algorithm.selectDiff(key_list[-1], False, "a")
         print(folder_path)
         for i, index in enumerate(song_diff):
-            queue_list.append([folder_path, index, song_id])
+            queue_list.append([folder_path, index, key_list[-1]])
+except:
+    queue_list = []
+    for i, index in enumerate(playlistRaw['songs']):
+        hash_list.append(playlistRaw['songs'][i]['hash'])
+    for i, song in enumerate(hash_list):
+        result = requests.get(f"https://api.beatsaver.com/maps/hash/{hash_list[i]}")
+        resultJson = json.loads(result.text)
+        try:
+            song_id = resultJson["id"]
+            
+            if(hash_list[i].lower() != resultJson["versions"][0]["hash"].lower()):
+                print(f"Hash {song_id} {(resultJson['name'])} From Playlist Entry Doesn't match BeatSaver or is unavaliable")
+                print("You seem to have an older version of this song?")
+                print("The Results may be different due to possible different local map versus hosted map")
+                print("If you just have an old entry but no song, a new version of the song will be downloaded but you'll need to update the playlist manually")
+                print("Press Enter to Continue")
+                #input()
+            folder_path, song_diff = Rating_Algorithm.selectDiff(song_id, False, "a")
+            print(folder_path)
+            for i, index in enumerate(song_diff):
+                queue_list.append([folder_path, index, song_id])
 
-    except KeyError:
-        if(resultJson["error"] == "Not Found"):
-            print(f"Song Hash {hash_list[i]} Not Found!")
-            print("Song was either deleted or doesn't exist")
-            print("Press Enter to Continue")
-            #input()
+        except KeyError:
+            if(resultJson["error"] == "Not Found"):
+                print(f"Song Hash {hash_list[i]} Not Found!")
+                print("Song was either deleted or doesn't exist")
+                print("Press Enter to Continue")
+                #input()
 
 for i, index in enumerate(queue_list):
     diff_list.append(Rating_Algorithm.Main(index[0], index[1], index[2]))
